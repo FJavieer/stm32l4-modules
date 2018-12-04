@@ -78,6 +78,7 @@ STM32L4_HAL_DIR		= $(STM32_DRIVERS_DIR)/STM32L4xx_HAL_Driver/
 
 LIBALX_DIR		= $(PARENT_DIR)/libalx/
 
+LED_DIR			= $(STM32L4_MODULES_DIR)/led/
 PWM_DIR			= $(STM32L4_MODULES_DIR)/pwm/
 SERVO_DIR		= $(STM32L4_MODULES_DIR)/servo/
 
@@ -93,6 +94,7 @@ export	STM32L4_HAL_DIR
 
 export	LIBALX_DIR
 
+export	LED_DIR
 export	PWM_DIR
 export	SERVO_DIR
 
@@ -101,16 +103,17 @@ export	SERVO_DIR
 #	action
 
 all:
+	$(Q)make -C $(LED_DIR)
 	$(Q)make -C $(PWM_DIR)
 	$(Q)make -C $(SERVO_DIR)
 	$(Q)make -C $(LIB_DIR)
 
 
 clean:
+	@echo  "	RM	*.o *.s *.a"
 	$(Q)find . -type f -name '*.o' -exec rm '{}' '+'
 	$(Q)find . -type f -name '*.s' -exec rm '{}' '+'
 	$(Q)find . -type f -name '*.a' -exec rm '{}' '+'
-	@echo  "Clean stm32l4-modules"
 
 ################################################################################
 ######## End of file ###########################################################

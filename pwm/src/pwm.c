@@ -56,7 +56,7 @@ void	pwm_init	(uint32_t resolution_s, uint32_t period)
 	} else {
 		return;
 	}
-	
+
 	__HAL_RCC_TIM2_CLK_ENABLE();
 
 	/* Resolution: 1 us;  Periodo: 1 ms */
