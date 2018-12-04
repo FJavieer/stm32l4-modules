@@ -78,6 +78,7 @@ STM32L4_HAL_DIR		= $(STM32_DRIVERS_DIR)/STM32L4xx_HAL_Driver/
 
 LIBALX_DIR		= $(PARENT_DIR)/libalx/
 
+DELAY_DIR		= $(STM32L4_MODULES_DIR)/delay/
 LED_DIR			= $(STM32L4_MODULES_DIR)/led/
 PWM_DIR			= $(STM32L4_MODULES_DIR)/pwm/
 SERVO_DIR		= $(STM32L4_MODULES_DIR)/servo/
@@ -94,6 +95,7 @@ export	STM32L4_HAL_DIR
 
 export	LIBALX_DIR
 
+export	DELAY_DIR
 export	LED_DIR
 export	PWM_DIR
 export	SERVO_DIR
@@ -103,9 +105,15 @@ export	SERVO_DIR
 #	action
 
 all:
+	@echo	'	MAKE	modules:	delay'
+	$(Q)make -C $(DELAY_DIR)
+	@echo	'	MAKE	modules:	led'
 	$(Q)make -C $(LED_DIR)
+	@echo	'	MAKE	modules:	pwm'
 	$(Q)make -C $(PWM_DIR)
+	@echo	'	MAKE	modules:	servo'
 	$(Q)make -C $(SERVO_DIR)
+	@echo	'	MAKE	modules:	lib'
 	$(Q)make -C $(LIB_DIR)
 
 

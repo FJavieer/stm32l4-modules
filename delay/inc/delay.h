@@ -1,14 +1,14 @@
 /******************************************************************************
- *	pwm.c								      *
- *	2018/nov/27							      *
+ *	delay.c								      *
+ *	2018/dec/04							      *
  ******************************************************************************/
 
 
 /******************************************************************************
  ******* include guard ********************************************************
  ******************************************************************************/
-# ifndef		PWM_H
-	# define	PWM_H
+# ifndef		DELAY_H
+	# define	DELAY_H
 
 
 /******************************************************************************
@@ -46,28 +46,24 @@
  ******* functions ************************************************************
  ******************************************************************************/
 	/*
-	 * @brief	Initialize base time for PWM.
-	 * @param	resolution_s:	divisions in 1 s.
-	 * @param	period:		period of the pwm (in resolution_s units).
+	 * @brief	Initialize base time for delay_us().
+	 * @param	None.
+	 * @return	None.
 	 */
-int32_t	pwm_init	(uint32_t resolution_s, uint32_t period);
+int32_t	delay_us_init	(void);
 
 	/**
-	 * @brief	Set PWM
-	 * @param	duty_cycle:	duty cycle value (fraction).
+	 * @brief	Delay <time_us> microseconds.
+	 * @param	time_us:	Delay value (us).
+	 * @return	None.
 	 */
-int32_t	pwm_set		(float duty_cycle);
-
-	/**
-	 * @brief	Stop PWM.
-	 */
-int32_t	pwm_stop	(void);
+int32_t	delay_us	(uint32_t time_us);
 
 
 /******************************************************************************
  ******* include guard ********************************************************
  ******************************************************************************/
-# endif			/* pwm.h */
+# endif			/* delay.h */
 
 
 /******************************************************************************

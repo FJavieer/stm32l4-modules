@@ -16,7 +16,7 @@
 
 /* libalx --------------------------------------------------------------------*/
 /* STM32L4 modules -----------------------------------------------------------*/
-	#include "pwm.h"
+	#include "delay.h"
 
 
 /******************************************************************************
@@ -31,9 +31,6 @@
 /* Static --------------------------------------------------------------------*/
 static	bool			init_pending	= true;
 static	TIM_HandleTypeDef	tim_handle;
-static	TIM_ClockConfigTypeDef	clk_config;
-static	TIM_MasterConfigTypeDef	master_config;
-static	TIM_OC_InitTypeDef	oc_init;
 
 
 /******************************************************************************
@@ -45,11 +42,11 @@ static	TIM_OC_InitTypeDef	oc_init;
  ******* global functions *****************************************************
  ******************************************************************************/
 	/*
-	 * @brief	Initialize base time for PWM.
-	 * @param	resolution_s:	divisions in 1 s.
-	 * @param	period:		period of the pwm (in resolution_s units).
+	 * @brief	Initialize base time for delay_us().
+	 * @param	None.
+	 * @return	None.
 	 */
-int32_t	pwm_init	(uint32_t resolution_s, uint32_t period)
+int32_t	delay_us_init	(void)
 {
 	if (init_pending) {
 		init_pending	= false;
@@ -57,95 +54,68 @@ int32_t	pwm_init	(uint32_t resolution_s, uint32_t period)
 		return	0;
 	}
 
-	__HAL_RCC_TIM2_CLK_ENABLE();
-
-	/* Resolution: 1 us;  Periodo: 1 ms */
-	tim_handle.Instance		= TIM2;
-	tim_handle.Init.Prescaler		= SystemCoreClock / resolution_s - 1;
+	__HAL_RCC_TIM6_CLK_ENABLE();
+	
+	/* Resolution: 1 us */
+	tim_handle.Instance		= TIM6; 
+	tim_handle.Init.Prescaler		= SystemCoreClock / 1000000u - 1;
 	tim_handle.Init.CounterMode		= TIM_COUNTERMODE_UP;
-	tim_handle.Init.Period			= period - 1;
+	tim_handle.Init.Period			= UINT16_MAX;
 	tim_handle.Init.ClockDivision		= TIM_CLOCKDIVISION_DIV1;
 	tim_handle.Init.RepetitionCounter	= 0x00u;
 	tim_handle.Init.AutoReloadPreload	= TIM_AUTORELOAD_PRELOAD_DISABLE;
 	if (HAL_TIM_Base_Init(&tim_handle) != HAL_OK) {
+		return	-1;
+	}
+
+	return	0;
+}
+
+	/**
+	 * @brief	Delay <time_us> microseconds.
+	 * @param	time_us:	Delay value (us).
+	 * @return	None.
+	 */
+int32_t	delay_us	(uint32_t time_us)
+{
+	if (init_pending) {
+		return	-1;
+	}
+
+	/* Delay == 0;  exit now */
+	if (time_us < 1) {
+		return	0;
+	}
+
+	/* Initialize delay value */
+	uint32_t	overflows;
+	uint32_t	partial;
+	uint32_t	counter_initial;
+	overflows	= (time_us / ((uint32_t)UINT16_MAX + 1)) + 1;
+	partial		= time_us % ((uint32_t)UINT16_MAX + 1);
+	counter_initial	= (uint32_t)UINT16_MAX + 1 - partial;
+	__HAL_TIM_SET_COUNTER(&tim_handle, counter_initial);
+
+	/* Start delay */
+	if (HAL_TIM_Base_Start(&tim_handle) != HAL_OK) {
 		return	-2;
 	}
 
-	clk_config.ClockSource		= TIM_CLOCKSOURCE_INTERNAL;
-	clk_config.ClockPolarity	= TIM_CLOCKPOLARITY_INVERTED;
-	clk_config.ClockPrescaler	= TIM_CLOCKPRESCALER_DIV1;
-	clk_config.ClockFilter		= 0;
-	if (HAL_TIM_ConfigClockSource(&tim_handle, &clk_config) != HAL_OK) {
-		return	-3;
+	/* Count flags until delay reached */
+	uint32_t	counter_flags;
+	bool		flag;
+	counter_flags	= 0;
+	while (counter_flags < overflows) {
+		flag	= __HAL_TIM_GET_FLAG(&tim_handle, TIM_FLAG_UPDATE);
+		if (flag) {
+			__HAL_TIM_CLEAR_FLAG(&tim_handle, TIM_FLAG_UPDATE);
+			counter_flags++;
+		}
 	}
 
-	master_config.MasterOutputTrigger	= TIM_TRGO_RESET;
-	master_config.MasterSlaveMode		= TIM_MASTERSLAVEMODE_DISABLE;
-	if (HAL_TIMEx_MasterConfigSynchronization(&tim_handle,
-						&master_config) != HAL_OK) {
-		return	-3;
-	}
-
-	if (HAL_TIM_PWM_Init(&tim_handle) != HAL_OK) {
-		return	-4;
-	}
-
-	/* Configure PWM values */
-	oc_init.OCMode		= TIM_OCMODE_PWM1;
-	oc_init.OCPolarity	= TIM_OCPOLARITY_HIGH;
-	oc_init.OCFastMode	= TIM_OCFAST_DISABLE;
-	oc_init.OCNPolarity	= TIM_OCNPOLARITY_HIGH;
-	oc_init.OCNIdleState	= TIM_OCNIDLESTATE_RESET;
-	oc_init.OCIdleState	= TIM_OCIDLESTATE_RESET;
-	oc_init.OCIdleState	= TIM_OCIDLESTATE_RESET;
-
-	return	0;
-}
-
-	/**
-	 * @brief	Set PWM
-	 * @param	duty_cycle:	duty cycle value (fraction).
-	 */
-int32_t	pwm_set	(float duty_cycle)
-{
-	/* Invalid duty cycle */
-	if (duty_cycle > 1.0 || duty_cycle < 0.0) {
-		return	-5;
-	}
-
-	/* Initialize base time */
-	if (init_pending) {
-		return	-1;
-	}
-
-	/* Initialize PWN with duty cycle */
-	oc_init.Pulse	= tim_handle.Init.Period * duty_cycle;
-	if (HAL_TIM_PWM_ConfigChannel(&tim_handle, &oc_init,
-						TIM_CHANNEL_1) != HAL_OK) {
-		return	-6;
-	}
-
-	/* Start PWM */
-	if (HAL_TIM_PWM_Start(&tim_handle, TIM_CHANNEL_1) != HAL_OK) {
-		return	-7;
-	}
-
-	return	0;
-}
-
-	/**
-	 * @brief	Stop PWM.
-	 */
-int32_t	pwm_stop	(void)
-{
-	/* Initialize base time */
-	if (init_pending) {
-		return	-1;
-	}
-
-	/* Stop timer */
+	/* Stop delay */
 	if (HAL_TIM_Base_Stop(&tim_handle) != HAL_OK) {
-		return	-8;
+		return	-3;
 	}
 
 	return	0;

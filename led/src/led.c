@@ -63,8 +63,6 @@ int32_t	led_init	(void)
 	} else {
 		return	0;
 	}
-
-	pwm_init(SERVO_PWM_RESOLUTION_s, SERVO_PWM_PERIOD_us);
 	
 	__HAL_RCC_GPIOA_CLK_ENABLE();
 	/* Configure the GPIO LED pin */
@@ -87,6 +85,10 @@ int32_t	led_init	(void)
 	 */
 int32_t	led_set		(void)
 {
+	if (init_pending) {
+		return	-1;
+	}
+
 	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_SET);
 
 	return	0;
@@ -98,6 +100,10 @@ int32_t	led_set		(void)
 	 */
 int32_t	led_reset	(void)
 {
+	if (init_pending) {
+		return	-1;
+	}
+
 	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_RESET);
 
 	return	0;
