@@ -1,13 +1,7 @@
 /******************************************************************************
- *	servo.h								      *
+ *	servo_test.c							      *
+ *	2018/dec/05							      *
  ******************************************************************************/
-
-
-/******************************************************************************
- ******* include guard ********************************************************
- ******************************************************************************/
-# ifndef		SERVO_H
-	# define	SERVO_H
 
 
 /******************************************************************************
@@ -17,36 +11,24 @@
 	#include <stdint.h>
 
 /* Drivers -------------------------------------------------------------------*/
+	#include "stm32l4xx_hal.h"
+
 /* libalx --------------------------------------------------------------------*/
+
 /* STM32L4 modules -----------------------------------------------------------*/
+	#include "servo.h"
+
+	#include "servo_test.h"
 
 
 /******************************************************************************
  ******* macros ***************************************************************
  ******************************************************************************/
-	# define	SERVO_ANGLE_MIN			-90
-	# define	SERVO_ANGLE_MAX			90
 
 
 /******************************************************************************
  ******* enums ****************************************************************
  ******************************************************************************/
-	enum	Err_Servo {
-		ERR_SERVO_OK = 0,
-		ERR_SERVO_SATURATION_NEG = -1,
-		ERR_SERVO_SATURATION_POS = 1,
-		ERR_SERVO_INIT = 2
-	};
-
-	enum	Servo_sX {
-		SERVO_SALL = 0,
-		SERVO_S1,
-		SERVO_S2,
-		SERVO_S3,
-		SERVO_S4,
-
-		SERVO_QTY
-	};
 
 
 /******************************************************************************
@@ -57,63 +39,64 @@
 /******************************************************************************
  ******* variables ************************************************************
  ******************************************************************************/
+/* Global --------------------------------------------------------------------*/
+/* Static --------------------------------------------------------------------*/
 
 
 /******************************************************************************
- ******* functions ************************************************************
+ ******* static functions (declarations) **************************************
  ******************************************************************************/
-	/**
-	 * @brief	Init servo s1 in PA15 using TIM2_CH1
-	 * @return	error.
-	 */
-uint32_t	servo_s1_init		(void);
-	/**
-	 * @brief	Init servo s2 in PA1 using TIM2_CH2
-	 * @return	error.
-	 */
-uint32_t	servo_s2_init		(void);
-	/**
-	 * @brief	Init servo s3 in PB10 using TIM2_CH3
-	 * @return	error.
-	 */
-uint32_t	servo_s3_init		(void);
-	/**
-	 * @brief	Init servo s4 in PB11 (GPIOB, GPIO_PIN_11)
-	 * @return	error.
-	 */
-uint32_t	servo_s4_init		(void);
-	/**
-	 * @brief	Init all servos using TIM2_CH[1:4]
-	 * @return	error.
-	 */
-uint32_t	servo_sALL_init		(void);
-
-	/**
-	 * @brief	Set servo position
-	 * @param	position_decimals:	position (deg) multiplied by 10.
-	 *			valid range: [-900, 900]
-	 * @return	error.
-	 */
-uint32_t	servo_sX_position_set	(int16_t position_decimals, int8_t servo);
-
-	/**
-	 * @brief	Get servo position
-	 * @param	*position_decimals:	position (deg) multiplied by 10.
-	 * @return	error.
-	 */
-uint32_t	servo_sX_position_get	(int16_t *position_decimals, int8_t servo);
-
-	/**
-	 * @brief	Stop servo
-	 * @return	error.
-	 */
-uint32_t	servo_sALL_stop		(void);
 
 
 /******************************************************************************
- ******* include guard ********************************************************
+ ******* global functions *****************************************************
  ******************************************************************************/
-# endif			/* servo.h */
+	/**
+	 * @brief	Test servos
+	 * @return	error.
+	 */
+uint32_t	servo_test		(void)
+{
+	uint32_t	error	= ERR_SERVO_OK;
+
+
+	error	|= servo_s1_init();
+	error	|= servo_sX_position_set(-850, SERVO_S1);
+	HAL_Delay(2000);
+
+	error	|= servo_s3_init();
+	error	|= servo_sX_position_set(-850, SERVO_S3);
+	HAL_Delay(2000);
+
+	error	|= servo_sALL_init();
+	error	|= servo_sX_position_set(500, SERVO_SALL);
+	HAL_Delay(2000);
+
+	error	|= servo_sALL_stop();
+	HAL_Delay(2000);
+
+	error	|= servo_s2_init();
+	error	|= servo_sX_position_set(850, SERVO_S2);
+	HAL_Delay(2000);
+
+	error	|= servo_s4_init();
+	error	|= servo_sX_position_set(850, SERVO_S4);
+	HAL_Delay(2000);
+
+	error	|= servo_sALL_init();
+	error	|= servo_sX_position_set(-900, SERVO_SALL);
+	HAL_Delay(2000);
+
+	error	|= servo_sALL_stop();
+	HAL_Delay(2000);
+
+	return	error;
+}
+
+
+/******************************************************************************
+ ******* static functions (definitions) ***************************************
+ ******************************************************************************/
 
 
 /******************************************************************************

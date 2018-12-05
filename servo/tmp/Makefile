@@ -14,7 +14,7 @@ SRC_DIR = $(SERVO_DIR)/src/
 
 # dependencies
 
-ALL	= servo.o
+ALL	= servo.o servo_test.o
 
 SERVO_INC_LIBALX	= alx_math.h
 SERVO_INC_CMSIS		= core_cm4.h
@@ -36,6 +36,20 @@ SERVO_INC_DIRS		= -I $(INC_DIR) \
 			-I $(STM32L4_HAL_INC_DIR) \
 			-I $(PWM_INC_DIR)
 
+SERVO_TST_INC_CMSIS	= core_cm4.h
+SERVO_TST_INC_CMSIS_L4	= stm32l4xx.h
+SERVO_TST_INC_HAL	= stm32l4xx_hal.h
+SERVO_TST_INC		= servo_test.h	servo.h
+SERVO_TST_DEPS		= $(SRC_DIR)/servo_test.c \
+			$(patsubst %,$(STM32_CMSIS_INC_DIR)/%,$(SERVO_TST_INC_CMSIS)) \
+			$(patsubst %,$(STM32L4_CMSIS_INC_DIR)/%,$(SERVO_TST_INC_CMSIS_L4)) \
+			$(patsubst %,$(STM32L4_HAL_INC_DIR)/%,$(SERVO_TST_INC_HAL)) \
+			$(patsubst %,$(INC_DIR)/%,$(SERVO_INC))
+SERVO_TST_INC_DIRS	= -I $(INC_DIR) \
+			-I $(STM32_CMSIS_INC_DIR) \
+			-I $(STM32L4_CMSIS_INC_DIR) \
+			-I $(STM32L4_HAL_INC_DIR)
+
 # target: dependencies
 #	action
 
@@ -46,6 +60,13 @@ servo.s: $(SERVO_DEPS)
 	$(Q)$(CC) $(CFLAGS) $(SERVO_INC_DIRS) -S $< -o $@
 	@echo  "	CC	$@"
 servo.o: servo.s
+	$(Q)$(AS) $< -o $@
+	@echo  "	AS	$@"
+
+servo_test.s: $(SERVO_TST_DEPS)
+	$(Q)$(CC) $(CFLAGS) $(SERVO_TST_INC_DIRS) -S $< -o $@
+	@echo  "	CC	$@"
+servo_test.o: servo_test.s
 	$(Q)$(AS) $< -o $@
 	@echo  "	AS	$@"
 

@@ -1,13 +1,13 @@
 /******************************************************************************
- *	servo.h								      *
+ *	servo_test.h							      *
  ******************************************************************************/
 
 
 /******************************************************************************
  ******* include guard ********************************************************
  ******************************************************************************/
-# ifndef		SERVO_H
-	# define	SERVO_H
+# ifndef		SERVO_TEST_H
+	# define	SERVO_TEST_H
 
 
 /******************************************************************************
@@ -24,29 +24,11 @@
 /******************************************************************************
  ******* macros ***************************************************************
  ******************************************************************************/
-	# define	SERVO_ANGLE_MIN			-90
-	# define	SERVO_ANGLE_MAX			90
 
 
 /******************************************************************************
  ******* enums ****************************************************************
  ******************************************************************************/
-	enum	Err_Servo {
-		ERR_SERVO_OK = 0,
-		ERR_SERVO_SATURATION_NEG = -1,
-		ERR_SERVO_SATURATION_POS = 1,
-		ERR_SERVO_INIT = 2
-	};
-
-	enum	Servo_sX {
-		SERVO_SALL = 0,
-		SERVO_S1,
-		SERVO_S2,
-		SERVO_S3,
-		SERVO_S4,
-
-		SERVO_QTY
-	};
 
 
 /******************************************************************************
@@ -63,57 +45,16 @@
  ******* functions ************************************************************
  ******************************************************************************/
 	/**
-	 * @brief	Init servo s1 in PA15 using TIM2_CH1
+	 * @brief	Test servos
 	 * @return	error.
 	 */
-uint32_t	servo_s1_init		(void);
-	/**
-	 * @brief	Init servo s2 in PA1 using TIM2_CH2
-	 * @return	error.
-	 */
-uint32_t	servo_s2_init		(void);
-	/**
-	 * @brief	Init servo s3 in PB10 using TIM2_CH3
-	 * @return	error.
-	 */
-uint32_t	servo_s3_init		(void);
-	/**
-	 * @brief	Init servo s4 in PB11 (GPIOB, GPIO_PIN_11)
-	 * @return	error.
-	 */
-uint32_t	servo_s4_init		(void);
-	/**
-	 * @brief	Init all servos using TIM2_CH[1:4]
-	 * @return	error.
-	 */
-uint32_t	servo_sALL_init		(void);
-
-	/**
-	 * @brief	Set servo position
-	 * @param	position_decimals:	position (deg) multiplied by 10.
-	 *			valid range: [-900, 900]
-	 * @return	error.
-	 */
-uint32_t	servo_sX_position_set	(int16_t position_decimals, int8_t servo);
-
-	/**
-	 * @brief	Get servo position
-	 * @param	*position_decimals:	position (deg) multiplied by 10.
-	 * @return	error.
-	 */
-uint32_t	servo_sX_position_get	(int16_t *position_decimals, int8_t servo);
-
-	/**
-	 * @brief	Stop servo
-	 * @return	error.
-	 */
-uint32_t	servo_sALL_stop		(void);
+uint32_t	servo_test		(void);
 
 
 /******************************************************************************
  ******* include guard ********************************************************
  ******************************************************************************/
-# endif			/* servo.h */
+# endif			/* servo_test.h */
 
 
 /******************************************************************************

@@ -64,44 +64,21 @@
 	 * @param	period:		period of the pwm (in resolution_s units).
 	 * @return	error
 	 */
-int32_t	pwm_tim2_init		(uint32_t resolution_s, uint32_t period);
+uint32_t	pwm_tim2_init		(uint32_t resolution_s, uint32_t period);
 
 	/**
-	 * @brief	Set PWM using TIM2 (all channels)
-	 * @param	duty_cycle:	duty cycle value (fraction).
+	 * @brief	Set PWM using TIM2
+	 * @param	duty_cycle:	duty cycle value (fraction)
+	 * @param	chan:		channel to be used (1 through 4; 0=ALL)
 	 * @return	error
 	 */
-int32_t	pwm_tim2_chALL_set	(float duty_cycle);
-	/**
-	 * @brief	Set PWM using TIM2_CH1
-	 * @param	duty_cycle:	duty cycle value (fraction).
-	 * @return	error
-	 */
-int32_t	pwm_tim2_ch1_set	(float duty_cycle);
-	/**
-	 * @brief	Set PWM using TIM2_CH1
-	 * @param	duty_cycle:	duty cycle value (fraction).
-	 * @return	error
-	 */
-int32_t	pwm_tim2_ch2_set	(float duty_cycle);
-	/**
-	 * @brief	Set PWM using TIM2_CH1
-	 * @param	duty_cycle:	duty cycle value (fraction).
-	 * @return	error
-	 */
-int32_t	pwm_tim2_ch3_set	(float duty_cycle);
-	/**
-	 * @brief	Set PWM using TIM2_CH1
-	 * @param	duty_cycle:	duty cycle value (fraction).
-	 * @return	error
-	 */
-int32_t	pwm_tim2_ch4_set	(float duty_cycle);
+uint32_t	pwm_tim2_chX_set	(float duty_cycle, int8_t chan);
 
 	/**
 	 * @brief	Stop PWM using TIM2
 	 * @return	error
 	 */
-int32_t	pwm_tim2_stop		(void);
+uint32_t	pwm_tim2_stop		(void);
 
 
 /******************************************************************************
