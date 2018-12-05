@@ -30,6 +30,19 @@
 /******************************************************************************
  ******* enums ****************************************************************
  ******************************************************************************/
+	enum	Err_PWM {
+		ERR_PWM_OK = 0,
+		ERR_PWM_INIT,
+		ERR_PWM_TIM_INIT,
+		ERR_PWM_TIM_CLK_CONF,
+		ERR_PWM_TIM_MASTER_CONF,
+		ERR_PWM_TIM_PWM_INIT,
+		ERR_PWM_TIM_BASE_STOP,
+		ERR_PWM_DUTY,
+		ERR_PWM_CHAN,
+		ERR_PWM_TIM_PWM_CONF,
+		ERR_PWM_TIM_PWM_START
+	};
 
 
 /******************************************************************************
@@ -45,23 +58,50 @@
 /******************************************************************************
  ******* functions ************************************************************
  ******************************************************************************/
-	/*
-	 * @brief	Initialize base time for PWM.
-	 * @param	resolution_s:	divisions in 1 s.
+	/**
+	 * @brief	Initialize base time for PWM using TIM2
+	 * @param	resolution_s:	divisions in 1 s
 	 * @param	period:		period of the pwm (in resolution_s units).
+	 * @return	error
 	 */
-int32_t	pwm_init	(uint32_t resolution_s, uint32_t period);
+int32_t	pwm_tim2_init		(uint32_t resolution_s, uint32_t period);
 
 	/**
-	 * @brief	Set PWM
+	 * @brief	Set PWM using TIM2 (all channels)
 	 * @param	duty_cycle:	duty cycle value (fraction).
+	 * @return	error
 	 */
-int32_t	pwm_set		(float duty_cycle);
+int32_t	pwm_tim2_chALL_set	(float duty_cycle);
+	/**
+	 * @brief	Set PWM using TIM2_CH1
+	 * @param	duty_cycle:	duty cycle value (fraction).
+	 * @return	error
+	 */
+int32_t	pwm_tim2_ch1_set	(float duty_cycle);
+	/**
+	 * @brief	Set PWM using TIM2_CH1
+	 * @param	duty_cycle:	duty cycle value (fraction).
+	 * @return	error
+	 */
+int32_t	pwm_tim2_ch2_set	(float duty_cycle);
+	/**
+	 * @brief	Set PWM using TIM2_CH1
+	 * @param	duty_cycle:	duty cycle value (fraction).
+	 * @return	error
+	 */
+int32_t	pwm_tim2_ch3_set	(float duty_cycle);
+	/**
+	 * @brief	Set PWM using TIM2_CH1
+	 * @param	duty_cycle:	duty cycle value (fraction).
+	 * @return	error
+	 */
+int32_t	pwm_tim2_ch4_set	(float duty_cycle);
 
 	/**
-	 * @brief	Stop PWM.
+	 * @brief	Stop PWM using TIM2
+	 * @return	error
 	 */
-int32_t	pwm_stop	(void);
+int32_t	pwm_tim2_stop		(void);
 
 
 /******************************************************************************

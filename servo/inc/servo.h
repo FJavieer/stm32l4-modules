@@ -33,9 +33,9 @@
  ******************************************************************************/
 	enum	Err_Servo {
 		ERR_SERVO_OK = 0,
-		ERR_SERVO_INIT = 2,
 		ERR_SERVO_SATURATION_NEG = -1,
-		ERR_SERVO_SATURATION_POS = 1
+		ERR_SERVO_SATURATION_POS = 1,
+		ERR_SERVO_INIT = 2
 	};
 
 
