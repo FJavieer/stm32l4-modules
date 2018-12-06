@@ -82,11 +82,6 @@ uint32_t	servo_s3_init		(void);
 	 * @return	error.
 	 */
 uint32_t	servo_s4_init		(void);
-	/**
-	 * @brief	Init all servos using TIM2_CH[1:4]
-	 * @return	error.
-	 */
-uint32_t	servo_sALL_init		(void);
 
 	/**
 	 * @brief	Set servo position

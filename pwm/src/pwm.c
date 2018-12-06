@@ -125,9 +125,6 @@ uint32_t	pwm_tim2_chX_set	(float duty_cycle, int8_t chan)
 
 	/* Select channel */
 	switch (chan) {
-	case 0:
-		tim_chan	= TIM_CHANNEL_ALL;
-		break;
 	case 1:
 		tim_chan	= TIM_CHANNEL_1;
 		break;

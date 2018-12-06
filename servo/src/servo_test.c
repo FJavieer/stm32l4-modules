@@ -68,7 +68,7 @@ uint32_t	servo_test		(void)
 	error	|= servo_sX_position_set(-850, SERVO_S3);
 	HAL_Delay(2000);
 
-	error	|= servo_sALL_init();
+	error	|= servo_s4_init();
 	error	|= servo_sX_position_set(500, SERVO_SALL);
 	HAL_Delay(2000);
 
@@ -83,7 +83,7 @@ uint32_t	servo_test		(void)
 	error	|= servo_sX_position_set(850, SERVO_S4);
 	HAL_Delay(2000);
 
-	error	|= servo_sALL_init();
+	error	|= servo_s1_init();
 	error	|= servo_sX_position_set(-900, SERVO_SALL);
 	HAL_Delay(2000);
 
