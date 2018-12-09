@@ -3,13 +3,13 @@
 ################################################################################
 # *AUTHORS*
 
-# EMAIL		"1903716@gmail.com"
+# EMAIL		<1903716@gmail.com>
 # FULL NAME	"Colomar Andrés, Alejandro"
 
-# EMAIL		""
+# EMAIL		<@.>
 # FULL NAME	"García Pedroche, Francisco Javier"
 
-# EMAIL		""
+# EMAIL		<@.>
 # FULL NAME	"Junquera Carrero, Santiago"
 
 ################################################################################
