@@ -105,7 +105,7 @@ uint32_t	servo_s1_init		(void)
 	__HAL_RCC_GPIOA_CLK_ENABLE();
 	/* Configure the GPIO LED pin */
 	gpio_init_values.Pin		= GPIO_PIN_15;
-	gpio_init_values.Mode		= GPIO_MODE_AF_PP;	// alternate function
+	gpio_init_values.Mode		= GPIO_MODE_AF_OD;	// alternate function
 	gpio_init_values.Pull		= GPIO_NOPULL;		// no pulls
 	gpio_init_values.Speed		= GPIO_SPEED_FREQ_LOW;
 	gpio_init_values.Alternate	= GPIO_AF1_TIM2;	// Pin connected to TIM2 output
@@ -141,7 +141,7 @@ uint32_t	servo_s2_init		(void)
 	__HAL_RCC_GPIOA_CLK_ENABLE();
 	/* Configure the GPIO LED pin */
 	gpio_init_values.Pin		= GPIO_PIN_1;
-	gpio_init_values.Mode		= GPIO_MODE_AF_PP;	// alternate function
+	gpio_init_values.Mode		= GPIO_MODE_AF_OD;	// alternate function
 	gpio_init_values.Pull		= GPIO_NOPULL;		// no pulls
 	gpio_init_values.Speed		= GPIO_SPEED_FREQ_LOW;
 	gpio_init_values.Alternate	= GPIO_AF1_TIM2;	// Pin connected to TIM2 output
@@ -177,7 +177,7 @@ uint32_t	servo_s3_init		(void)
 	__HAL_RCC_GPIOB_CLK_ENABLE();
 	/* Configure the GPIO LED pin */
 	gpio_init_values.Pin		= GPIO_PIN_10;
-	gpio_init_values.Mode		= GPIO_MODE_AF_PP;	// alternate function
+	gpio_init_values.Mode		= GPIO_MODE_AF_OD;	// alternate function
 	gpio_init_values.Pull		= GPIO_NOPULL;		// no pulls
 	gpio_init_values.Speed		= GPIO_SPEED_FREQ_LOW;
 	gpio_init_values.Alternate	= GPIO_AF1_TIM2;	// Pin connected to TIM2 output
@@ -213,7 +213,7 @@ uint32_t	servo_s4_init		(void)
 	__HAL_RCC_GPIOB_CLK_ENABLE();
 	/* Configure the GPIO LED pin */
 	gpio_init_values.Pin		= GPIO_PIN_11;
-	gpio_init_values.Mode		= GPIO_MODE_AF_PP;	// alternate function
+	gpio_init_values.Mode		= GPIO_MODE_AF_OD;	// alternate function
 	gpio_init_values.Pull		= GPIO_NOPULL;		// no pulls
 	gpio_init_values.Speed		= GPIO_SPEED_FREQ_LOW;
 	gpio_init_values.Alternate	= GPIO_AF1_TIM2;	// Pin connected to TIM2 output
