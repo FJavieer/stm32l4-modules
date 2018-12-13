@@ -14,7 +14,7 @@ SERVO_TMP_DIR	= $(SERVO_DIR)/tmp/
 ALL	= libstm32l4-modules.a
 
 MODS_OBJ_DELAY	= delay.o
-MODS_OBJ_LED	= led.o
+MODS_OBJ_LED	= led.o led_test.o
 MODS_OBJ_PWM	= pwm.o
 MODS_OBJ_SERVO	= servo.o servo_test.o
 MODS_OBJS	= \
