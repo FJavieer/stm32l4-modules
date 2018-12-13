@@ -29,17 +29,17 @@
  ******* macros ***************************************************************
  ******************************************************************************/
 		/* Resolution = 1/1000000 s = 1 us */
-	# define	SERVO_PWM_RESOLUTION_s		1000000u
+	# define	SERVO_PWM_RESOLUTION_s		(1000000u)
 
 		/* Period = 20 ms = 20000 us */
-	# define	SERVO_PWM_PERIOD_us		20000u
+	# define	SERVO_PWM_PERIOD_us		(20000u)
 
 		/* Angle = 0 deg -> Duty time = 1.5 ms -> Duty cycle = 0.075 */
-	# define	SERVO_PWM_DUTY_DEF		0.075f
+	# define	SERVO_PWM_DUTY_DEF		(0.075f)
 		/* Angle = -90 deg -> Duty time = 1 ms -> Duty cycle = 0.05 */
-	# define	SERVO_PWM_DUTY_MIN		0.05f
+	# define	SERVO_PWM_DUTY_MIN		(0.020f)//(0.05f) (from datashit)
 		/* Angle = 90 deg -> Duty time = 2 ms -> Duty cycle = 0.1 */
-	# define	SERVO_PWM_DUTY_MAX		0.1f
+	# define	SERVO_PWM_DUTY_MAX		(0.120f)//(0.1f) (from datashit)
 
 
 /******************************************************************************
@@ -57,7 +57,6 @@
  ******************************************************************************/
 /* Global --------------------------------------------------------------------*/
 /* Static --------------------------------------------------------------------*/
-static	GPIO_InitTypeDef	gpio_init_values;
 static	float			duty_cycle[SERVO_QTY];
 static	bool			init_pending[SERVO_QTY]	= {
 					true, true, true, true, true};
@@ -86,7 +85,8 @@ static	uint32_t	servo_duty_calc	(int16_t position_decimals, float *duty);
 	 */
 uint32_t	servo_s1_init		(void)
 {
-	uint32_t	error	= ERR_SERVO_OK;
+	uint32_t		error	= ERR_SERVO_OK;
+	GPIO_InitTypeDef	gpio_init_values;
 
 	/* Init pending */
 	if (init_pending[SERVO_S1]) {
@@ -122,7 +122,8 @@ uint32_t	servo_s1_init		(void)
 	 */
 uint32_t	servo_s2_init		(void)
 {
-	uint32_t	error	= ERR_SERVO_OK;
+	uint32_t		error	= ERR_SERVO_OK;
+	GPIO_InitTypeDef	gpio_init_values;
 
 	/* Init pending */
 	if (init_pending[SERVO_S2]) {
@@ -158,7 +159,8 @@ uint32_t	servo_s2_init		(void)
 	 */
 uint32_t	servo_s3_init		(void)
 {
-	uint32_t	error	= ERR_SERVO_OK;
+	uint32_t		error	= ERR_SERVO_OK;
+	GPIO_InitTypeDef	gpio_init_values;
 
 	/* Init pending */
 	if (init_pending[SERVO_S3]) {
@@ -194,7 +196,8 @@ uint32_t	servo_s3_init		(void)
 	 */
 uint32_t	servo_s4_init		(void)
 {
-	uint32_t	error	= ERR_SERVO_OK;
+	uint32_t		error	= ERR_SERVO_OK;
+	GPIO_InitTypeDef	gpio_init_values;
 
 	/* Init pending */
 	if (init_pending[SERVO_S4]) {
