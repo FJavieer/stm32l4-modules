@@ -16,6 +16,8 @@
 /* libalx --------------------------------------------------------------------*/
 
 /* STM32L4 modules -----------------------------------------------------------*/
+	#include "delay.h"
+	#include "led.h"
 	#include "servo.h"
 
 	#include "servo_test.h"
@@ -58,37 +60,37 @@
 uint32_t	servo_test		(void)
 {
 	uint32_t	error	= ERR_SERVO_OK;
+	int		i;
 
+	for (i = 0; i <= 90; i+=10) {
+		error	|= led_set();
 
-	error	|= servo_s1_init();
-	error	|= servo_sX_position_set(-850, SERVO_S1);
-	HAL_Delay(2000);
+		error	|= servo_sX_position_set(-(i*10), SERVO_S1);
+		error	|= servo_sX_position_set(-(i*10), SERVO_S2);
+		error	|= servo_sX_position_set(-(i*10), SERVO_S3);
+		error	|= servo_sX_position_set(-(i*10), SERVO_S4);
+		error	|= delay_us(1000000u);
 
-	error	|= servo_s3_init();
-	error	|= servo_sX_position_set(-850, SERVO_S3);
-	HAL_Delay(2000);
+		error	|= servo_sX_position_set(-0, SERVO_S1);
+		error	|= servo_sX_position_set(-0, SERVO_S2);
+		error	|= servo_sX_position_set(-0, SERVO_S3);
+		error	|= servo_sX_position_set(-0, SERVO_S4);
+		error	|= delay_us(1000000u);
 
-	error	|= servo_s4_init();
-	error	|= servo_sX_position_set(500, SERVO_SALL);
-	HAL_Delay(2000);
+		error	|= led_reset();
 
-	error	|= servo_sALL_stop();
-	HAL_Delay(2000);
+		error	|= servo_sX_position_set((i*10), SERVO_S1);
+		error	|= servo_sX_position_set((i*10), SERVO_S2);
+		error	|= servo_sX_position_set((i*10), SERVO_S3);
+		error	|= servo_sX_position_set((i*10), SERVO_S4);
+		error	|= delay_us(1000000u);
 
-	error	|= servo_s2_init();
-	error	|= servo_sX_position_set(850, SERVO_S2);
-	HAL_Delay(2000);
-
-	error	|= servo_s4_init();
-	error	|= servo_sX_position_set(850, SERVO_S4);
-	HAL_Delay(2000);
-
-	error	|= servo_s1_init();
-	error	|= servo_sX_position_set(-900, SERVO_SALL);
-	HAL_Delay(2000);
-
-	error	|= servo_sALL_stop();
-	HAL_Delay(2000);
+		error	|= servo_sX_position_set(0, SERVO_S1);
+		error	|= servo_sX_position_set(0, SERVO_S2);
+		error	|= servo_sX_position_set(0, SERVO_S3);
+		error	|= servo_sX_position_set(0, SERVO_S4);
+		error	|= delay_us(1000000u);
+	}
 
 	return	error;
 }
