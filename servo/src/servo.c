@@ -19,6 +19,7 @@
 	#include "alx_math.h"
 
 /* STM32L4 modules -----------------------------------------------------------*/
+	#include "errors.h"
 		/* pwm_init(), pwm_set(), pwm_stop() */
 	#include "pwm.h"
 
@@ -59,7 +60,7 @@
 /* Static --------------------------------------------------------------------*/
 static	float			duty_cycle[SERVO_QTY];
 static	bool			init_pending[SERVO_QTY]	= {
-					true, true, true, true, true};
+					true, true, true, true};
 
 
 /******************************************************************************
@@ -71,9 +72,9 @@ static	bool			init_pending[SERVO_QTY]	= {
 	 *			valid range: [-900, 900]
 	 * @param	duty:			Duty cycle
 	 *			valid range: [0, 1]
-	 * @return	error.
+	 * @return	None
 	 */
-static	uint32_t	servo_duty_calc	(int16_t position_decimals, float *duty);
+static	int	servo_duty_calc	(int16_t position_decimals, float *duty);
 
 
 /******************************************************************************
@@ -81,26 +82,23 @@ static	uint32_t	servo_duty_calc	(int16_t position_decimals, float *duty);
  ******************************************************************************/
 	/**
 	 * @brief	Init servo s1 in PA15 using TIM2_CH1
-	 * @return	error.
+	 *		Sets global variable 'error'
+	 * @return	None
 	 */
-uint32_t	servo_s1_init		(void)
+void	servo_s1_init		(void)
 {
-	uint32_t		error	= ERR_SERVO_OK;
 	GPIO_InitTypeDef	gpio_init_values;
 
 	/* Init pending */
 	if (init_pending[SERVO_S1]) {
 		init_pending[SERVO_S1]	= false;
-		init_pending[SERVO_SALL]	= init_pending[SERVO_S1]  ||
-						init_pending[SERVO_S2]  ||
-						init_pending[SERVO_S3]  ||
-						init_pending[SERVO_S4];
 	} else {
-		return	ERR_SERVO_OK;
+		error	|= ERROR_SERVO_INIT;
+		return;
 	}
 
 	/* Initialize TIM2 for PWM */
-	error	|= pwm_tim2_init(SERVO_PWM_RESOLUTION_s, SERVO_PWM_PERIOD_us);
+	pwm_tim2_init(SERVO_PWM_RESOLUTION_s, SERVO_PWM_PERIOD_us);
 
 	__HAL_RCC_GPIOA_CLK_ENABLE();
 	/* Configure the GPIO LED pin */
@@ -112,32 +110,27 @@ uint32_t	servo_s1_init		(void)
 	HAL_GPIO_Init(GPIOA, &gpio_init_values);
 
 	/* Initialize PWM with default duty cycle (0 DEG) */
-	error	|= pwm_tim2_chX_set(SERVO_PWM_DUTY_DEF, 1);
-
-	return	error;
+	pwm_tim2_chX_set(SERVO_PWM_DUTY_DEF, TIM_CHANNEL_1);
 }
 	/**
 	 * @brief	Init servo s2 in PA1 using TIM2_CH2
-	 * @return	error.
+	 *		Sets global variable 'error'
+	 * @return	None
 	 */
-uint32_t	servo_s2_init		(void)
+void	servo_s2_init		(void)
 {
-	uint32_t		error	= ERR_SERVO_OK;
 	GPIO_InitTypeDef	gpio_init_values;
 
 	/* Init pending */
 	if (init_pending[SERVO_S2]) {
 		init_pending[SERVO_S2]	= false;
-		init_pending[SERVO_SALL]	= init_pending[SERVO_S1]  ||
-						init_pending[SERVO_S2]  ||
-						init_pending[SERVO_S3]  ||
-						init_pending[SERVO_S4];
 	} else {
-		return	ERR_SERVO_OK;
+		error	|= ERROR_SERVO_INIT;
+		return;
 	}
 
 	/* Initialize TIM2 for PWM */
-	error	|= pwm_tim2_init(SERVO_PWM_RESOLUTION_s, SERVO_PWM_PERIOD_us);
+	pwm_tim2_init(SERVO_PWM_RESOLUTION_s, SERVO_PWM_PERIOD_us);
 
 	__HAL_RCC_GPIOA_CLK_ENABLE();
 	/* Configure the GPIO LED pin */
@@ -149,32 +142,27 @@ uint32_t	servo_s2_init		(void)
 	HAL_GPIO_Init(GPIOA, &gpio_init_values);
 
 	/* Initialize PWM with default duty cycle (0 DEG) */
-	error	|= pwm_tim2_chX_set(SERVO_PWM_DUTY_DEF, 2);
-
-	return	error;
+	pwm_tim2_chX_set(SERVO_PWM_DUTY_DEF, TIM_CHANNEL_2);
 }
 	/**
 	 * @brief	Init servo s3 in PB10 using TIM2_CH3
-	 * @return	error.
+	 *		Sets global variable 'error'
+	 * @return	None
 	 */
-uint32_t	servo_s3_init		(void)
+void	servo_s3_init		(void)
 {
-	uint32_t		error	= ERR_SERVO_OK;
 	GPIO_InitTypeDef	gpio_init_values;
 
 	/* Init pending */
 	if (init_pending[SERVO_S3]) {
 		init_pending[SERVO_S3]	= false;
-		init_pending[SERVO_SALL]	= init_pending[SERVO_S1]  ||
-						init_pending[SERVO_S2]  ||
-						init_pending[SERVO_S3]  ||
-						init_pending[SERVO_S4];
 	} else {
-		return	ERR_SERVO_OK;
+		error	|= ERROR_SERVO_INIT;
+		return;
 	}
 
 	/* Initialize TIM2 for PWM */
-	error	|= pwm_tim2_init(SERVO_PWM_RESOLUTION_s, SERVO_PWM_PERIOD_us);
+	pwm_tim2_init(SERVO_PWM_RESOLUTION_s, SERVO_PWM_PERIOD_us);
 
 	__HAL_RCC_GPIOB_CLK_ENABLE();
 	/* Configure the GPIO LED pin */
@@ -186,32 +174,27 @@ uint32_t	servo_s3_init		(void)
 	HAL_GPIO_Init(GPIOB, &gpio_init_values);
 
 	/* Initialize PWM with default duty cycle (0 DEG) */
-	error	|= pwm_tim2_chX_set(SERVO_PWM_DUTY_DEF, 3);
-
-	return	error;
+	pwm_tim2_chX_set(SERVO_PWM_DUTY_DEF, TIM_CHANNEL_3);
 }
 	/**
 	 * @brief	Init servo s4 in PB11 using TIM2_CH4
-	 * @return	error.
+	 *		Sets global variable 'error'
+	 * @return	None
 	 */
-uint32_t	servo_s4_init		(void)
+void	servo_s4_init		(void)
 {
-	uint32_t		error	= ERR_SERVO_OK;
 	GPIO_InitTypeDef	gpio_init_values;
 
 	/* Init pending */
 	if (init_pending[SERVO_S4]) {
 		init_pending[SERVO_S4]		= false;
-		init_pending[SERVO_SALL]	= init_pending[SERVO_S1]  ||
-						init_pending[SERVO_S2]  ||
-						init_pending[SERVO_S3]  ||
-						init_pending[SERVO_S4];
 	} else {
-		return	ERR_SERVO_OK;
+		error	|= ERROR_SERVO_INIT;
+		return;
 	}
 
 	/* Initialize TIM2 for PWM */
-	error	|= pwm_tim2_init(SERVO_PWM_RESOLUTION_s, SERVO_PWM_PERIOD_us);
+	pwm_tim2_init(SERVO_PWM_RESOLUTION_s, SERVO_PWM_PERIOD_us);
 
 	__HAL_RCC_GPIOB_CLK_ENABLE();
 	/* Configure the GPIO LED pin */
@@ -223,69 +206,82 @@ uint32_t	servo_s4_init		(void)
 	HAL_GPIO_Init(GPIOB, &gpio_init_values);
 
 	/* Initialize PWM with default duty cycle (0 DEG) */
-	error	|= pwm_tim2_chX_set(SERVO_PWM_DUTY_DEF, 4);
-
-	return	error;
+	pwm_tim2_chX_set(SERVO_PWM_DUTY_DEF, TIM_CHANNEL_4);
 }
 
 	/**
 	 * @brief	Set servo sX position
+	 *		Sets global variable 'error'
 	 * @param	position_decimals:	position (deg) multiplied by 10.
 	 *			valid range: [-900, 900]
-	 * @return	error.
+	 * @return	None
 	 */
-uint32_t	servo_sX_position_set	(int16_t position_decimals, int8_t servo)
+void	servo_sX_position_set	(int16_t position_decimals, int8_t servo)
 {
-	uint32_t	error	= ERR_SERVO_OK;
+	uint32_t	tim_chan;
 
 	/* Check if servo has been initialized */
 	if (init_pending[servo]) {
-		return	ERR_SERVO_INIT;
+		error	|= ERROR_SERVO_INIT;
+		return;
+	}
+
+	/* Select channel */
+	switch (servo) {
+	case SERVO_S1:
+		tim_chan	= TIM_CHANNEL_1;
+		break;
+	case SERVO_S2:
+		tim_chan	= TIM_CHANNEL_2;
+		break;
+	case SERVO_S3:
+		tim_chan	= TIM_CHANNEL_3;
+		break;
+	case SERVO_S4:
+		tim_chan	= TIM_CHANNEL_4;
+		break;
+	default:
+		error	|= ERROR_SERVO_ID;
+		return;
 	}
 
 	/* Calc duty */
-	error	|= servo_duty_calc(position_decimals, &duty_cycle[servo]);
+	servo_duty_calc(position_decimals, &duty_cycle[servo]);
 	/* set PWM */
-	error	|= pwm_tim2_chX_set(duty_cycle[servo], servo);
-
-	return	error;
+	pwm_tim2_chX_set(duty_cycle[servo], tim_chan);
 }
 
 	/**
 	 * @brief	Get servo sX position
+	 *		Sets global variable 'error'
 	 * @param	*position_decimals:	position (deg) multiplied by 10.
-	 * @return	error.
+	 * @return	None
 	 */
-uint32_t	servo_sX_position_get	(int16_t *position_decimals, int8_t servo)
+void	servo_sX_position_get	(int16_t *position_decimals, int8_t servo)
 {
 	/* Check if servo has been initialized */
 	if (init_pending[servo]) {
-		return	ERR_SERVO_INIT;
+		error	|= ERROR_SERVO_INIT;
+		return;
 	}
 
 	*position_decimals	= alx_scale_linear_f(duty_cycle[SERVO_S1],
 				SERVO_PWM_DUTY_MIN, SERVO_PWM_DUTY_MAX,
 				SERVO_ANGLE_MIN * 10, SERVO_ANGLE_MAX * 10);
-
-	return	ERR_SERVO_OK;
 }
 
 	/**
 	 * @brief	Stop servos
-	 * @return	error.
+	 * @return	None
 	 */
-uint32_t	servo_sALL_stop		(void)
+void	servo_sALL_stop		(void)
 {
-	uint32_t	error	= ERR_SERVO_OK;
-
-	error	|= pwm_tim2_stop();
+	pwm_tim2_stop();
 
 	init_pending[SERVO_S1]		= true;
 	init_pending[SERVO_S2]		= true;
 	init_pending[SERVO_S3]		= true;
 	init_pending[SERVO_S4]		= true;
-
-	return	error;
 }
 
 
@@ -298,38 +294,38 @@ uint32_t	servo_sALL_stop		(void)
 	 *			valid range: [-900, 900]
 	 * @param	duty:			Duty cycle
 	 *			valid range: [0, 1]
-	 * @return	error.
+	 * @return	saturation:	0 =	OK,
+	 *				>0 =	POSITIVE SATURATION,
+	 *				<0 =	NEGATIVE SATURATION
 	 */
-static	uint32_t	servo_duty_calc	(int16_t position_decimals, float *duty)
+static	int	servo_duty_calc	(int16_t position_decimals, float *duty)
 {
-	uint32_t	error	= ERR_SERVO_OK;
+	int	saturation	= SERVO_SATURATION_OK;
 
 	/* Check if there is saturation */
 	if (position_decimals < (SERVO_ANGLE_MIN * 10)) {
-		error	= ERR_SERVO_SATURATION_NEG;
+		saturation	= SERVO_SATURATION_NEG;
 	}
 	if (position_decimals > (SERVO_ANGLE_MAX * 10)) {
-		error	= ERR_SERVO_SATURATION_POS;
+		saturation	= SERVO_SATURATION_POS;
 	}
 
 	/* set duty cycle */
-	switch (error) {
-	case ERR_SERVO_SATURATION_NEG:
+	switch (saturation) {
+	case SERVO_SATURATION_NEG:
 		*duty	= SERVO_PWM_DUTY_MIN;
 		break;
-	case ERR_SERVO_SATURATION_POS:
+	case SERVO_SATURATION_POS:
 		*duty	= SERVO_PWM_DUTY_MAX;
 		break;
-	case ERR_SERVO_OK:
+	default:
 		*duty	= alx_scale_linear_f(position_decimals,
 				SERVO_ANGLE_MIN * 10, SERVO_ANGLE_MAX * 10,
 				SERVO_PWM_DUTY_MIN, SERVO_PWM_DUTY_MAX);
 		break;
-	default:
-		break;
 	}
 
-	return	error;
+	return	saturation;
 }
 
 

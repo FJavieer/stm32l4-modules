@@ -6,8 +6,8 @@
 /******************************************************************************
  ******* include guard ********************************************************
  ******************************************************************************/
-# ifndef		SERVO_H
-	# define	SERVO_H
+# ifndef		ERROR_H
+	# define	ERROR_H
 
 
 /******************************************************************************
@@ -24,28 +24,35 @@
 /******************************************************************************
  ******* macros ***************************************************************
  ******************************************************************************/
-	# define	SERVO_ANGLE_MIN			(-90)
-	# define	SERVO_ANGLE_MAX			(90)
 
 
 /******************************************************************************
  ******* enums ****************************************************************
  ******************************************************************************/
-	enum	Err_Servo {
-		ERR_SERVO_OK = 0,
-		ERR_SERVO_SATURATION_NEG = -1,
-		ERR_SERVO_SATURATION_POS = 1,
-		ERR_SERVO_INIT = 2
-	};
+	enum	Error_Stm32l4_Modules {
+		ERROR_OK			= 0x00000000u,
 
-	enum	Servo_sX {
-		SERVO_SALL = 0,
-		SERVO_S1,
-		SERVO_S2,
-		SERVO_S3,
-		SERVO_S4,
+		ERROR_DELAY_HAL_TIM_INIT	= 0x00000001u,
+		ERROR_DELAY_HAL_TIM_START	= 0x00000002u,
+		ERROR_DELAY_HAL_TIM_STOP	= 0x00000004u,
+		ERROR_DELAY_INIT		= 0x00000008u,
+		ERROR_DELAY_NULL		= 0x00000010u,
 
-		SERVO_QTY
+		ERROR_LED_INIT			= 0x00000020u,
+
+		ERROR_PWM_HAL_TIM_INIT		= 0x00000040u,
+		ERROR_PWM_HAL_TIM_CLK_CONF	= 0x00000080u,
+		ERROR_PWM_HAL_TIM_MASTER_CONF	= 0x00000100u,
+		ERROR_PWM_HAL_TIM_PWM_INIT	= 0x00000200u,
+		ERROR_PWM_HAL_TIM_PWM_CONF	= 0x00000400u,
+		ERROR_PWM_HAL_TIM_PWM_START	= 0x00000800u,
+		ERROR_PWM_HAL_TIM_STOP		= 0x00001000u,
+		ERROR_PWM_INIT			= 0x00002000u,
+		ERROR_PWM_DUTY			= 0x00004000u,
+		ERROR_PWM_CHAN			= 0x00008000u,
+
+		ERROR_SERVO_INIT		= 0x00010000u,
+		ERROR_SERVO_ID			= 0x00020000u,
 	};
 
 
@@ -57,58 +64,26 @@
 /******************************************************************************
  ******* variables ************************************************************
  ******************************************************************************/
+extern	uint32_t	error;
 
 
 /******************************************************************************
  ******* functions ************************************************************
  ******************************************************************************/
 	/**
-	 * @brief	Init servo s1 in PA15 using TIM2_CH1
-	 * @return	error.
+	 * @brief	Handle error
+	 *		Displays the error value by flashing a led from MSB
+	 *		to LSB.  A long flash is a 1 and a short flash is a 0.
+	 *		After displaying the value, it resets 'error'.
+	 * @return	None
 	 */
-uint32_t	servo_s1_init		(void);
-	/**
-	 * @brief	Init servo s2 in PA1 using TIM2_CH2
-	 * @return	error.
-	 */
-uint32_t	servo_s2_init		(void);
-	/**
-	 * @brief	Init servo s3 in PB10 using TIM2_CH3
-	 * @return	error.
-	 */
-uint32_t	servo_s3_init		(void);
-	/**
-	 * @brief	Init servo s4 in PB11 (GPIOB, GPIO_PIN_11)
-	 * @return	error.
-	 */
-uint32_t	servo_s4_init		(void);
-
-	/**
-	 * @brief	Set servo position
-	 * @param	position_decimals:	position (deg) multiplied by 10.
-	 *			valid range: [-900, 900]
-	 * @return	error.
-	 */
-uint32_t	servo_sX_position_set	(int16_t position_decimals, int8_t servo);
-
-	/**
-	 * @brief	Get servo position
-	 * @param	*position_decimals:	position (deg) multiplied by 10.
-	 * @return	error.
-	 */
-uint32_t	servo_sX_position_get	(int16_t *position_decimals, int8_t servo);
-
-	/**
-	 * @brief	Stop servo
-	 * @return	error.
-	 */
-uint32_t	servo_sALL_stop		(void);
+void	error_handle		(void);
 
 
 /******************************************************************************
  ******* include guard ********************************************************
  ******************************************************************************/
-# endif			/* servo.h */
+# endif			/* error.h */
 
 
 /******************************************************************************

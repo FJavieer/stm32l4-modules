@@ -16,6 +16,7 @@
 
 /* libalx --------------------------------------------------------------------*/
 /* STM32L4 modules -----------------------------------------------------------*/
+	#include "errors.h"
 
 	#include "led.h"
 
@@ -53,15 +54,17 @@ static	bool	init_pending	= true;
  ******************************************************************************/
 	/**
 	 * @brief	Init LED in GPIO_PIN_5
-	 * @return	error.
+	 *		Sets global variable 'error'
+	 * @return	None
 	 */
-int32_t	led_init	(void)
+void	led_init	(void)
 {
 	/* Initialize base time */
 	if (init_pending) {
 		init_pending	= false;
 	} else {
-		return	0;
+		error	|= ERROR_LED_INIT;
+		return;
 	}
 	
 	__HAL_RCC_GPIOA_CLK_ENABLE();
@@ -75,38 +78,36 @@ int32_t	led_init	(void)
 
 	/* Reset LED */
 	led_reset();
-
-	return	0;
 }
 
 	/**
 	 * @brief	LED on
-	 * @return	error.
+	 *		Sets global variable 'error'
+	 * @return	None
 	 */
-int32_t	led_set		(void)
+void	led_set		(void)
 {
 	if (init_pending) {
-		return	-1;
+		error	|= ERROR_LED_INIT;
+		return;
 	}
 
 	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_SET);
-
-	return	0;
 }
 
 	/**
 	 * @brief	LED off
-	 * @return	error.
+	 *		Sets global variable 'error'
+	 * @return	None
 	 */
-int32_t	led_reset	(void)
+void	led_reset	(void)
 {
 	if (init_pending) {
-		return	-1;
+		error	|= ERROR_LED_INIT;
+		return;
 	}
 
 	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_RESET);
-
-	return	0;
 }
 
 

@@ -31,15 +31,13 @@
 /******************************************************************************
  ******* enums ****************************************************************
  ******************************************************************************/
-	enum	Err_Servo {
-		ERR_SERVO_OK = 0,
-		ERR_SERVO_SATURATION_NEG = -1,
-		ERR_SERVO_SATURATION_POS = 1,
-		ERR_SERVO_INIT = 2
+	enum	Servo_Saturation {
+		SERVO_SATURATION_OK = 0,
+		SERVO_SATURATION_NEG = -1,
+		SERVO_SATURATION_POS = 1
 	};
 
-	enum	Servo_sX {
-		SERVO_SALL = 0,
+	enum	Servo_Sx {
 		SERVO_S1,
 		SERVO_S2,
 		SERVO_S3,
@@ -64,45 +62,51 @@
  ******************************************************************************/
 	/**
 	 * @brief	Init servo s1 in PA15 using TIM2_CH1
-	 * @return	error.
+	 *		Sets global variable 'error'
+	 * @return	None
 	 */
-uint32_t	servo_s1_init		(void);
+void	servo_s1_init		(void);
 	/**
 	 * @brief	Init servo s2 in PA1 using TIM2_CH2
-	 * @return	error.
+	 *		Sets global variable 'error'
+	 * @return	None
 	 */
-uint32_t	servo_s2_init		(void);
+void	servo_s2_init		(void);
 	/**
 	 * @brief	Init servo s3 in PB10 using TIM2_CH3
-	 * @return	error.
+	 *		Sets global variable 'error'
+	 * @return	None
 	 */
-uint32_t	servo_s3_init		(void);
+void	servo_s3_init		(void);
 	/**
 	 * @brief	Init servo s4 in PB11 (GPIOB, GPIO_PIN_11)
-	 * @return	error.
+	 *		Sets global variable 'error'
+	 * @return	None
 	 */
-uint32_t	servo_s4_init		(void);
+void	servo_s4_init		(void);
 
 	/**
 	 * @brief	Set servo position
+	 *		Sets global variable 'error'
 	 * @param	position_decimals:	position (deg) multiplied by 10.
 	 *			valid range: [-900, 900]
-	 * @return	error.
+	 * @return	None
 	 */
-uint32_t	servo_sX_position_set	(int16_t position_decimals, int8_t servo);
+void	servo_sX_position_set	(int16_t position_decimals, int8_t servo);
 
 	/**
 	 * @brief	Get servo position
+	 *		Sets global variable 'error'
 	 * @param	*position_decimals:	position (deg) multiplied by 10.
-	 * @return	error.
+	 * @return	None
 	 */
-uint32_t	servo_sX_position_get	(int16_t *position_decimals, int8_t servo);
+void	servo_sX_position_get	(int16_t *position_decimals, int8_t servo);
 
 	/**
-	 * @brief	Stop servo
-	 * @return	error.
+	 * @brief	Stop servos
+	 * @return	None
 	 */
-uint32_t	servo_sALL_stop		(void);
+void	servo_sALL_stop		(void);
 
 
 /******************************************************************************

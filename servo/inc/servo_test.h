@@ -48,7 +48,7 @@
 	 * @brief	Test servos
 	 * @return	error.
 	 */
-uint32_t	servo_test		(void);
+void	servo_test	(void);
 
 
 /******************************************************************************

@@ -55,44 +55,41 @@
  ******************************************************************************/
 	/**
 	 * @brief	Test servos
-	 * @return	error.
+	 * @return	None
 	 */
-uint32_t	servo_test		(void)
+void	servo_test	(void)
 {
-	uint32_t	error	= ERR_SERVO_OK;
-	int		i;
+	int	i;
 
 	for (i = 0; i <= 90; i+=10) {
-		error	|= led_set();
+		led_set();
 
-		error	|= servo_sX_position_set(-(i*10), SERVO_S1);
-		error	|= servo_sX_position_set(-(i*10), SERVO_S2);
-		error	|= servo_sX_position_set(-(i*10), SERVO_S3);
-		error	|= servo_sX_position_set(-(i*10), SERVO_S4);
-		error	|= delay_us(1000000u);
+		servo_sX_position_set(-(i*10), SERVO_S1);
+		servo_sX_position_set(-(i*10), SERVO_S2);
+		servo_sX_position_set(-(i*10), SERVO_S3);
+		servo_sX_position_set(-(i*10), SERVO_S4);
+		delay_us(1000000u);
 
-		error	|= servo_sX_position_set(-0, SERVO_S1);
-		error	|= servo_sX_position_set(-0, SERVO_S2);
-		error	|= servo_sX_position_set(-0, SERVO_S3);
-		error	|= servo_sX_position_set(-0, SERVO_S4);
-		error	|= delay_us(1000000u);
+		servo_sX_position_set(-0, SERVO_S1);
+		servo_sX_position_set(-0, SERVO_S2);
+		servo_sX_position_set(-0, SERVO_S3);
+		servo_sX_position_set(-0, SERVO_S4);
+		delay_us(1000000u);
 
-		error	|= led_reset();
+		led_reset();
 
-		error	|= servo_sX_position_set((i*10), SERVO_S1);
-		error	|= servo_sX_position_set((i*10), SERVO_S2);
-		error	|= servo_sX_position_set((i*10), SERVO_S3);
-		error	|= servo_sX_position_set((i*10), SERVO_S4);
-		error	|= delay_us(1000000u);
+		servo_sX_position_set((i*10), SERVO_S1);
+		servo_sX_position_set((i*10), SERVO_S2);
+		servo_sX_position_set((i*10), SERVO_S3);
+		servo_sX_position_set((i*10), SERVO_S4);
+		delay_us(1000000u);
 
-		error	|= servo_sX_position_set(0, SERVO_S1);
-		error	|= servo_sX_position_set(0, SERVO_S2);
-		error	|= servo_sX_position_set(0, SERVO_S3);
-		error	|= servo_sX_position_set(0, SERVO_S4);
-		error	|= delay_us(1000000u);
+		servo_sX_position_set(0, SERVO_S1);
+		servo_sX_position_set(0, SERVO_S2);
+		servo_sX_position_set(0, SERVO_S3);
+		servo_sX_position_set(0, SERVO_S4);
+		delay_us(1000000u);
 	}
-
-	return	error;
 }
 
 

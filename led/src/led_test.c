@@ -54,22 +54,19 @@
  ******************************************************************************/
 	/**
 	 * @brief	Test LEDs
-	 * @return	error.
+	 * @return	None
 	 */
-uint32_t	led_test		(void)
+void	led_test	(void)
 {
-	uint32_t	error	= ERR_LED_OK;
 	int		i;
 
 	for (i = 0; i <= 100; i++) {
-		error	|= led_set();
-		error	|= delay_us(1000u * i);
+		led_set();
+		delay_us(1000u * i);
 
-		error	|= led_reset();
-		error	|= delay_us(1000u * i);
+		led_reset();
+		delay_us(1000u * i);
 	}
-
-	return	error;
 }
 
 

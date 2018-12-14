@@ -1,6 +1,6 @@
 /******************************************************************************
- *	servo_test.c							      *
- *	2018/dec/05							      *
+ *	error.c								      *
+ *	2018/dec/13							      *
  ******************************************************************************/
 
 
@@ -8,22 +8,28 @@
  ******* headers **************************************************************
  ******************************************************************************/
 /* Standard C ----------------------------------------------------------------*/
+	#include <stdbool.h>
 	#include <stdint.h>
 
 /* Drivers -------------------------------------------------------------------*/
 	#include "stm32l4xx_hal.h"
 
 /* libalx --------------------------------------------------------------------*/
-
 /* STM32L4 modules -----------------------------------------------------------*/
-	#include "servo.h"
+		/* delay_us_init(), delay_us() */
+	#include "delay.h"
+		/* led_init(), led_set(), led_stop() */
+	#include "led.h"
 
-	#include "servo_test.h"
+	#include "errors.h"
 
 
 /******************************************************************************
  ******* macros ***************************************************************
  ******************************************************************************/
+	# define	ERROR_BIT_LEN		(1000000u)
+	# define	ERROR_1_PULSE_LEN_US	(500000u)
+	# define	ERROR_0_PULSE_LEN_US	(100000u)
 
 
 /******************************************************************************
@@ -40,6 +46,7 @@
  ******* variables ************************************************************
  ******************************************************************************/
 /* Global --------------------------------------------------------------------*/
+	uint32_t	error;
 /* Static --------------------------------------------------------------------*/
 
 
@@ -52,45 +59,18 @@
  ******* global functions *****************************************************
  ******************************************************************************/
 	/**
-	 * @brief	Test servos
-	 * @return	error.
+	 * @brief	Handle error
+	 *		Displays the error value by flashing a led from MSB
+	 *		to LSB.  A long flash is a 1 and a short flash is a 0.
+	 *		After displaying the value, it resets 'error'.
+	 * @return	None
 	 */
-uint32_t	servo_test		(void)
+void	error_handle	(void)
 {
-	uint32_t	error	= ERR_SERVO_OK;
-
-
-	error	|= servo_s1_init();
-	error	|= servo_sX_position_set(-850, SERVO_S1);
-	HAL_Delay(2000);
-
-	error	|= servo_s3_init();
-	error	|= servo_sX_position_set(-850, SERVO_S3);
-	HAL_Delay(2000);
-
-	error	|= servo_s4_init();
-	error	|= servo_sX_position_set(500, SERVO_SALL);
-	HAL_Delay(2000);
-
-	error	|= servo_sALL_stop();
-	HAL_Delay(2000);
-
-	error	|= servo_s2_init();
-	error	|= servo_sX_position_set(850, SERVO_S2);
-	HAL_Delay(2000);
-
-	error	|= servo_s4_init();
-	error	|= servo_sX_position_set(850, SERVO_S4);
-	HAL_Delay(2000);
-
-	error	|= servo_s1_init();
-	error	|= servo_sX_position_set(-900, SERVO_SALL);
-	HAL_Delay(2000);
-
-	error	|= servo_sALL_stop();
-	HAL_Delay(2000);
-
-	return	error;
+	led_set();
+	delay_us(1000u);
+	led_reset();
+	delay_us(1000u);
 }
 
 

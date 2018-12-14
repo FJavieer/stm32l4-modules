@@ -2,7 +2,7 @@
 
 # directories
 
-TMP_DIR = $(SERVO_DIR)/tmp/
+TMP_DIR = $(ERRORS_DIR)/tmp/
 
 # target: dependencies
 #	action

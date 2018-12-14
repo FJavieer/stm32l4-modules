@@ -8,6 +8,7 @@ STM32L4_CMSIS_INC_DIR	= $(STM32L4_CMSIS_DIR)/Include/
 STM32L4_HAL_INC_DIR	= $(STM32L4_HAL_DIR)/Inc/
 
 DELAY_INC_DIR		= $(DELAY_DIR)/inc/
+ERRORS_INC_DIR		= $(ERRORS_DIR)/inc/
 LED_INC_DIR		= $(LED_DIR)/inc/
 PWM_INC_DIR		= $(PWM_DIR)/inc/
 
@@ -22,6 +23,7 @@ SERVO_INC_LIBALX	= alx_math.h
 SERVO_INC_CMSIS		= core_cm4.h
 SERVO_INC_CMSIS_L4	= stm32l4xx.h
 SERVO_INC_HAL		= stm32l4xx_hal.h
+SERVO_INC_ERRORS	= errors.h
 SERVO_INC_PWM		= pwm.h
 SERVO_INC		= servo.h
 SERVO_DEPS		= $(SRC_DIR)/servo.c \
@@ -29,6 +31,7 @@ SERVO_DEPS		= $(SRC_DIR)/servo.c \
 			$(patsubst %,$(STM32_CMSIS_INC_DIR)/%,$(SERVO_INC_CMSIS)) \
 			$(patsubst %,$(STM32L4_CMSIS_INC_DIR)/%,$(SERVO_INC_CMSIS_L4)) \
 			$(patsubst %,$(STM32L4_HAL_INC_DIR)/%,$(SERVO_INC_HAL)) \
+			$(patsubst %,$(ERRORS_INC_DIR)/%,$(SERVO_INC_ERRORS)) \
 			$(patsubst %,$(PWM_INC_DIR)/%,$(SERVO_INC_PWM)) \
 			$(patsubst %,$(INC_DIR)/%,$(SERVO_INC))
 SERVO_INC_DIRS		= -I $(INC_DIR) \
@@ -36,7 +39,8 @@ SERVO_INC_DIRS		= -I $(INC_DIR) \
 			-I $(STM32_CMSIS_INC_DIR) \
 			-I $(STM32L4_CMSIS_INC_DIR) \
 			-I $(STM32L4_HAL_INC_DIR) \
-			-I $(PWM_INC_DIR)
+			-I $(PWM_INC_DIR) \
+			-I $(ERRORS_INC_DIR)
 
 SERVO_TST_INC_CMSIS	= core_cm4.h
 SERVO_TST_INC_CMSIS_L4	= stm32l4xx.h

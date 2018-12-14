@@ -45,19 +45,21 @@
 /******************************************************************************
  ******* functions ************************************************************
  ******************************************************************************/
-	/*
-	 * @brief	Initialize base time for delay_us().
-	 * @param	None.
-	 * @return	None.
+	/**
+	 * @brief	Initialize base time for delay_us()
+	 *		Sets global variable 'error'
+	 * @param	None
+	 * @return	None
 	 */
-int32_t	delay_us_init	(void);
+void	delay_us_init	(void);
 
 	/**
-	 * @brief	Delay <time_us> microseconds.
-	 * @param	time_us:	Delay value (us).
-	 * @return	None.
+	 * @brief	Delay <time_us> microseconds
+	 *		Sets global variable 'error'
+	 * @param	time_us:	Delay value (us)
+	 * @return	None
 	 */
-int32_t	delay_us	(uint32_t time_us);
+void	delay_us	(uint32_t time_us);
 
 
 /******************************************************************************

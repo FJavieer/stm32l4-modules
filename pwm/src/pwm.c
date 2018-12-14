@@ -16,6 +16,8 @@
 
 /* libalx --------------------------------------------------------------------*/
 /* STM32L4 modules -----------------------------------------------------------*/
+	#include "errors.h"
+
 	#include "pwm.h"
 
 
@@ -46,16 +48,18 @@ static	TIM_OC_InitTypeDef	oc_init;
  ******************************************************************************/
 	/**
 	 * @brief	Initialize base time for PWM using TIM2.
+	 *		Sets global variable 'error'
 	 * @param	resolution_s:	divisions in 1 s.
 	 * @param	period:		period of the pwm (in resolution_s units).
-	 * @return	error
+	 * @return	None
 	 */
-uint32_t	pwm_tim2_init		(uint32_t resolution_s, uint32_t period)
+void	pwm_tim2_init		(uint32_t resolution_s, uint32_t period)
 {
 	if (init_pending) {
 		init_pending	= false;
 	} else {
-		return	ERR_PWM_OK;
+		error	|= ERROR_PWM_INIT;
+		return;
 	}
 
 	__HAL_RCC_TIM2_CLK_ENABLE();
@@ -69,7 +73,9 @@ uint32_t	pwm_tim2_init		(uint32_t resolution_s, uint32_t period)
 	tim_handle.Init.RepetitionCounter	= 0x00u;
 	tim_handle.Init.AutoReloadPreload	= TIM_AUTORELOAD_PRELOAD_DISABLE;
 	if (HAL_TIM_Base_Init(&tim_handle) != HAL_OK) {
-		return	ERR_PWM_TIM_INIT;
+		error	|= ERROR_PWM_HAL_TIM_INIT;
+		error_handle();
+		return;
 	}
 
 	clk_config.ClockSource		= TIM_CLOCKSOURCE_INTERNAL;
@@ -77,18 +83,24 @@ uint32_t	pwm_tim2_init		(uint32_t resolution_s, uint32_t period)
 	clk_config.ClockPrescaler	= TIM_CLOCKPRESCALER_DIV1;
 	clk_config.ClockFilter		= 0;
 	if (HAL_TIM_ConfigClockSource(&tim_handle, &clk_config) != HAL_OK) {
-		return	ERR_PWM_TIM_CLK_CONF;
+		error	|= ERROR_PWM_HAL_TIM_CLK_CONF;
+		error_handle();
+		return;
 	}
 
 	master_config.MasterOutputTrigger	= TIM_TRGO_RESET;
 	master_config.MasterSlaveMode		= TIM_MASTERSLAVEMODE_DISABLE;
 	if (HAL_TIMEx_MasterConfigSynchronization(&tim_handle,
 						&master_config) != HAL_OK) {
-		return	ERR_PWM_TIM_MASTER_CONF;
+		error	|= ERROR_PWM_HAL_TIM_MASTER_CONF;
+		error_handle();
+		return;
 	}
 
 	if (HAL_TIM_PWM_Init(&tim_handle) != HAL_OK) {
-		return	ERR_PWM_TIM_PWM_INIT;
+		error	|= ERROR_PWM_HAL_TIM_PWM_INIT;
+		error_handle();
+		return;
 	}
 
 	/* Configure PWM values */
@@ -99,79 +111,64 @@ uint32_t	pwm_tim2_init		(uint32_t resolution_s, uint32_t period)
 	oc_init.OCNIdleState	= TIM_OCNIDLESTATE_RESET;
 	oc_init.OCIdleState	= TIM_OCIDLESTATE_RESET;
 	oc_init.OCIdleState	= TIM_OCIDLESTATE_RESET;
-
-	return	ERR_PWM_OK;
 }
 
 	/**
 	 * @brief	Set PWM using TIM2
+	 *		Sets global variable 'error'
 	 * @param	duty_cycle:	duty cycle value (fraction)
 	 * @param	chan:		channel to be used (1 through 4; 0=ALL)
-	 * @return	error
+	 * @return	None
 	 */
-uint32_t	pwm_tim2_chX_set	(float duty_cycle, int8_t chan)
+void	pwm_tim2_chX_set	(float duty_cycle, uint32_t tim_chan)
 {
-	uint32_t	tim_chan;
-
 	/* Invalid duty cycle */
 	if (duty_cycle > 1.0 || duty_cycle < 0.0) {
-		return	ERR_PWM_DUTY;
+		error	|= ERROR_PWM_DUTY;
+		return;
 	}
 
 	/* Init pending */
 	if (init_pending) {
-		return	ERR_PWM_INIT;
-	}
-
-	/* Select channel */
-	switch (chan) {
-	case 1:
-		tim_chan	= TIM_CHANNEL_1;
-		break;
-	case 2:
-		tim_chan	= TIM_CHANNEL_2;
-		break;
-	case 3:
-		tim_chan	= TIM_CHANNEL_3;
-		break;
-	case 4:
-		tim_chan	= TIM_CHANNEL_4;
-		break;
-	default:
-		return	ERR_PWM_CHAN;
+		error	|= ERROR_PWM_INIT;
+		return;
 	}
 
 	/* Initialize PWN with duty cycle */
 	oc_init.Pulse	= tim_handle.Init.Period * duty_cycle;
 	if (HAL_TIM_PWM_ConfigChannel(&tim_handle, &oc_init, tim_chan) != HAL_OK) {
-		return	ERR_PWM_TIM_PWM_CONF;
+		error	|= ERROR_PWM_HAL_TIM_PWM_CONF;
+		error_handle();
+		return;
 	}
 
 	/* Start PWM */
 	if (HAL_TIM_PWM_Start(&tim_handle, tim_chan) != HAL_OK) {
-		return	ERR_PWM_TIM_PWM_START;
+		error	|= ERROR_PWM_HAL_TIM_PWM_START;
+		error_handle();
+		return;
 	}
-
-	return	ERR_PWM_OK;
 }
 
 	/**
 	 * @brief	Stop PWM using TIM2
-	 * @return	error
+	 *		Sets global variable 'error'
+	 * @return	None
 	 */
-uint32_t	pwm_tim2_stop		(void)
+void	pwm_tim2_stop		(void)
 {
 	/* Initialize base time */
 	if (init_pending) {
-		return	ERR_PWM_INIT;
+		error	|= ERROR_PWM_INIT;
+		return;
 	}
 
 	/* Stop timer */
 	if (HAL_TIM_Base_Stop(&tim_handle) != HAL_OK) {
-		return	ERR_PWM_TIM_BASE_STOP;
+		error	|= ERROR_PWM_HAL_TIM_STOP;
+		error_handle();
+		return;
 	}
-
-	return	ERR_PWM_OK;
 }
 
 

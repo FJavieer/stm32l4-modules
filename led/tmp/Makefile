@@ -8,6 +8,7 @@ STM32L4_CMSIS_INC_DIR	= $(STM32L4_CMSIS_DIR)/Include/
 STM32L4_HAL_INC_DIR	= $(STM32L4_HAL_DIR)/Inc/
 
 DELAY_INC_DIR		= $(DELAY_DIR)/inc/
+ERRORS_INC_DIR		= $(ERRORS_DIR)/inc/
 
 INC_DIR = $(LED_DIR)/inc/
 SRC_DIR = $(LED_DIR)/src/
@@ -19,16 +20,19 @@ ALL	= led.o led_test.o
 LED_INC_CMSIS		= core_cm4.h
 LED_INC_CMSIS_L4	= stm32l4xx.h
 LED_INC_HAL		= stm32l4xx_hal.h
+LED_INC_ERRORS		= errors.h
 LED_INC			= led.h
 LED_DEPS		= $(SRC_DIR)/led.c \
 			$(patsubst %,$(STM32_CMSIS_INC_DIR)/%,$(LED_INC_CMSIS)) \
 			$(patsubst %,$(STM32L4_CMSIS_INC_DIR)/%,$(LED_INC_CMSIS_L4)) \
 			$(patsubst %,$(STM32L4_HAL_INC_DIR)/%,$(LED_INC_HAL)) \
+			$(patsubst %,$(ERRORS_INC_DIR)/%,$(LED_INC_ERRORS)) \
 			$(patsubst %,$(INC_DIR)/%,$(LED_INC))
 LED_INC_DIRS		= -I $(INC_DIR) \
 			-I $(STM32_CMSIS_INC_DIR) \
 			-I $(STM32L4_CMSIS_INC_DIR) \
-			-I $(STM32L4_HAL_INC_DIR)
+			-I $(STM32L4_HAL_INC_DIR) \
+			-I $(ERRORS_INC_DIR)
 
 LED_TST_INC_CMSIS	= core_cm4.h
 LED_TST_INC_CMSIS_L4	= stm32l4xx.h
