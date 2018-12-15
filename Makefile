@@ -79,6 +79,7 @@ STM32L4_HAL_DIR		= $(STM32_DRIVERS_DIR)/STM32L4xx_HAL_Driver/
 LIBALX_DIR		= $(PARENT_DIR)/libalx/
 
 CAN_DIR			= $(STM32L4_MODULES_DIR)/can/
+CLK_DIR			= $(STM32L4_MODULES_DIR)/clk/
 DELAY_DIR		= $(STM32L4_MODULES_DIR)/delay/
 ERRORS_DIR		= $(STM32L4_MODULES_DIR)/errors/
 LED_DIR			= $(STM32L4_MODULES_DIR)/led/
@@ -98,6 +99,7 @@ export	STM32L4_HAL_DIR
 export	LIBALX_DIR
 
 export	CAN_DIR
+export	CLK_DIR
 export	DELAY_DIR
 export	ERRORS_DIR
 export	LED_DIR
@@ -111,6 +113,8 @@ export	SERVO_DIR
 all:
 	@echo	'	MAKE	modules:	can'
 	$(Q)make -C $(CAN_DIR)
+	@echo	'	MAKE	modules:	clk'
+	$(Q)make -C $(CLK_DIR)
 	@echo	'	MAKE	modules:	delay'
 	$(Q)make -C $(DELAY_DIR)
 	@echo	'	MAKE	modules:	errors'
