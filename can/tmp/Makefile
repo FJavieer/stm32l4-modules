@@ -7,29 +7,34 @@ STM32_CMSIS_INC_DIR	= $(STM32_CMSIS_DIR)/Include/
 STM32L4_CMSIS_INC_DIR	= $(STM32L4_CMSIS_DIR)/Include/
 STM32L4_HAL_INC_DIR	= $(STM32L4_HAL_DIR)/Inc/
 
-INC_DIR = $(PWM_DIR)/inc/
-SRC_DIR = $(PWM_DIR)/src/
+ERRORS_INC_DIR		= $(ERRORS_DIR)/inc/
+
+INC_DIR = $(CAN_DIR)/inc/
+SRC_DIR = $(CAN_DIR)/src/
 
 # dependencies
 
-ALL	= pwm.o
+ALL	= can.o
 
-PWM_INC_LIBALX		=
-PWM_INC_CMSIS		= core_cm4.h
-PWM_INC_CMSIS_L4	= stm32l4xx.h
-PWM_INC_HAL		= stm32l4xx_hal.h
-PWM_INC			= pwm.h
-PWM_DEPS		= $(SRC_DIR)/pwm.c \
-			$(patsubst %,$(LIBALX_INC_DIR)/%,$(PWM_INC_LIBALX)) \
-			$(patsubst %,$(STM32_CMSIS_INC_DIR)/%,$(PWM_INC_CMSIS)) \
-			$(patsubst %,$(STM32L4_CMSIS_INC_DIR)/%,$(PWM_INC_CMSIS_L4)) \
-			$(patsubst %,$(STM32L4_HAL_INC_DIR)/%,$(PWM_INC_HAL)) \
-			$(patsubst %,$(INC_DIR)/%,$(PWM_INC))
-PWM_INC_DIRS		= -I $(INC_DIR) \
+CAN_INC_LIBALX		=
+CAN_INC_CMSIS		= core_cm4.h
+CAN_INC_CMSIS_L4	= stm32l4xx.h
+CAN_INC_HAL		= stm32l4xx_hal.h
+CAN_INC_ERRORS		= errors.h
+CAN_INC			= can.h
+CAN_DEPS		= $(SRC_DIR)/can.c \
+			$(patsubst %,$(LIBALX_INC_DIR)/%,$(CAN_INC_LIBALX)) \
+			$(patsubst %,$(STM32_CMSIS_INC_DIR)/%,$(CAN_INC_CMSIS)) \
+			$(patsubst %,$(STM32L4_CMSIS_INC_DIR)/%,$(CAN_INC_CMSIS_L4)) \
+			$(patsubst %,$(STM32L4_HAL_INC_DIR)/%,$(CAN_INC_HAL)) \
+			$(patsubst %,$(ERRORS_INC_DIR)/%,$(CAN_INC_ERRORS)) \
+			$(patsubst %,$(INC_DIR)/%,$(CAN_INC))
+CAN_INC_DIRS		= -I $(INC_DIR) \
 			-I $(LIBALX_INC_DIR) \
 			-I $(STM32_CMSIS_INC_DIR) \
 			-I $(STM32L4_CMSIS_INC_DIR) \
-			-I $(STM32L4_HAL_INC_DIR)
+			-I $(STM32L4_HAL_INC_DIR) \
+			-I $(ERRORS_INC_DIR)
 
 # target: dependencies
 #	action
@@ -37,10 +42,10 @@ PWM_INC_DIRS		= -I $(INC_DIR) \
 all: $(ALL)
 
 
-pwm.s: $(PWM_DEPS)
-	$(Q)$(CC) $(CFLAGS) $(PWM_INC_DIRS) -S $< -o $@
+can.s: $(CAN_DEPS)
+	$(Q)$(CC) $(CFLAGS) $(CAN_INC_DIRS) -S $< -o $@
 	@echo  "	CC	$@"
-pwm.o: pwm.s
+can.o: can.s
 	$(Q)$(AS) $< -o $@
 	@echo  "	AS	$@"
 

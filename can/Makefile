@@ -2,7 +2,7 @@
 
 # directories
 
-TMP_DIR = $(PWM_DIR)/tmp/
+TMP_DIR = $(CAN_DIR)/tmp/
 
 # target: dependencies
 #	action
