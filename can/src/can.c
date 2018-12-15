@@ -189,6 +189,11 @@ void	can_msg_read	(uint8_t data [CAN_DATA_LEN])
 		return;
 	}
 
+	if (!can_msg_pending) {
+		error	|= ERROR_CAN_NO_MSG;
+		return;
+	}
+
 	for (i = 0; i < CAN_DATA_LEN; i++) {
 		data[i]	= can_rx_data[i];
 	}
