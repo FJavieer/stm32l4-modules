@@ -153,6 +153,8 @@ void	can_init	(void)
 	 */
 void	can_msg_write	(uint8_t data [CAN_DATA_LEN])
 {
+	int	i;
+
 	if (init_pending) {
 		error	|= ERROR_CAN_INIT;
 		error_handle();
@@ -164,7 +166,7 @@ void	can_msg_write	(uint8_t data [CAN_DATA_LEN])
 	}
 
 	/* Transmit TX message */
-	if (HAL_CAN_AddTxMessage(&can_handle, &can_tx_header, &can_tx_data,
+	if (HAL_CAN_AddTxMessage(&can_handle, &can_tx_header, can_tx_data,
 						&can_tx_mailbox) != HAL_OK) {
 		error	|= ERROR_CAN_HAL_ADD_TX_MSG;
 		error_handle();
@@ -180,6 +182,8 @@ void	can_msg_write	(uint8_t data [CAN_DATA_LEN])
 	 */
 void	can_msg_read	(uint8_t data [CAN_DATA_LEN])
 {
+	int	i;
+
 	if (init_pending) {
 		error	|= ERROR_CAN_INIT;
 		error_handle();
@@ -207,9 +211,9 @@ void	HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *can_handle_ptr)
 {
 	/* Get RX message */
 	if (HAL_CAN_GetRxMessage(can_handle_ptr, CAN_RX_FIFO0, &can_rx_header,
-						&can_rx_data) != HAL_OK) {
+						can_rx_data) != HAL_OK) {
 		error	|= ERROR_CAN_HAL_GET_RX_MSG;
-		Error_Handler(ERR_PWM_INIT);
+		error_handle();
 	} else if (can_msg_pending) {
 		error	|= ERROR_CAN_MSG_LOST;
 	} else {
