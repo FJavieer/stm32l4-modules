@@ -30,8 +30,6 @@
  ******* variables ************************************************************
  ******************************************************************************/
 /* Global --------------------------------------------------------------------*/
-	uint32_t	sysclk_freq;
-
 /* Static --------------------------------------------------------------------*/
 
 
@@ -75,9 +73,9 @@ void	sysclk_config	(void)
 	rcc_osc_init_values.PLL.PLLSource	= RCC_PLLSOURCE_MSI;
 	rcc_osc_init_values.PLL.PLLM		= 1;
 	rcc_osc_init_values.PLL.PLLN		= 40;
-	rcc_osc_init_values.PLL.PLLR		= 2;
-	rcc_osc_init_values.PLL.PLLP		= 7;
-	rcc_osc_init_values.PLL.PLLQ		= 4;
+	rcc_osc_init_values.PLL.PLLP		= RCC_PLLP_DIV7;
+	rcc_osc_init_values.PLL.PLLQ		= RCC_PLLQ_DIV4;
+	rcc_osc_init_values.PLL.PLLR		= RCC_PLLR_DIV2;
 	if (HAL_RCC_OscConfig(&rcc_osc_init_values) != HAL_OK) {
 		/* Initialization Error */
 		error	|= ERROR_CLK_HAL_RCC_OSC_CONF;
@@ -103,8 +101,6 @@ void	sysclk_config	(void)
 			;
 		}
 	}
-
-	sysclk_freq	= 80000000u;
 }
 
 

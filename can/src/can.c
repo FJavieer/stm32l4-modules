@@ -95,8 +95,8 @@ void	can_init	(void)
 	can_handle.Init.SyncJumpWidth		= CAN_SJW_1TQ;
 	can_handle.Init.TimeSeg1		= CAN_BS1_4TQ;
 	can_handle.Init.TimeSeg2		= CAN_BS2_5TQ;
-	/* CAN clock = 80MHz/180 = 444.44kHz. Period = 2.25uS.....*/
-	can_handle.Init.Prescaler		= 180;
+	/* CAN clock = 1 MHz = 80 MHz / 80;  Period = 1 us */
+	can_handle.Init.Prescaler		= SystemCoreClock / 1000000u;
 
 	if (HAL_CAN_Init(&can_handle) != HAL_OK) {
 		error	|= ERROR_CAN_HAL_CAN_INIT;
@@ -105,16 +105,15 @@ void	can_init	(void)
 	}
 
 	/* -4- Configure the CAN Filter ##################################### */
-	can_filter.FilterBank		= 5; // <14 -> CAN1
-	can_filter.FilterMode		= CAN_FILTERMODE_IDMASK;
-	can_filter.FilterScale		= CAN_FILTERSCALE_16BIT;
 	can_filter.FilterIdHigh		= 0x0000u;
 	can_filter.FilterIdLow		= 0x0000u;
 	can_filter.FilterMaskIdHigh	= 0x0000u;
 	can_filter.FilterMaskIdLow	= 0x0000u;
-	can_filter.FilterFIFOAssignment	= 0;
+	can_filter.FilterFIFOAssignment	= CAN_FILTER_FIFO0;
+	can_filter.FilterBank		= 5;
+	can_filter.FilterMode		= CAN_FILTERMODE_IDMASK;
+	can_filter.FilterScale		= CAN_FILTERSCALE_16BIT;
 	can_filter.FilterActivation	= ENABLE;
-	can_filter.SlaveStartFilterBank	= 0;
 
 	if (HAL_CAN_ConfigFilter(&can_handle, &can_filter) != HAL_OK) {
 		error	|= ERROR_CAN_HAL_CAN_FILTER;
@@ -137,10 +136,10 @@ void	can_init	(void)
 	}
 
 	/* -7- Configure Transmission process ############################### */
-	can_tx_header.StdId			= 0x03AAu;
+	can_tx_header.StdId			= 0x3AAu;
 	can_tx_header.ExtId			= 0x00u;
-	can_tx_header.RTR			= CAN_RTR_DATA;
 	can_tx_header.IDE			= CAN_ID_STD;
+	can_tx_header.RTR			= CAN_RTR_DATA;
 	can_tx_header.DLC			= CAN_DATA_LEN;
 	can_tx_header.TransmitGlobalTime	= DISABLE;
 }
