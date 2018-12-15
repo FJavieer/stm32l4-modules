@@ -1,6 +1,6 @@
 /******************************************************************************
  *	can.c								      *
- *	2018/nov/27							      *
+ *	2018/dec/15							      *
  ******************************************************************************/
 
 
@@ -25,6 +25,7 @@
 /******************************************************************************
  ******* macros ***************************************************************
  ******************************************************************************/
+	# define	CAN_DATA_LEN	(8)
 
 
 /******************************************************************************
@@ -46,32 +47,33 @@
  ******* functions ************************************************************
  ******************************************************************************/
 	/**
-	 * @brief	Initialize base time for PWM using TIM2
-	 * @param	resolution_s:	divisions in 1 s
-	 * @param	period:		period of the pwm (in resolution_s units).
-	 * @return	error
+	 * @brief	Initialize CAN
+	 *		Sets global variable 'error'
+	 * @return	None
 	 */
-uint32_t	pwm_tim2_init		(uint32_t resolution_s, uint32_t period);
+void	can_init	(void);
 
 	/**
-	 * @brief	Set PWM using TIM2
-	 * @param	duty_cycle:	duty cycle value (fraction)
-	 * @param	chan:		channel to be used (1 through 4; 0=ALL)
-	 * @return	error
+	 * @brief	Transmit the message in data through CAN
+	 *		Sets global variable 'error'
+	 * @param	data:		data to transmit
+	 * @return	None
 	 */
-uint32_t	pwm_tim2_chX_set	(float duty_cycle, int8_t chan);
+void	can_msg_write	(uint8_t data [CAN_DATA_LEN]);
 
 	/**
-	 * @brief	Stop PWM using TIM2
-	 * @return	error
+	 * @brief	Return the data received
+	 *		Sets global variable 'error'
+	 * @param	data:		array where data is to be stored
+	 * @return	None
 	 */
-uint32_t	pwm_tim2_stop		(void);
+void	can_msg_read	(uint8_t data [CAN_DATA_LEN]);
 
 
 /******************************************************************************
  ******* include guard ********************************************************
  ******************************************************************************/
-# endif			/* pwm.h */
+# endif			/* can.h */
 
 
 /******************************************************************************
