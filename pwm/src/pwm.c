@@ -47,10 +47,10 @@ static	TIM_OC_InitTypeDef	oc_init;
  ******* global functions *****************************************************
  ******************************************************************************/
 	/**
-	 * @brief	Initialize base time for PWM using TIM2.
+	 * @brief	Initialize base time for PWM using TIM2
 	 *		Sets global variable 'error'
-	 * @param	resolution_s:	divisions in 1 s.
-	 * @param	period:		period of the pwm (in resolution_s units).
+	 * @param	resolution_s:	divisions in 1 s
+	 * @param	period:		period of the pwm (in resolution_s units)
 	 * @return	None
 	 */
 void	pwm_tim2_init		(uint32_t resolution_s, uint32_t period)
