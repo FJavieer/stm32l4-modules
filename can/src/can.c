@@ -94,6 +94,9 @@ void	can_init	(void)
 	}
 
 	can_tx_header_conf();
+
+	HAL_NVIC_SetPriority(CAN1_RX0_IRQn, 1, 0);
+	HAL_NVIC_EnableIRQ(CAN1_RX0_IRQn);
 }
 
 	/**
