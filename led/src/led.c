@@ -59,7 +59,6 @@ static	bool	init_pending	= true;
 	 */
 void	led_init	(void)
 {
-	/* Initialize base time */
 	if (init_pending) {
 		init_pending	= false;
 	} else {
@@ -68,15 +67,14 @@ void	led_init	(void)
 	}
 	
 	__HAL_RCC_GPIOA_CLK_ENABLE();
-	/* Configure the GPIO LED pin */
+
 	GPIO_InitTypeDef	gpio_init_values;
-	gpio_init_values.Pin		= GPIO_PIN_5;		// LED2 pin
-	gpio_init_values.Mode		= GPIO_MODE_OUTPUT_PP;	// alternate function
-	gpio_init_values.Pull		= GPIO_NOPULL;		// no pulls
+	gpio_init_values.Pin		= GPIO_PIN_5;
+	gpio_init_values.Mode		= GPIO_MODE_OUTPUT_PP;
+	gpio_init_values.Pull		= GPIO_NOPULL;
 	gpio_init_values.Speed		= GPIO_SPEED_FREQ_LOW;
 	HAL_GPIO_Init(GPIOA, &gpio_init_values);
 
-	/* Reset LED */
 	led_reset();
 }
 
