@@ -81,6 +81,7 @@ LIBALX_DIR		= $(PARENT_DIR)/libalx/
 CAN_DIR			= $(STM32L4_MODULES_DIR)/can/
 CLK_DIR			= $(STM32L4_MODULES_DIR)/clk/
 DELAY_DIR		= $(STM32L4_MODULES_DIR)/delay/
+DISPLAY_DIR		= $(STM32L4_MODULES_DIR)/display/
 ERRORS_DIR		= $(STM32L4_MODULES_DIR)/errors/
 LED_DIR			= $(STM32L4_MODULES_DIR)/led/
 PWM_DIR			= $(STM32L4_MODULES_DIR)/pwm/
@@ -102,6 +103,7 @@ export	LIBALX_DIR
 export	CAN_DIR
 export	CLK_DIR
 export	DELAY_DIR
+export	DISPLAY_DIR
 export	ERRORS_DIR
 export	LED_DIR
 export	PWM_DIR
@@ -119,6 +121,8 @@ all:
 	$(Q)make -C $(CLK_DIR)
 	@echo	'	MAKE	modules:	delay'
 	$(Q)make -C $(DELAY_DIR)
+	@echo	'	MAKE	modules:	display'
+	$(Q)make -C $(DISPLAY_DIR)
 	@echo	'	MAKE	modules:	errors'
 	$(Q)make -C $(ERRORS_DIR)
 	@echo	'	MAKE	modules:	led'

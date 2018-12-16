@@ -2,7 +2,7 @@
 
 # directories
 
-TMP_DIR = $(LED_DIR)/tmp/
+TMP_DIR = $(DISPLAY_DIR)/tmp/
 
 # target: dependencies
 #	action

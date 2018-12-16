@@ -17,6 +17,7 @@
 /* libalx --------------------------------------------------------------------*/
 /* STM32L4 modules -----------------------------------------------------------*/
 	#include "errors.h"
+	#include "spi.h"
 
 	#include "display.h"
 
@@ -47,7 +48,7 @@ static	bool			init_pending	= true;
 /******************************************************************************
  ******* static functions (declarations) **************************************
  ******************************************************************************/
-static	void	display_display_start	(void);
+static	int	display_display_start	(void);
 static	int	display_data_set	(char ch, uint16_t data [8]);
 
 
@@ -74,10 +75,14 @@ int	display_init	(void)
 
 	if (spi_init()) {
 		error	|= ERROR_DISPLAY_SPI_INIT;
-		error_handler();
+		error_handle();
 		return	ERROR_NOK;
 	}
-	display_display_start();
+	if (display_display_start()) {
+		error	|= ERROR_DISPLAY_SPI_MSG_WRITE;
+		error_handle();
+		return	ERROR_NOK;
+	}
 
 	return	ERROR_OK;
 }
@@ -101,14 +106,14 @@ int	display_set	(char ch)
 
 	if (display_data_set(ch, data)) {
 		error	|= ERROR_DISPLAY_CHAR;
-		error_handler();
+		error_handle();
 		return	ERROR_NOK;
 	}
 
 	for (i = 0; i < 8; i++) {
 		if (spi_msg_write(data[i])) {
 			error	|= ERROR_DISPLAY_SPI_MSG_WRITE;
-			error_handler();
+			error_handle();
 			return	ERROR_NOK;
 		}
 	}
@@ -121,33 +126,47 @@ int	display_set	(char ch)
  ******* static functions (definitions) ***************************************
  ******************************************************************************/
 
-static	void	display_display_start	(void)
+static	int	display_display_start	(void)
 {
 	uint16_t data;
 
 	/* Disable MAX7219 */
 	data	= 0x0C00;
-	spi_msg_write(data);
+	if (spi_msg_write(data)) {
+		return	ERROR_NOK;
+	}
 
 	/* Disable Test Mode */
 	data	= 0x0F00;
-	spi_msg_write(data);
+	if (spi_msg_write(data)) {
+		return	ERROR_NOK;
+	}
 
 	/* Enable 8 Digits */
 	data	= 0x0BFF;
-	spi_msg_write(data);
+	if (spi_msg_write(data)) {
+		return	ERROR_NOK;
+	}
 
 	/* Set highest brightness */
 	data	= 0x0A0F;
-	spi_msg_write(data);
+	if (spi_msg_write(data)) {
+		return	ERROR_NOK;
+	}
 
 	/* Disable Mode BCD */
 	data	= 0x0900;
-	spi_msg_write(data);
+	if (spi_msg_write(data)) {
+		return	ERROR_NOK;
+	}
 
 	/* Enable MAX7219 */
 	data	= 0x0C01;
-	spi_msg_write(data);
+	if (spi_msg_write(data)) {
+		return	ERROR_NOK;
+	}
+
+	return	ERROR_OK;
 }
 
 static	int	display_data_set	(char ch, uint16_t data [8])
