@@ -38,6 +38,8 @@ static	TIM_HandleTypeDef	tim_handle;
 /******************************************************************************
  ******* static functions (declarations) **************************************
  ******************************************************************************/
+static	void	delay_us_delay_init	(uint32_t time_us, uint32_t *overflows);
+static	void	delay_us_delay_loop	(uint32_t overflows);
 
 
 /******************************************************************************
@@ -85,10 +87,6 @@ void	delay_us_init	(void)
 void	delay_us	(uint32_t time_us)
 {
 	uint32_t	overflows;
-	uint32_t	partial;
-	uint32_t	counter_initial;
-	uint32_t	counter_flags;
-	bool		flag;
 
 	if (init_pending) {
 		error	|= ERROR_DELAY_INIT;
@@ -102,30 +100,16 @@ void	delay_us	(uint32_t time_us)
 		return;
 	}
 
-	/* Initialize delay value */
-	overflows	= (time_us / ((uint32_t)UINT16_MAX + 1)) + 1;
-	partial		= time_us % ((uint32_t)UINT16_MAX + 1);
-	counter_initial	= (uint32_t)UINT16_MAX + 1 - partial;
-	__HAL_TIM_SET_COUNTER(&tim_handle, counter_initial);
+	delay_us_delay_init(time_us, &overflows);
 
-	/* Start delay */
 	if (HAL_TIM_Base_Start(&tim_handle) != HAL_OK) {
 		error	|= ERROR_DELAY_HAL_TIM_START;
 		error_handle();
 		return;
 	}
 
-	/* Count flags until delay reached */
-	counter_flags	= 0;
-	while (counter_flags < overflows) {
-		flag	= __HAL_TIM_GET_FLAG(&tim_handle, TIM_FLAG_UPDATE);
-		if (flag) {
-			__HAL_TIM_CLEAR_FLAG(&tim_handle, TIM_FLAG_UPDATE);
-			counter_flags++;
-		}
-	}
+	delay_us_delay_loop(overflows);
 
-	/* Stop delay */
 	if (HAL_TIM_Base_Stop(&tim_handle) != HAL_OK) {
 		error	|= ERROR_DELAY_HAL_TIM_STOP;
 		error_handle();
@@ -137,6 +121,32 @@ void	delay_us	(uint32_t time_us)
 /******************************************************************************
  ******* static functions (definitions) ***************************************
  ******************************************************************************/
+static	void	delay_us_delay_init	(uint32_t time_us, uint32_t *overflows)
+{
+	uint32_t	counter_initial;
+	uint32_t	partial;
+
+	*overflows		= (time_us / ((uint32_t)UINT16_MAX + 1u)) + 1u;
+	partial			= time_us % ((uint32_t)UINT16_MAX + 1u);
+	*counter_initial	= (uint32_t)UINT16_MAX + 1u - partial;
+
+	__HAL_TIM_SET_COUNTER(&tim_handle, counter_initial);
+}
+
+static	void	delay_us_delay_loop	(uint32_t overflows)
+{
+	uint32_t	counter_flags;
+	bool		flag;
+
+	counter_flags	= 0;
+	while (counter_flags < overflows) {
+		flag	= __HAL_TIM_GET_FLAG(&tim_handle, TIM_FLAG_UPDATE);
+		if (flag) {
+			__HAL_TIM_CLEAR_FLAG(&tim_handle, TIM_FLAG_UPDATE);
+			counter_flags++;
+		}
+	}
+}
 
 
 /******************************************************************************
