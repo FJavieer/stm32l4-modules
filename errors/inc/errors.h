@@ -25,7 +25,7 @@
  ******* macros ***************************************************************
  ******************************************************************************/
 	# define	ERROR_OK	(0)
-	# define	ERROR_GENERIC	(-1)
+	# define	ERROR_NOK	(-1)
 
 
 /******************************************************************************
@@ -58,7 +58,9 @@
 
 	enum	Error_Stm32l4_Modules_Display {
 		ERROR_DISPLAY_INIT			= 0x00080001u,
-		ERROR_DISPLAY_CHAR			= 0x00080002u
+		ERROR_DISPLAY_SPI_INIT			= 0x00080002u,
+		ERROR_DISPLAY_CHAR			= 0x00080004u,
+		ERROR_DISPLAY_SPI_MSG_WRITE		= 0x00080008u
 	};
 
 	enum	Error_Stm32l4_Modules_I2c {
