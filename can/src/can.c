@@ -35,7 +35,6 @@ static	bool			init_pending	= true;
 static	CAN_HandleTypeDef	can_handle;
 static	CAN_TxHeaderTypeDef	can_tx_header;
 static	CAN_RxHeaderTypeDef	can_rx_header;
-static	uint8_t			can_tx_data [CAN_DATA_LEN];
 static	uint8_t			can_rx_data [CAN_DATA_LEN];
 static	uint32_t		can_tx_mailbox;
 /* Volatile ------------------------------------------------------------------*/
@@ -105,6 +104,7 @@ void	can_init	(void)
 	 */
 void	can_msg_write	(uint8_t data [CAN_DATA_LEN])
 {
+	uint8_t	can_tx_data [CAN_DATA_LEN];
 	int	i;
 
 	if (init_pending) {
