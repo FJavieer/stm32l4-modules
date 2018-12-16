@@ -24,7 +24,6 @@
 /******************************************************************************
  ******* macros ***************************************************************
  ******************************************************************************/
-	# define	SPI_TIMEOUT	(500)
 
 
 /******************************************************************************
@@ -43,15 +42,12 @@
 /* Global --------------------------------------------------------------------*/
 /* Static --------------------------------------------------------------------*/
 static	bool			init_pending	= true;
-static	SPI_HandleTypeDef	spi_handle;
 
 
 /******************************************************************************
  ******* static functions (declarations) **************************************
  ******************************************************************************/
-static	int	display_spi_init	(void);
-static	void	display_gpio_init	(void);
-static	void	display_display_init	(void);
+static	void	display_display_start	(void);
 static	void	display_data_set	(char ch, uint16_t data [8]);
 
 
@@ -68,21 +64,8 @@ static	void	display_data_set	(char ch, uint16_t data [8]);
 	 */
 void	display_init	(void)
 {
-	GPIO_InitTypeDef gpio_init_values;
-
-	__HAL_RCC_GPIOB_CLK_ENABLE ();
-	__HAL_RCC_GPIOC_CLK_ENABLE ();
-	__SPI2_CLK_ENABLE();
-
-	if (display_spi_init()) {
-		error	|= ;
-		error_handle();
-		return;
-	}
-	__HAL_SPI_ENABLE(&spi_handle);
-
-	display_gpio_init();
-	display_display_init();
+	spi_init();
+	display_display_start();
 }
 
 	/**
@@ -99,17 +82,7 @@ void	display_set	(char ch)
 	display_data_set(ch, data);
 
 	for (i = 0; i < 8; i++) {
-		HAL_GPIO_WritePin(GPIOC, GPIO_PIN_2, GPIO_PIN_RESET);
-		if (HAL_SPI_Transmit(&spi_handle, (uint8_t *)(&(data[i])),
-							1, SPI_TIMEOUT)) {
-			error	|= ;
-			error_handle();
-			return;
-		}
-		while (HAL_SPI_GetState(&spi_handle) != HAL_SPI_STATE_READY) {
-			;
-		}
-		HAL_GPIO_WritePin(GPIOC, GPIO_PIN_2, GPIO_PIN_SET);
+		spi_msg_write(8, &(data[0]));
 	}
 }
 
@@ -117,128 +90,34 @@ void	display_set	(char ch)
 /******************************************************************************
  ******* static functions (definitions) ***************************************
  ******************************************************************************/
-static	int	display_spi_init	(void)
-{
-	spi_handle.Instance		= SPI2;
-	spi_handle.Init.BaudRatePrescaler	= SPI_BAUDRATEPRESCALER_32;
-	spi_handle.Init.Direction		= SPI_DIRECTION_2LINES;
-	spi_handle.Init.CLKPhase		= SPI_PHASE_1EDGE;
-	spi_handle.Init.CLKPolarity		= SPI_POLARITY_LOW;
-	spi_handle.Init.CRCCalculation		= SPI_CRCCALCULATION_DISABLE;
-	spi_handle.Init.DataSize		= SPI_DATASIZE_16BIT;
-	spi_handle.Init.FirstBit		= SPI_FIRSTBIT_MSB;
-	spi_handle.Init.NSS			= SPI_NSS_SOFT;
-	spi_handle.Init.TIMode			= SPI_TIMODE_DISABLE;
-	spi_handle.Init.Mode			= SPI_MODE_MASTER;
 
-	return	HAL_SPI_Init(&spi_handle);
-}
-
-static	void	display_gpio_init	(void)
-{
-	gpio_init_values.Pin		= GPIO_PIN_13;                
-	gpio_init_values.Mode		= GPIO_MODE_AF_PP;
-	gpio_init_values.Speed		= GPIO_SPEED_FREQ_HIGH;
-	gpio_init_values.Pull		= GPIO_NOPULL;
-	gpio_init_values.Alternate	= GPIO_AF5_SPI2;
-	HAL_GPIO_Init(GPIOB, &gpio_init_values);
-
-	gpio_init_values.Pin		= GPIO_PIN_3;                
-	gpio_init_values.Mode		= GPIO_MODE_AF_PP;
-	gpio_init_values.Speed		= GPIO_SPEED_FREQ_HIGH;
-	gpio_init_values.Pull		= GPIO_NOPULL;
-	gpio_init_values.Alternate	= GPIO_AF5_SPI2;
-	HAL_GPIO_Init(GPIOC, &gpio_init_values);
-
-	gpio_init_values.Pin		= GPIO_PIN_2;                
-	gpio_init_values.Mode		= GPIO_MODE_OUTPUT_PP;
-	gpio_init_values.Speed		= GPIO_SPEED_FREQ_HIGH;
-	gpio_init_values.Pull		= GPIO_NOPULL;
-	HAL_GPIO_Init(GPIOC, &gpio_init_values);
-	HAL_GPIO_WritePin(GPIOC, GPIO_PIN_2, GPIO_PIN_SET);
-}
-
-static	void	display_display_init	(void)
+static	void	display_display_start	(void)
 {
 	uint16_t data;
 
 	//Disable MAX7219
 	data	= 0x0C00;
-	HAL_GPIO_WritePin(GPIOC, GPIO_PIN_2, GPIO_PIN_RESET);
-	if (HAL_SPI_Transmit(&spi_handle, (uint8_t *)(&data), 1, SPI_TIMEOUT)) {
-		error	|= ;
-		error_handle();
-		return;
-	}
-	while (HAL_SPI_GetState(&spi_handle) != HAL_SPI_STATE_READY) {
-		;
-	}
-	HAL_GPIO_WritePin(GPIOC, GPIO_PIN_2, GPIO_PIN_SET);
+	spi_msg_write(1, &data);
 
 	//Disable Test Mode
 	data	= 0x0F00;
-	HAL_GPIO_WritePin(GPIOC, GPIO_PIN_2, GPIO_PIN_RESET);
-	if (HAL_SPI_Transmit(&spi_handle, (uint8_t *)(&data), 1, SPI_TIMEOUT)) {
-		error	|= ;
-		error_handle();
-		return;
-	}
-	while (HAL_SPI_GetState(&spi_handle) != HAL_SPI_STATE_READY) {
-		;
-	}
-	HAL_GPIO_WritePin(GPIOC, GPIO_PIN_2, GPIO_PIN_SET);
+	spi_msg_write(1, &data);
 
 	//Enable 8 Digits
 	data	= 0x0BFF;
-	HAL_GPIO_WritePin(GPIOC, GPIO_PIN_2, GPIO_PIN_RESET);
-	if (HAL_SPI_Transmit(&spi_handle, (uint8_t *)(&data), 1, SPI_TIMEOUT)) {
-		error	|= ;
-		error_handle();
-		return;
-	}
-	while (HAL_SPI_GetState(&spi_handle) != HAL_SPI_STATE_READY) {
-		;
-	}
-	HAL_GPIO_WritePin(GPIOC, GPIO_PIN_2, GPIO_PIN_SET);
+	spi_msg_write(1, &data);
 
 	//Set highest brightness
 	data	= 0x0A0F;
-	HAL_GPIO_WritePin(GPIOC, GPIO_PIN_2, GPIO_PIN_RESET);
-	if (HAL_SPI_Transmit(&spi_handle, (uint8_t *)(&data), 1, SPI_TIMEOUT)) {
-		error	|= ;
-		error_handle();
-		return;
-	}
-	while (HAL_SPI_GetState(&spi_handle) != HAL_SPI_STATE_READY) {
-		;
-	}
-	HAL_GPIO_WritePin(GPIOC, GPIO_PIN_2, GPIO_PIN_SET);
+	spi_msg_write(1, &data);
 
 	//Disable Mode BCD
 	data	= 0x0900;
-	HAL_GPIO_WritePin(GPIOC, GPIO_PIN_2, GPIO_PIN_RESET);
-	if (HAL_SPI_Transmit(&spi_handle, (uint8_t *)(&data), 1, SPI_TIMEOUT)) {
-		error	|= ;
-		error_handle();
-		return;
-	}
-	while (HAL_SPI_GetState(&spi_handle) != HAL_SPI_STATE_READY) {
-		;
-	}
-	HAL_GPIO_WritePin(GPIOC, GPIO_PIN_2, GPIO_PIN_SET);
+	spi_msg_write(1, &data);
 
 	//Enable MAX7219
 	data	= 0x0C01;
-	HAL_GPIO_WritePin(GPIOC, GPIO_PIN_2, GPIO_PIN_RESET);
-	if (HAL_SPI_Transmit(&spi_handle, (uint8_t *)(&data), 1, SPI_TIMEOUT)) {
-		error	|= ;
-		error_handle();
-		return;
-	}
-	while (HAL_SPI_GetState(&spi_handle) != HAL_SPI_STATE_READY) {
-		;
-	}
-	HAL_GPIO_WritePin(GPIOC, GPIO_PIN_2, GPIO_PIN_SET);
+	spi_msg_write(1, &data);
 
 	Set_Number_Matrix(10);
 }
