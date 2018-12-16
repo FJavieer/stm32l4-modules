@@ -76,87 +76,32 @@ void	spi_init	(void)
 	 * @param	data:	data to transmit
 	 * @return	None
 	 */
-void	spi_msg_write	(uint8_t data_len, uint8_t data [data_len])
+void	spi_msg_write	(uint16_t data)
 {
-	uint8_t	spi_data [data_len];
+	uint8_t	spi_data [sizeof(uint16_t) / sizeof(uint8_t)];
 	int	i;
 
 	if (init_pending) {
-		error	|= ERROR_CAN_INIT;
+		error	|= ERROR_SPI_INIT;
 		error_handle();
 		return;
 	}
 
-	for (i = 0; i < data_len; i++) {
-		spi_data[i]	= data[i];
-	}
+	spi_data[0]	= data / (UINT8_MAX + 1u);
+	spi_data[1]	= data % (UINT8_MAX + 1u);
 
 	HAL_GPIO_WritePin(GPIOC, GPIO_PIN_2, GPIO_PIN_RESET);
 
-	if (HAL_SPI_Transmit(&spi_handle, (uint8_t *)(&spi_data[0]), data_len,
-								SPI_TIMEOUT)) {
-		error	|= ;
+	if (HAL_SPI_Transmit(&spi_handle, spi_data, 1, SPI_TIMEOUT)) {
+		error	|= ERROR_SPI_HAL_SPI_TRANSMIT;
 		error_handle();
 		return;
 	}
 	while (HAL_SPI_GetState(&spi_handle) != HAL_SPI_STATE_READY) {
-		;
+		/* Empty loop */
 	}
 
 	HAL_GPIO_WritePin(GPIOC, GPIO_PIN_2, GPIO_PIN_SET);
-}
-
-	/**
-	 * @brief	Return the data received
-	 *		Sets global variable 'error'
-	 * @param	data:	array where data is to be written
-	 * @return	None
-	 */
-void	can_msg_read	(uint8_t data [CAN_DATA_LEN])
-{
-	/* FIXME */
-
-	int	i;
-
-	if (init_pending) {
-		error	|= ERROR_CAN_INIT;
-		error_handle();
-		return;
-	}
-
-	if (!can_msg_pending) {
-		error	|= ERROR_CAN_NO_MSG;
-		return;
-	}
-
-	for (i = 0; i < CAN_DATA_LEN; i++) {
-		data[i]	= can_rx_data[i];
-	}
-
-	can_msg_pending	= false;
-}
-
-
-/******************************************************************************
- ******* HAL weak functions (redefinitions) ***********************************
- ******************************************************************************/
-/**
- * @brief	Rx Fifo 0 message pending callback
- * @param	hcan: pointer to a CAN_HandleTypeDef structure that contains
- *		the configuration information for the specified CAN.
- * @return	None
- */
-void	HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *can_handle_ptr)
-{
-	if (HAL_CAN_GetRxMessage(can_handle_ptr, CAN_RX_FIFO0, &can_rx_header,
-								can_rx_data)) {
-		error	|= ERROR_CAN_HAL_GET_RX_MSG;
-		error_handle();
-	} else if (can_msg_pending) {
-		error	|= ERROR_CAN_MSG_LOST;
-	} else {
-		can_msg_pending	= true;
-	}
 }
 
 
