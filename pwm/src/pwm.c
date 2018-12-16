@@ -33,14 +33,16 @@
 /* Static --------------------------------------------------------------------*/
 static	bool			init_pending	= true;
 static	TIM_HandleTypeDef	tim_handle;
-static	TIM_ClockConfigTypeDef	clk_config;
-static	TIM_MasterConfigTypeDef	master_config;
 static	TIM_OC_InitTypeDef	oc_init;
 
 
 /******************************************************************************
  ******* static functions (declarations) **************************************
  ******************************************************************************/
+static	int	pwm_tim2_tim_init	(void);
+static	int	pwm_tim2_clk_conf	(void);
+static	int	pwm_tim2_master_conf	(void);
+static	void	pwm_tim2_oc_conf	(void);
 
 
 /******************************************************************************
@@ -63,54 +65,27 @@ void	pwm_tim2_init		(uint32_t resolution_s, uint32_t period)
 	}
 
 	__HAL_RCC_TIM2_CLK_ENABLE();
-
-	/* Resolution: 1 us;  Periodo: 1 ms */
-	tim_handle.Instance		= TIM2;
-	tim_handle.Init.Prescaler		= SystemCoreClock / resolution_s - 1;
-	tim_handle.Init.CounterMode		= TIM_COUNTERMODE_UP;
-	tim_handle.Init.Period			= period - 1;
-	tim_handle.Init.ClockDivision		= TIM_CLOCKDIVISION_DIV1;
-	tim_handle.Init.RepetitionCounter	= 0x00u;
-	tim_handle.Init.AutoReloadPreload	= TIM_AUTORELOAD_PRELOAD_DISABLE;
-	if (HAL_TIM_Base_Init(&tim_handle) != HAL_OK) {
+	if (pwm_tim2_tim_init()) {
 		error	|= ERROR_PWM_HAL_TIM_INIT;
 		error_handle();
 		return;
 	}
-
-	clk_config.ClockSource		= TIM_CLOCKSOURCE_INTERNAL;
-	clk_config.ClockPolarity	= TIM_CLOCKPOLARITY_INVERTED;
-	clk_config.ClockPrescaler	= TIM_CLOCKPRESCALER_DIV1;
-	clk_config.ClockFilter		= 0;
-	if (HAL_TIM_ConfigClockSource(&tim_handle, &clk_config) != HAL_OK) {
+	if (pwm_tim2_clk_conf()) {
 		error	|= ERROR_PWM_HAL_TIM_CLK_CONF;
 		error_handle();
 		return;
 	}
-
-	master_config.MasterOutputTrigger	= TIM_TRGO_RESET;
-	master_config.MasterSlaveMode		= TIM_MASTERSLAVEMODE_DISABLE;
-	if (HAL_TIMEx_MasterConfigSynchronization(&tim_handle,
-						&master_config) != HAL_OK) {
+	if (pwm_tim2_master_conf()) {
 		error	|= ERROR_PWM_HAL_TIM_MASTER_CONF;
 		error_handle();
 		return;
 	}
-
 	if (HAL_TIM_PWM_Init(&tim_handle) != HAL_OK) {
 		error	|= ERROR_PWM_HAL_TIM_PWM_INIT;
 		error_handle();
 		return;
 	}
-
-	/* Configure PWM values */
-	oc_init.OCMode		= TIM_OCMODE_PWM1;
-	oc_init.OCPolarity	= TIM_OCPOLARITY_HIGH;
-	oc_init.OCFastMode	= TIM_OCFAST_DISABLE;
-	oc_init.OCNPolarity	= TIM_OCNPOLARITY_HIGH;
-	oc_init.OCNIdleState	= TIM_OCNIDLESTATE_RESET;
-	oc_init.OCIdleState	= TIM_OCIDLESTATE_RESET;
-	oc_init.OCIdleState	= TIM_OCIDLESTATE_RESET;
+	pwm_tim2_oc_conf();
 }
 
 	/**
@@ -175,6 +150,54 @@ void	pwm_tim2_stop		(void)
 /******************************************************************************
  ******* static functions (definitions) ***************************************
  ******************************************************************************/
+static	int	pwm_tim2_tim_init	(void)
+{
+	/* Resolution: 1 us;  Periode: 1 ms */
+	tim_handle.Instance		= TIM2;
+	tim_handle.Init.Prescaler		= (SystemCoreClock /
+							resolution_s) - 1u;
+	tim_handle.Init.CounterMode		= TIM_COUNTERMODE_UP;
+	tim_handle.Init.Period			= period - 1u;
+	tim_handle.Init.ClockDivision		= TIM_CLOCKDIVISION_DIV1;
+	tim_handle.Init.RepetitionCounter	= 0x00u;
+	tim_handle.Init.AutoReloadPreload	= TIM_AUTORELOAD_PRELOAD_DISABLE;
+
+	return	HAL_TIM_Base_Init(&tim_handle);
+}
+
+static	int	pwm_tim2_clk_conf	(void)
+{
+	TIM_ClockConfigTypeDef	clk_config;
+
+	clk_config.ClockSource		= TIM_CLOCKSOURCE_INTERNAL;
+	clk_config.ClockPolarity	= TIM_CLOCKPOLARITY_INVERTED;
+	clk_config.ClockPrescaler	= TIM_CLOCKPRESCALER_DIV1;
+	clk_config.ClockFilter		= 0;
+
+	return	HAL_TIM_ConfigClockSource(&tim_handle, &clk_config);
+}
+
+static	int	pwm_tim2_master_conf	(void)
+{
+	TIM_MasterConfigTypeDef	master_config;
+
+	master_config.MasterOutputTrigger	= TIM_TRGO_RESET;
+	master_config.MasterSlaveMode		= TIM_MASTERSLAVEMODE_DISABLE;
+
+	return	HAL_TIMEx_MasterConfigSynchronization(&tim_handle,
+								&master_config);
+}
+
+static	void	pwm_tim2_oc_conf	(void)
+{
+	oc_init.OCMode		= TIM_OCMODE_PWM1;
+	oc_init.OCPolarity	= TIM_OCPOLARITY_HIGH;
+	oc_init.OCFastMode	= TIM_OCFAST_DISABLE;
+	oc_init.OCNPolarity	= TIM_OCNPOLARITY_HIGH;
+	oc_init.OCNIdleState	= TIM_OCNIDLESTATE_RESET;
+	oc_init.OCIdleState	= TIM_OCIDLESTATE_RESET;
+	oc_init.OCIdleState	= TIM_OCIDLESTATE_RESET;
+}
 
 
 /******************************************************************************
