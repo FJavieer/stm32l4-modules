@@ -1,13 +1,13 @@
 /******************************************************************************
- *	servo.h								      *
+ *	errors.h							      *
  ******************************************************************************/
 
 
 /******************************************************************************
  ******* include guard ********************************************************
  ******************************************************************************/
-# ifndef		ERROR_H
-	# define	ERROR_H
+# ifndef		ERRORS_H
+	# define	ERRORS_H
 
 
 /******************************************************************************
@@ -24,48 +24,57 @@
 /******************************************************************************
  ******* macros ***************************************************************
  ******************************************************************************/
+	# define	ERROR_OK	(0u)
 
 
 /******************************************************************************
  ******* enums ****************************************************************
  ******************************************************************************/
+	enum	Error_Stm32l4_Modules_Can {
+		ERROR_CAN_HAL_CAN_INIT			= 0x00010001u,
+		ERROR_CAN_HAL_CAN_FILTER		= 0x00010002u,
+		ERROR_CAN_HAL_CAN_START			= 0x00010004u,
+		ERROR_CAN_HAL_CAN_ACTIVATE_NOTIFICATION	= 0x00010008u,
+		ERROR_CAN_HAL_ADD_TX_MSG		= 0x00010010u,
+		ERROR_CAN_HAL_GET_RX_MSG		= 0x00010020u,
+		ERROR_CAN_INIT				= 0x00010040u,
+		ERROR_CAN_MSG_LOST			= 0x00010080u,
+		ERROR_CAN_NO_MSG			= 0x00010100u
+	};
+
 	enum	Error_Stm32l4_Modules {
-		ERROR_OK				= 0x00000000u,
+		ERROR_CLK_HAL_RCC_OSC_CONF		= 0x00020001u,
+		ERROR_CLK_HAL_RCC_CLK_CONF		= 0x00020002u
+	};
 
-		ERROR_DELAY_HAL_TIM_INIT		= 0x00000001u,
-		ERROR_DELAY_HAL_TIM_START		= 0x00000002u,
-		ERROR_DELAY_HAL_TIM_STOP		= 0x00000004u,
-		ERROR_DELAY_INIT			= 0x00000008u,
-		ERROR_DELAY_NULL			= 0x00000010u,
+	enum	Error_Stm32l4_Modules_Delay {
+		ERROR_DELAY_HAL_TIM_INIT		= 0x00040001u,
+		ERROR_DELAY_HAL_TIM_START		= 0x00040002u,
+		ERROR_DELAY_HAL_TIM_STOP		= 0x00040004u,
+		ERROR_DELAY_INIT			= 0x00040008u,
+		ERROR_DELAY_NULL			= 0x00040010u
+	};
 
-		ERROR_LED_INIT				= 0x00000020u,
+	enum	Error_Stm32l4_Modules_Led {
+		ERROR_LED_INIT				= 0x00080001u
+	};
 
-		ERROR_PWM_HAL_TIM_INIT			= 0x00000040u,
-		ERROR_PWM_HAL_TIM_CLK_CONF		= 0x00000080u,
-		ERROR_PWM_HAL_TIM_MASTER_CONF		= 0x00000100u,
-		ERROR_PWM_HAL_TIM_PWM_INIT		= 0x00000200u,
-		ERROR_PWM_HAL_TIM_PWM_CONF		= 0x00000400u,
-		ERROR_PWM_HAL_TIM_PWM_START		= 0x00000800u,
-		ERROR_PWM_HAL_TIM_STOP			= 0x00001000u,
-		ERROR_PWM_INIT				= 0x00002000u,
-		ERROR_PWM_DUTY				= 0x00004000u,
-		ERROR_PWM_CHAN				= 0x00008000u,
+	enum	Error_Stm32l4_Modules_Pwm {
+		ERROR_PWM_HAL_TIM_INIT			= 0x00100001u,
+		ERROR_PWM_HAL_TIM_CLK_CONF		= 0x00100002u,
+		ERROR_PWM_HAL_TIM_MASTER_CONF		= 0x00100004u,
+		ERROR_PWM_HAL_TIM_PWM_INIT		= 0x00100008u,
+		ERROR_PWM_HAL_TIM_PWM_CONF		= 0x00100010u,
+		ERROR_PWM_HAL_TIM_PWM_START		= 0x00100020u,
+		ERROR_PWM_HAL_TIM_STOP			= 0x00100040u,
+		ERROR_PWM_INIT				= 0x00100080u,
+		ERROR_PWM_DUTY				= 0x00100100u,
+		ERROR_PWM_CHAN				= 0x00100200u
+	};
 
-		ERROR_SERVO_INIT			= 0x00010000u,
-		ERROR_SERVO_ID				= 0x00020000u,
-
-		ERROR_CAN_HAL_CAN_INIT			= 0x00040000u,
-		ERROR_CAN_HAL_CAN_FILTER		= 0x00080000u,
-		ERROR_CAN_HAL_CAN_START			= 0x00100000u,
-		ERROR_CAN_HAL_CAN_ACTIVATE_NOTIFICATION	= 0x00200000u,
-		ERROR_CAN_HAL_ADD_TX_MSG		= 0x00400000u,
-		ERROR_CAN_HAL_GET_RX_MSG		= 0x00800000u,
-		ERROR_CAN_INIT				= 0x01000000u,
-		ERROR_CAN_MSG_LOST			= 0x02000000u,
-		ERROR_CAN_NO_MSG			= 0x04000000u,
-
-		ERROR_CLK_HAL_RCC_OSC_CONF		= 0x08000000u,
-		ERROR_CLK_HAL_RCC_CLK_CONF		= 0x10000000u,
+	enum	Error_Stm32l4_Modules_Servo {
+		ERROR_SERVO_INIT			= 0x00200001u,
+		ERROR_SERVO_ID				= 0x00200002u,
 	};
 
 
@@ -96,7 +105,7 @@ void	error_handle	(void);
 /******************************************************************************
  ******* include guard ********************************************************
  ******************************************************************************/
-# endif			/* error.h */
+# endif			/* errors.h */
 
 
 /******************************************************************************
