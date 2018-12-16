@@ -57,16 +57,16 @@ static	void	can_tx_header_conf	(void);
 	/**
 	 * @brief	Initialize CAN
 	 *		Sets global variable 'error'
-	 * @return	None
+	 * @return	Error
 	 */
-void	can_init	(void)
+int	can_init	(void)
 {
 
 	if (init_pending) {
 		init_pending	= false;
 	} else {
 		error	|= ERROR_CAN_INIT;
-		return;
+		return	ERROR_GENERIC;
 	}
 
 	can_msg_pending	= false;
@@ -75,37 +75,39 @@ void	can_init	(void)
 	if (can_peripherial_init()) {
 		error	|= ERROR_CAN_HAL_CAN_INIT;
 		error_handle();
-		return;
+		return	ERROR_GENERIC;
 	}
 	if (can_filter_conf()) {
 		error	|= ERROR_CAN_HAL_CAN_FILTER;
 		error_handle();
-		return;
+		return	ERROR_GENERIC;
 	}
 	if (HAL_CAN_Start(&can_handle)) {
 		error	|= ERROR_CAN_HAL_CAN_START;
 		error_handle();
-		return;
+		return	ERROR_GENERIC;
 	}
 	if (HAL_CAN_ActivateNotification(&can_handle, CAN_IT_RX_FIFO0_MSG_PENDING)) {
 		error	|= ERROR_CAN_HAL_CAN_ACTIVATE_NOTIFICATION;
 		error_handle();
-		return;
+		return	ERROR_GENERIC;
 	}
 
 	can_tx_header_conf();
 
 	HAL_NVIC_SetPriority(CAN1_RX0_IRQn, 1, 0);
 	HAL_NVIC_EnableIRQ(CAN1_RX0_IRQn);
+
+	return	ERROR_OK;
 }
 
 	/**
 	 * @brief	Transmit the message in data through CAN
 	 *		Sets global variable 'error'
 	 * @param	data:	data to transmit
-	 * @return	None
+	 * @return	Error
 	 */
-void	can_msg_write	(uint8_t data [CAN_DATA_LEN])
+int	can_msg_write	(uint8_t data [CAN_DATA_LEN])
 {
 	uint8_t	can_tx_data [CAN_DATA_LEN];
 	int	i;
@@ -113,7 +115,7 @@ void	can_msg_write	(uint8_t data [CAN_DATA_LEN])
 	if (init_pending) {
 		error	|= ERROR_CAN_INIT;
 		error_handle();
-		return;
+		return	ERROR_GENERIC;
 	}
 
 	for (i = 0; i < CAN_DATA_LEN; i++) {
@@ -124,29 +126,31 @@ void	can_msg_write	(uint8_t data [CAN_DATA_LEN])
 							&can_tx_mailbox)) {
 		error	|= ERROR_CAN_HAL_ADD_TX_MSG;
 		error_handle();
-		return;
+		return	ERROR_GENERIC;
 	}
+
+	return	ERROR_OK;
 }
 
 	/**
 	 * @brief	Return the data received
 	 *		Sets global variable 'error'
 	 * @param	data:	array where data is to be written
-	 * @return	None
+	 * @return	Error
 	 */
-void	can_msg_read	(uint8_t data [CAN_DATA_LEN])
+int	can_msg_read	(uint8_t data [CAN_DATA_LEN])
 {
 	int	i;
 
 	if (init_pending) {
 		error	|= ERROR_CAN_INIT;
 		error_handle();
-		return;
+		return	ERROR_GENERIC;
 	}
 
 	if (!can_msg_pending) {
 		error	|= ERROR_CAN_NO_MSG;
-		return;
+		return	ERROR_GENERIC;
 	}
 
 	for (i = 0; i < CAN_DATA_LEN; i++) {
@@ -154,6 +158,8 @@ void	can_msg_read	(uint8_t data [CAN_DATA_LEN])
 	}
 
 	can_msg_pending	= false;
+
+	return	ERROR_OK;
 }
 
 
