@@ -58,9 +58,8 @@
  ******************************************************************************/
 /* Global --------------------------------------------------------------------*/
 /* Static --------------------------------------------------------------------*/
-static	float			duty_cycle[SERVO_QTY];
-static	bool			init_pending[SERVO_QTY]	= {
-					true, true, true, true};
+static	float	duty_cycle [SERVO_QTY];
+static	bool	init_pending [SERVO_QTY]	= {true, true, true, true};
 
 
 /******************************************************************************
