@@ -74,9 +74,13 @@ void	can_init	(void)
 	can_clk_enable();
 	can_gpio_init();
 	if (can_peripherial_init()) {
+		error	|= ERROR_CAN_HAL_CAN_INIT;
+		error_handle();
 		return;
 	}
 	if (can_filter_conf()) {
+		error	|= ERROR_CAN_HAL_CAN_FILTER;
+		error_handle();
 		return;
 	}
 	if (HAL_CAN_Start(&can_handle)) {
@@ -211,13 +215,7 @@ static	int	can_peripherial_init	(void)
 	/* CAN clock = 1 MHz = 80 MHz / 80;  Period = 1 us */
 	can_handle.Init.Prescaler		= SystemCoreClock / 1000000u;
 
-	if (HAL_CAN_Init(&can_handle)) {
-		error	|= ERROR_CAN_HAL_CAN_INIT;
-		error_handle();
-		return	-1;
-	}
-
-	return	0;
+	return	HAL_CAN_Init(&can_handle);
 }
 
 static	int	can_filter_conf		(void)
@@ -234,13 +232,7 @@ static	int	can_filter_conf		(void)
 	can_filter.FilterScale		= CAN_FILTERSCALE_16BIT;
 	can_filter.FilterActivation	= ENABLE;
 
-	if (HAL_CAN_ConfigFilter(&can_handle, &can_filter)) {
-		error	|= ERROR_CAN_HAL_CAN_FILTER;
-		error_handle();
-		return	-1;
-	}
-
-	return	0;
+	return	HAL_CAN_ConfigFilter(&can_handle, &can_filter);
 }
 
 static	void	can_tx_header_conf	(void)
