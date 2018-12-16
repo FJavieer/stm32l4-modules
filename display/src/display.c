@@ -48,7 +48,7 @@ static	bool			init_pending	= true;
  ******* static functions (declarations) **************************************
  ******************************************************************************/
 static	void	display_display_start	(void);
-static	void	display_data_set	(char ch, uint16_t data [8]);
+static	int	display_data_set	(char ch, uint16_t data [8]);
 
 
 /******************************************************************************
@@ -60,30 +60,61 @@ static	void	display_data_set	(char ch, uint16_t data [8]);
 	 *		PC3 -> MOSI
 	 *		PC2 -> SELECT
 	 *		Sets global variable 'error'
-	 * @return	None
+	 * @return	Error
 	 */
-void	display_init	(void)
+int	display_init	(void)
 {
-	spi_init();
+	/* Init pending */
+	if (init_pending) {
+		init_pending	= false;
+	} else {
+		error	|= ERROR_DISPLAY_INIT;
+		return	ERROR_OK;
+	}
+
+	if (spi_init()) {
+		error	|= ERROR_DISPLAY_SPI_INIT;
+		error_handler();
+		return	ERROR_NOK;
+	}
 	display_display_start();
+
+	return	ERROR_OK;
 }
 
 	/**
 	 * @brief	Show @param ch on the display
 	 *		Sets global variable 'error'
 	 * @param	ch:	The character to be displayed
-	 * @return	None
+	 * @return	Error
 	 */
-void	display_set	(char ch)
+int	display_set	(char ch)
 {
 	uint16_t	data [8];
 	int		i;
 
-	display_data_set(ch, data);
+	/* Check if display has been initialized */
+	if (init_pending) {
+		error	|= ERROR_DISPLAY_INIT;
+		error_handler();
+		return	ERROR_NOK;
+	}
+
+	if (display_data_set(ch, data)) {
+		error	|= ERROR_DISPLAY_CHAR;
+		error_handler();
+		return	ERROR_NOK;
+	}
 
 	for (i = 0; i < 8; i++) {
-		spi_msg_write(8, &(data[0]));
+		if (spi_msg_write(data[i])) {
+			error	|= ERROR_DISPLAY_SPI_MSG_WRITE;
+			error_handler();
+			return	ERROR_NOK;
+		}
 	}
+
+	return	ERROR_OK;
 }
 
 
@@ -95,34 +126,32 @@ static	void	display_display_start	(void)
 {
 	uint16_t data;
 
-	//Disable MAX7219
+	/* Disable MAX7219 */
 	data	= 0x0C00;
-	spi_msg_write(1, &data);
+	spi_msg_write(data);
 
-	//Disable Test Mode
+	/* Disable Test Mode */
 	data	= 0x0F00;
-	spi_msg_write(1, &data);
+	spi_msg_write(data);
 
-	//Enable 8 Digits
+	/* Enable 8 Digits */
 	data	= 0x0BFF;
-	spi_msg_write(1, &data);
+	spi_msg_write(data);
 
-	//Set highest brightness
+	/* Set highest brightness */
 	data	= 0x0A0F;
-	spi_msg_write(1, &data);
+	spi_msg_write(data);
 
-	//Disable Mode BCD
+	/* Disable Mode BCD */
 	data	= 0x0900;
-	spi_msg_write(1, &data);
+	spi_msg_write(data);
 
-	//Enable MAX7219
+	/* Enable MAX7219 */
 	data	= 0x0C01;
-	spi_msg_write(1, &data);
-
-	Set_Number_Matrix(10);
+	spi_msg_write(data);
 }
 
-static	void	display_data_set	(char ch, uint16_t data [8])
+static	int	display_data_set	(char ch, uint16_t data [8])
 {
 	switch (ch) {
 	case '0':
@@ -234,9 +263,10 @@ static	void	display_data_set	(char ch, uint16_t data [8])
 		data[5]	= 0x0600u;
 		data[6]	= 0x0700u;
 		data[7]	= 0x0800u;
-		error	|= ;
-		break;
+		return	ERROR_NOK;
 	}
+
+	return	ERROR_OK;
 }
 
 
