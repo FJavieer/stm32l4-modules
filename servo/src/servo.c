@@ -222,7 +222,7 @@ int	servo_sX_position_set	(int16_t position_decimals, int8_t servo)
 	/* Check if servo has been initialized */
 	if (init_pending[servo]) {
 		error	|= ERROR_SERVO_INIT;
-		return	ERROR_GENERIC;
+		return	ERROR_NOK;
 	}
 
 	/* Select channel */
@@ -241,7 +241,7 @@ int	servo_sX_position_set	(int16_t position_decimals, int8_t servo)
 		break;
 	default:
 		error	|= ERROR_SERVO_ID;
-		return	ERROR_GENERIC;
+		return	ERROR_NOK;
 	}
 
 	/* Calc duty */
@@ -263,7 +263,7 @@ int	servo_sX_position_get	(int16_t *position_decimals, int8_t servo)
 	/* Check if servo has been initialized */
 	if (init_pending[servo]) {
 		error	|= ERROR_SERVO_INIT;
-		return	ERROR_GENERIC;
+		return	ERROR_NOK;
 	}
 
 	*position_decimals	= alx_scale_linear_f(duty_cycle[SERVO_S1],

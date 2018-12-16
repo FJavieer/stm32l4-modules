@@ -96,7 +96,6 @@ int	display_set	(char ch)
 	/* Check if display has been initialized */
 	if (init_pending) {
 		error	|= ERROR_DISPLAY_INIT;
-		error_handler();
 		return	ERROR_NOK;
 	}
 

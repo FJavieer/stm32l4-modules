@@ -69,22 +69,22 @@ int	pwm_tim2_init		(uint32_t resolution_sec, uint32_t period)
 	if (pwm_tim2_tim_init(resolution_sec, period)) {
 		error	|= ERROR_PWM_HAL_TIM_INIT;
 		error_handle();
-		return	ERROR_GENERIC;
+		return	ERROR_NOK;
 	}
 	if (pwm_tim2_clk_conf()) {
 		error	|= ERROR_PWM_HAL_TIM_CLK_CONF;
 		error_handle();
-		return	ERROR_GENERIC;
+		return	ERROR_NOK;
 	}
 	if (pwm_tim2_master_conf()) {
 		error	|= ERROR_PWM_HAL_TIM_MASTER_CONF;
 		error_handle();
-		return	ERROR_GENERIC;
+		return	ERROR_NOK;
 	}
 	if (HAL_TIM_PWM_Init(&tim_handle)) {
 		error	|= ERROR_PWM_HAL_TIM_PWM_INIT;
 		error_handle();
-		return	ERROR_GENERIC;
+		return	ERROR_NOK;
 	}
 	pwm_tim2_oc_conf();
 
@@ -103,13 +103,13 @@ int	pwm_tim2_chX_set	(float duty_cycle, uint32_t tim_chan)
 	/* Invalid duty cycle */
 	if (duty_cycle > 1.0 || duty_cycle < 0.0) {
 		error	|= ERROR_PWM_DUTY;
-		return	ERROR_GENERIC;
+		return	ERROR_NOK;
 	}
 
 	/* Init pending */
 	if (init_pending) {
 		error	|= ERROR_PWM_INIT;
-		return	ERROR_GENERIC;
+		return	ERROR_NOK;
 	}
 
 	/* Initialize PWN with duty cycle */
@@ -117,14 +117,14 @@ int	pwm_tim2_chX_set	(float duty_cycle, uint32_t tim_chan)
 	if (HAL_TIM_PWM_ConfigChannel(&tim_handle, &oc_init, tim_chan)) {
 		error	|= ERROR_PWM_HAL_TIM_PWM_CONF;
 		error_handle();
-		return	ERROR_GENERIC;
+		return	ERROR_NOK;
 	}
 
 	/* Start PWM */
 	if (HAL_TIM_PWM_Start(&tim_handle, tim_chan)) {
 		error	|= ERROR_PWM_HAL_TIM_PWM_START;
 		error_handle();
-		return	ERROR_GENERIC;
+		return	ERROR_NOK;
 	}
 
 	return	ERROR_OK;
@@ -140,14 +140,14 @@ int	pwm_tim2_stop		(void)
 	/* Initialize base time */
 	if (init_pending) {
 		error	|= ERROR_PWM_INIT;
-		return	ERROR_GENERIC;
+		return	ERROR_NOK;
 	}
 
 	/* Stop timer */
 	if (HAL_TIM_Base_Stop(&tim_handle)) {
 		error	|= ERROR_PWM_HAL_TIM_STOP;
 		error_handle();
-		return	ERROR_GENERIC;
+		return	ERROR_NOK;
 	}
 
 	return	ERROR_OK;

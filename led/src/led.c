@@ -87,7 +87,7 @@ int	led_set		(void)
 {
 	if (init_pending) {
 		error	|= ERROR_LED_INIT;
-		return	ERROR_GENERIC;
+		return	ERROR_NOK;
 	}
 
 	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_SET);
@@ -104,7 +104,7 @@ int	led_reset	(void)
 {
 	if (init_pending) {
 		error	|= ERROR_LED_INIT;
-		return	ERROR_GENERIC;
+		return	ERROR_NOK;
 	}
 
 	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_RESET);

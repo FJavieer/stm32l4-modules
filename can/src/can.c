@@ -75,22 +75,22 @@ int	can_init	(void)
 	if (can_peripherial_init()) {
 		error	|= ERROR_CAN_HAL_CAN_INIT;
 		error_handle();
-		return	ERROR_GENERIC;
+		return	ERROR_NOK;
 	}
 	if (can_filter_conf()) {
 		error	|= ERROR_CAN_HAL_CAN_FILTER;
 		error_handle();
-		return	ERROR_GENERIC;
+		return	ERROR_NOK;
 	}
 	if (HAL_CAN_Start(&can_handle)) {
 		error	|= ERROR_CAN_HAL_CAN_START;
 		error_handle();
-		return	ERROR_GENERIC;
+		return	ERROR_NOK;
 	}
 	if (HAL_CAN_ActivateNotification(&can_handle, CAN_IT_RX_FIFO0_MSG_PENDING)) {
 		error	|= ERROR_CAN_HAL_CAN_ACTIVATE_NOTIFICATION;
 		error_handle();
-		return	ERROR_GENERIC;
+		return	ERROR_NOK;
 	}
 
 	can_tx_header_conf();
@@ -114,8 +114,7 @@ int	can_msg_write	(uint8_t data [CAN_DATA_LEN])
 
 	if (init_pending) {
 		error	|= ERROR_CAN_INIT;
-		error_handle();
-		return	ERROR_GENERIC;
+		return	ERROR_NOK;
 	}
 
 	for (i = 0; i < CAN_DATA_LEN; i++) {
@@ -126,7 +125,7 @@ int	can_msg_write	(uint8_t data [CAN_DATA_LEN])
 							&can_tx_mailbox)) {
 		error	|= ERROR_CAN_HAL_ADD_TX_MSG;
 		error_handle();
-		return	ERROR_GENERIC;
+		return	ERROR_NOK;
 	}
 
 	return	ERROR_OK;
@@ -144,13 +143,12 @@ int	can_msg_read	(uint8_t data [CAN_DATA_LEN])
 
 	if (init_pending) {
 		error	|= ERROR_CAN_INIT;
-		error_handle();
-		return	ERROR_GENERIC;
+		return	ERROR_NOK;
 	}
 
 	if (!can_msg_pending) {
 		error	|= ERROR_CAN_NO_MSG;
-		return	ERROR_GENERIC;
+		return	ERROR_NOK;
 	}
 
 	for (i = 0; i < CAN_DATA_LEN; i++) {

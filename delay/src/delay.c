@@ -73,7 +73,7 @@ int	delay_us_init	(void)
 	if (HAL_TIM_Base_Init(&tim_handle)) {
 		error	|= ERROR_DELAY_HAL_TIM_INIT;
 		error_handle();
-		return	ERROR_GENERIC;
+		return	ERROR_NOK;
 	}
 
 	return	ERROR_OK;
@@ -91,14 +91,13 @@ int	delay_us	(uint32_t time_us)
 
 	if (init_pending) {
 		error	|= ERROR_DELAY_INIT;
-		error_handle();
-		return	ERROR_GENERIC;
+		return	ERROR_NOK;
 	}
 
 	/* Delay == 0;  exit now */
 	if (time_us < 1) {
 		error	|= ERROR_DELAY_NULL;
-		return	ERROR_GENERIC;
+		return	ERROR_NOK;
 	}
 
 	delay_us_delay_init(time_us, &overflows);
@@ -106,7 +105,7 @@ int	delay_us	(uint32_t time_us)
 	if (HAL_TIM_Base_Start(&tim_handle)) {
 		error	|= ERROR_DELAY_HAL_TIM_START;
 		error_handle();
-		return	ERROR_GENERIC;
+		return	ERROR_NOK;
 	}
 
 	delay_us_delay_loop(overflows);
@@ -114,7 +113,7 @@ int	delay_us	(uint32_t time_us)
 	if (HAL_TIM_Base_Stop(&tim_handle)) {
 		error	|= ERROR_DELAY_HAL_TIM_STOP;
 		error_handle();
-		return	ERROR_GENERIC;
+		return	ERROR_NOK;
 	}
 
 	return	ERROR_OK;

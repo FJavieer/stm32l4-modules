@@ -66,7 +66,7 @@ int	spi_init	(void)
 	if (spi_peripherial_init()) {
 		error	|= ERROR_SPI_HAL_SPI_INIT;
 		error_handle();
-		return	ERROR_GENERIC;
+		return	ERROR_NOK;
 	}
 
 	return	ERROR_OK;
@@ -76,17 +76,15 @@ int	spi_init	(void)
 	 * @brief	Transmit the message in data through SPI
 	 *		Sets global variable 'error'
 	 * @param	data:	data to transmit
-	 * @return	None
+	 * @return	Error
 	 */
 int	spi_msg_write	(uint16_t data)
 {
 	uint8_t	spi_data [sizeof(uint16_t) / sizeof(uint8_t)];
-	int	i;
 
 	if (init_pending) {
 		error	|= ERROR_SPI_INIT;
-		error_handle();
-		return	ERROR_GENERIC;
+		return	ERROR_NOK;
 	}
 
 	spi_data[0]	= data / (UINT8_MAX + 1u);
@@ -97,7 +95,7 @@ int	spi_msg_write	(uint16_t data)
 	if (HAL_SPI_Transmit(&spi_handle, spi_data, 1, SPI_TIMEOUT)) {
 		error	|= ERROR_SPI_HAL_SPI_TRANSMIT;
 		error_handle();
-		return	ERROR_GENERIC;
+		return	ERROR_NOK;
 	}
 	while (HAL_SPI_GetState(&spi_handle) != HAL_SPI_STATE_READY) {
 		/* Empty loop */
