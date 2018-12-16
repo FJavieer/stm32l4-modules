@@ -39,7 +39,7 @@ static	TIM_OC_InitTypeDef	oc_init;
 /******************************************************************************
  ******* static functions (declarations) **************************************
  ******************************************************************************/
-static	int	pwm_tim2_tim_init	(void);
+static	int	pwm_tim2_tim_init	(uint32_t resolution_sec, uint32_t period);
 static	int	pwm_tim2_clk_conf	(void);
 static	int	pwm_tim2_master_conf	(void);
 static	void	pwm_tim2_oc_conf	(void);
@@ -55,7 +55,7 @@ static	void	pwm_tim2_oc_conf	(void);
 	 * @param	period:		period of the pwm (in resolution_s units)
 	 * @return	None
 	 */
-void	pwm_tim2_init		(uint32_t resolution_s, uint32_t period)
+void	pwm_tim2_init		(uint32_t resolution_sec, uint32_t period)
 {
 	if (init_pending) {
 		init_pending	= false;
@@ -65,7 +65,7 @@ void	pwm_tim2_init		(uint32_t resolution_s, uint32_t period)
 	}
 
 	__HAL_RCC_TIM2_CLK_ENABLE();
-	if (pwm_tim2_tim_init()) {
+	if (pwm_tim2_tim_init(resolution_sec, period)) {
 		error	|= ERROR_PWM_HAL_TIM_INIT;
 		error_handle();
 		return;
@@ -150,12 +150,12 @@ void	pwm_tim2_stop		(void)
 /******************************************************************************
  ******* static functions (definitions) ***************************************
  ******************************************************************************/
-static	int	pwm_tim2_tim_init	(void)
+static	int	pwm_tim2_tim_init	(uint32_t resolution_sec, uint32_t period)
 {
 	/* Resolution: 1 us;  Periode: 1 ms */
 	tim_handle.Instance		= TIM2;
 	tim_handle.Init.Prescaler		= (SystemCoreClock /
-							resolution_s) - 1u;
+							resolution_sec) - 1u;
 	tim_handle.Init.CounterMode		= TIM_COUNTERMODE_UP;
 	tim_handle.Init.Period			= period - 1u;
 	tim_handle.Init.ClockDivision		= TIM_CLOCKDIVISION_DIV1;
