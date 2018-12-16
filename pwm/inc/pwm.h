@@ -51,25 +51,25 @@
 	 * @param	resolution_sec:	divisions in 1 s
 	 * @param	period:		period of the pwm
 	 *					(in resolution_sec units).
-	 * @return	None
+	 * @return	Error
 	 */
-void	pwm_tim2_init		(uint32_t resolution_sec, uint32_t period);
+int	pwm_tim2_init		(uint32_t resolution_sec, uint32_t period);
 
 	/**
 	 * @brief	Set PWM using TIM2
 	 *		Sets global variable 'error'
 	 * @param	duty_cycle:	duty cycle value (fraction)
 	 * @param	chan:		channel to be used (1 through 4; 0=ALL)
-	 * @return	None
+	 * @return	Error
 	 */
-void	pwm_tim2_chX_set	(float duty_cycle, uint32_t tim_chan);
+int	pwm_tim2_chX_set	(float duty_cycle, uint32_t tim_chan);
 
 	/**
 	 * @brief	Stop PWM using TIM2
 	 *		Sets global variable 'error'
-	 * @return	None
+	 * @return	Error
 	 */
-void	pwm_tim2_stop		(void);
+int	pwm_tim2_stop		(void);
 
 
 /******************************************************************************

@@ -213,16 +213,16 @@ void	servo_s4_init		(void)
 	 *		Sets global variable 'error'
 	 * @param	position_decimals:	position (deg) multiplied by 10.
 	 *			valid range: [-900, 900]
-	 * @return	None
+	 * @return	Error
 	 */
-void	servo_sX_position_set	(int16_t position_decimals, int8_t servo)
+int	servo_sX_position_set	(int16_t position_decimals, int8_t servo)
 {
 	uint32_t	tim_chan;
 
 	/* Check if servo has been initialized */
 	if (init_pending[servo]) {
 		error	|= ERROR_SERVO_INIT;
-		return;
+		return	ERROR_GENERIC;
 	}
 
 	/* Select channel */
@@ -241,32 +241,36 @@ void	servo_sX_position_set	(int16_t position_decimals, int8_t servo)
 		break;
 	default:
 		error	|= ERROR_SERVO_ID;
-		return;
+		return	ERROR_GENERIC;
 	}
 
 	/* Calc duty */
 	servo_duty_calc(position_decimals, &duty_cycle[servo]);
 	/* set PWM */
 	pwm_tim2_chX_set(duty_cycle[servo], tim_chan);
+
+	return	ERROR_OK;
 }
 
 	/**
 	 * @brief	Get servo sX position
 	 *		Sets global variable 'error'
 	 * @param	*position_decimals:	position (deg) multiplied by 10.
-	 * @return	None
+	 * @return	Error
 	 */
-void	servo_sX_position_get	(int16_t *position_decimals, int8_t servo)
+int	servo_sX_position_get	(int16_t *position_decimals, int8_t servo)
 {
 	/* Check if servo has been initialized */
 	if (init_pending[servo]) {
 		error	|= ERROR_SERVO_INIT;
-		return;
+		return	ERROR_GENERIC;
 	}
 
 	*position_decimals	= alx_scale_linear_f(duty_cycle[SERVO_S1],
 				SERVO_PWM_DUTY_MIN, SERVO_PWM_DUTY_MAX,
 				SERVO_ANGLE_MIN * 10, SERVO_ANGLE_MAX * 10);
+
+	return	ERROR_OK;
 }
 
 	/**

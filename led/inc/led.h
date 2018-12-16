@@ -44,9 +44,26 @@
 /******************************************************************************
  ******* functions ************************************************************
  ******************************************************************************/
+	/**
+	 * @brief	Init LED in GPIO_PIN_5
+	 *		Sets global variable 'error'
+	 * @return	None
+	 */
 void	led_init	(void);
-void	led_set		(void);
-void	led_reset	(void);
+
+	/**
+	 * @brief	LED on
+	 *		Sets global variable 'error'
+	 * @return	Error
+	 */
+int	led_set		(void);
+
+	/**
+	 * @brief	LED off
+	 *		Sets global variable 'error'
+	 * @return	Error
+	 */
+int	led_reset	(void);
 
 
 /******************************************************************************

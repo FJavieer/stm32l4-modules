@@ -50,15 +50,15 @@ static	int	spi_peripherial_init	(void);
 	/**
 	 * @brief	Initialize SPI
 	 *		Sets global variable 'error'
-	 * @return	None
+	 * @return	Error
 	 */
-void	spi_init	(void)
+int	spi_init	(void)
 {
 	if (init_pending) {
 		init_pending	= false;
 	} else {
 		error	|= ERROR_SPI_INIT;
-		return;
+		return	ERROR_OK;
 	}
 
 	spi_clk_enable();
@@ -66,8 +66,10 @@ void	spi_init	(void)
 	if (spi_peripherial_init()) {
 		error	|= ERROR_SPI_HAL_SPI_INIT;
 		error_handle();
-		return;
+		return	ERROR_GENERIC;
 	}
+
+	return	ERROR_OK;
 }
 
 	/**
@@ -76,7 +78,7 @@ void	spi_init	(void)
 	 * @param	data:	data to transmit
 	 * @return	None
 	 */
-void	spi_msg_write	(uint16_t data)
+int	spi_msg_write	(uint16_t data)
 {
 	uint8_t	spi_data [sizeof(uint16_t) / sizeof(uint8_t)];
 	int	i;
@@ -84,7 +86,7 @@ void	spi_msg_write	(uint16_t data)
 	if (init_pending) {
 		error	|= ERROR_SPI_INIT;
 		error_handle();
-		return;
+		return	ERROR_GENERIC;
 	}
 
 	spi_data[0]	= data / (UINT8_MAX + 1u);
@@ -95,13 +97,15 @@ void	spi_msg_write	(uint16_t data)
 	if (HAL_SPI_Transmit(&spi_handle, spi_data, 1, SPI_TIMEOUT)) {
 		error	|= ERROR_SPI_HAL_SPI_TRANSMIT;
 		error_handle();
-		return;
+		return	ERROR_GENERIC;
 	}
 	while (HAL_SPI_GetState(&spi_handle) != HAL_SPI_STATE_READY) {
 		/* Empty loop */
 	}
 
 	HAL_GPIO_WritePin(GPIOC, GPIO_PIN_2, GPIO_PIN_SET);
+
+	return	ERROR_OK;
 }
 
 

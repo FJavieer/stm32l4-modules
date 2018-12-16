@@ -56,7 +56,7 @@ int	delay_us_init	(void)
 		init_pending	= false;
 	} else {
 		error	|= ERROR_DELAY_INIT;
-		return	ERROR_GENERIC;
+		return	ERROR_OK;
 	}
 
 	__HAL_RCC_TIM6_CLK_ENABLE();

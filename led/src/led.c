@@ -81,31 +81,35 @@ void	led_init	(void)
 	/**
 	 * @brief	LED on
 	 *		Sets global variable 'error'
-	 * @return	None
+	 * @return	Error
 	 */
-void	led_set		(void)
+int	led_set		(void)
 {
 	if (init_pending) {
 		error	|= ERROR_LED_INIT;
-		return;
+		return	ERROR_GENERIC;
 	}
 
 	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_SET);
+
+	return	ERROR_OK;
 }
 
 	/**
 	 * @brief	LED off
 	 *		Sets global variable 'error'
-	 * @return	None
+	 * @return	Error
 	 */
-void	led_reset	(void)
+int	led_reset	(void)
 {
 	if (init_pending) {
 		error	|= ERROR_LED_INIT;
-		return;
+		return	ERROR_GENERIC;
 	}
 
 	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_RESET);
+
+	return	ERROR_OK;
 }
 
 

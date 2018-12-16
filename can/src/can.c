@@ -66,7 +66,7 @@ int	can_init	(void)
 		init_pending	= false;
 	} else {
 		error	|= ERROR_CAN_INIT;
-		return	ERROR_GENERIC;
+		return	ERROR_OK;
 	}
 
 	can_msg_pending	= false;
