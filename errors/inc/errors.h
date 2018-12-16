@@ -24,7 +24,8 @@
 /******************************************************************************
  ******* macros ***************************************************************
  ******************************************************************************/
-	# define	ERROR_OK	(0u)
+	# define	ERROR_OK	(0)
+	# define	ERROR_GENERIC	(-1)
 
 
 /******************************************************************************
@@ -42,7 +43,7 @@
 		ERROR_CAN_NO_MSG			= 0x00010100u
 	};
 
-	enum	Error_Stm32l4_Modules {
+	enum	Error_Stm32l4_Modules_Clk {
 		ERROR_CLK_HAL_RCC_OSC_CONF		= 0x00020001u,
 		ERROR_CLK_HAL_RCC_CLK_CONF		= 0x00020002u
 	};
@@ -55,32 +56,45 @@
 		ERROR_DELAY_NULL			= 0x00040010u
 	};
 
+	enum	Error_Stm32l4_Modules_Display {
+		ERROR_DISPLAY_INIT			= 0x00080001u,
+		ERROR_DISPLAY_CHAR			= 0x00080002u
+	};
+
+	enum	Error_Stm32l4_Modules_I2c {
+		ERROR_I2C_INIT				= 0x00100001u
+	};
+
+	enum	Error_Stm32l4_Modules_Joystick {
+		ERROR_JOYSTICK_INIT			= 0x00200001u
+	};
+
 	enum	Error_Stm32l4_Modules_Led {
-		ERROR_LED_INIT				= 0x00100001u
+		ERROR_LED_INIT				= 0x00400001u
 	};
 
 	enum	Error_Stm32l4_Modules_Pwm {
-		ERROR_PWM_HAL_TIM_INIT			= 0x00200001u,
-		ERROR_PWM_HAL_TIM_CLK_CONF		= 0x00200002u,
-		ERROR_PWM_HAL_TIM_MASTER_CONF		= 0x00200004u,
-		ERROR_PWM_HAL_TIM_PWM_INIT		= 0x00200008u,
-		ERROR_PWM_HAL_TIM_PWM_CONF		= 0x00200010u,
-		ERROR_PWM_HAL_TIM_PWM_START		= 0x00200020u,
-		ERROR_PWM_HAL_TIM_STOP			= 0x00200040u,
-		ERROR_PWM_INIT				= 0x00200080u,
-		ERROR_PWM_DUTY				= 0x00200100u,
-		ERROR_PWM_CHAN				= 0x00200200u
+		ERROR_PWM_HAL_TIM_INIT			= 0x00800001u,
+		ERROR_PWM_HAL_TIM_CLK_CONF		= 0x00800002u,
+		ERROR_PWM_HAL_TIM_MASTER_CONF		= 0x00800004u,
+		ERROR_PWM_HAL_TIM_PWM_INIT		= 0x00800008u,
+		ERROR_PWM_HAL_TIM_PWM_CONF		= 0x00800010u,
+		ERROR_PWM_HAL_TIM_PWM_START		= 0x00800020u,
+		ERROR_PWM_HAL_TIM_STOP			= 0x00800040u,
+		ERROR_PWM_INIT				= 0x00800080u,
+		ERROR_PWM_DUTY				= 0x00800100u,
+		ERROR_PWM_CHAN				= 0x00800200u
 	};
 
 	enum	Error_Stm32l4_Modules_Servo {
-		ERROR_SERVO_INIT			= 0x00400001u,
-		ERROR_SERVO_ID				= 0x00400002u,
+		ERROR_SERVO_INIT			= 0x01000001u,
+		ERROR_SERVO_ID				= 0x01000002u,
 	};
 
 	enum	Error_Stm32l4_Modules_Spi {
-		ERROR_SPI_HAL_SPI_INIT			= 0x00800001u,
-		ERROR_SPI_HAL_SPI_TRANSMIT		= 0x00800002u,
-		ERROR_SPI_INIT				= 0x00800004u
+		ERROR_SPI_HAL_SPI_INIT			= 0x02000001u,
+		ERROR_SPI_HAL_SPI_TRANSMIT		= 0x02000002u,
+		ERROR_SPI_INIT				= 0x02000004u
 	};
 
 
