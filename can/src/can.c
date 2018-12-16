@@ -45,6 +45,11 @@ static	volatile	bool	can_msg_pending;
 /******************************************************************************
  ******* static functions (declarations) **************************************
  ******************************************************************************/
+static	void	can_clk_activate	(void);
+static	void	can_gpio_init		(void);
+static	void	can_peripherial_conf	(void);
+static	void	can_filter_conf		(void);
+static	void	can_tx_header_conf	(void);
 
 
 /******************************************************************************
@@ -67,36 +72,10 @@ void	can_init	(void)
 		return;
 	}
 
-	/* -0- initialize data ############################################## */
 	can_msg_pending	= false;
-
-	/* -1- First we have to activate the clocks!! ####################### */
-	__HAL_RCC_GPIOA_CLK_ENABLE();
-	__CAN1_CLK_ENABLE();
-
-	/* -2- Configure and connect pins to CAN1 peripheral ################ */
-	/* PA12 -> TX // PA11 -> RX */
-	gpio_init_values.Pin		= GPIO_PIN_12 | GPIO_PIN_11;
-	gpio_init_values.Mode		= GPIO_MODE_AF_OD;
-	gpio_init_values.Speed		= GPIO_SPEED_FREQ_LOW;
-	gpio_init_values.Pull		= GPIO_NOPULL;
-	gpio_init_values.Alternate	= GPIO_AF9_CAN1;
-	HAL_GPIO_Init(GPIOA, &gpio_init_values);
-
-	/* -3- Configure the CAN peripheral ################################# */
-	can_handle.Instance		= CAN1;
-	can_handle.Init.TimeTriggeredMode	= DISABLE;
-	can_handle.Init.AutoBusOff		= DISABLE;
-	can_handle.Init.AutoWakeUp		= DISABLE;
-	can_handle.Init.AutoRetransmission	= ENABLE;
-	can_handle.Init.ReceiveFifoLocked	= DISABLE;
-	can_handle.Init.TransmitFifoPriority	= DISABLE;
-	can_handle.Init.Mode			= CAN_MODE_NORMAL;
-	can_handle.Init.SyncJumpWidth		= CAN_SJW_1TQ;
-	can_handle.Init.TimeSeg1		= CAN_BS1_4TQ;
-	can_handle.Init.TimeSeg2		= CAN_BS2_5TQ;
-	/* CAN clock = 1 MHz = 80 MHz / 80;  Period = 1 us */
-	can_handle.Init.Prescaler		= SystemCoreClock / 1000000u;
+	can_clk_activate();
+	can_gpio_init();
+	can_peripherial_conf();
 
 	if (HAL_CAN_Init(&can_handle) != HAL_OK) {
 		error	|= ERROR_CAN_HAL_CAN_INIT;
@@ -104,16 +83,7 @@ void	can_init	(void)
 		return;
 	}
 
-	/* -4- Configure the CAN Filter ##################################### */
-	can_filter.FilterIdHigh		= 0x0000u;
-	can_filter.FilterIdLow		= 0x0000u;
-	can_filter.FilterMaskIdHigh	= 0x0000u;
-	can_filter.FilterMaskIdLow	= 0x0000u;
-	can_filter.FilterFIFOAssignment	= CAN_FILTER_FIFO0;
-	can_filter.FilterBank		= 5;
-	can_filter.FilterMode		= CAN_FILTERMODE_IDMASK;
-	can_filter.FilterScale		= CAN_FILTERSCALE_16BIT;
-	can_filter.FilterActivation	= ENABLE;
+	can_filter_conf();
 
 	if (HAL_CAN_ConfigFilter(&can_handle, &can_filter) != HAL_OK) {
 		error	|= ERROR_CAN_HAL_CAN_FILTER;
@@ -121,27 +91,19 @@ void	can_init	(void)
 		return;
 	}
 
-	/* -5- Start the CAN peripheral ##################################### */
 	if (HAL_CAN_Start(&can_handle) != HAL_OK) {
 		error	|= ERROR_CAN_HAL_CAN_START;
 		error_handle();
 		return;
 	}
 
-	/* -6- Activate CAN RX notification ################################# */
 	if (HAL_CAN_ActivateNotification(&can_handle, CAN_IT_RX_FIFO0_MSG_PENDING) != HAL_OK) {
 		error	|= ERROR_CAN_HAL_CAN_ACTIVATE_NOTIFICATION;
 		error_handle();
 		return;
 	}
 
-	/* -7- Configure Transmission process ############################### */
-	can_tx_header.StdId			= 0x3AAu;
-	can_tx_header.ExtId			= 0x00u;
-	can_tx_header.IDE			= CAN_ID_STD;
-	can_tx_header.RTR			= CAN_RTR_DATA;
-	can_tx_header.DLC			= CAN_DATA_LEN;
-	can_tx_header.TransmitGlobalTime	= DISABLE;
+	can_tx_header_conf();
 }
 
 	/**
@@ -164,7 +126,6 @@ void	can_msg_write	(uint8_t data [CAN_DATA_LEN])
 		can_tx_data[i]	= data[i];
 	}
 
-	/* Transmit TX message */
 	if (HAL_CAN_AddTxMessage(&can_handle, &can_tx_header, can_tx_data,
 						&can_tx_mailbox) != HAL_OK) {
 		error	|= ERROR_CAN_HAL_ADD_TX_MSG;
@@ -213,7 +174,6 @@ void	can_msg_read	(uint8_t data [CAN_DATA_LEN])
  */
 void	HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *can_handle_ptr)
 {
-	/* Get RX message */
 	if (HAL_CAN_GetRxMessage(can_handle_ptr, CAN_RX_FIFO0, &can_rx_header,
 						can_rx_data) != HAL_OK) {
 		error	|= ERROR_CAN_HAL_GET_RX_MSG;
@@ -229,6 +189,62 @@ void	HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *can_handle_ptr)
 /******************************************************************************
  ******* static functions (definitions) ***************************************
  ******************************************************************************/
+static	void	can_clk_activate	(void)
+{
+	__HAL_RCC_GPIOA_CLK_ENABLE();
+	__CAN1_CLK_ENABLE();
+}
+
+static	void	can_gpio_init		(void)
+{
+	/* PA12 -> TX // PA11 -> RX */
+	gpio_init_values.Pin		= GPIO_PIN_12 | GPIO_PIN_11;
+	gpio_init_values.Mode		= GPIO_MODE_AF_OD;
+	gpio_init_values.Speed		= GPIO_SPEED_FREQ_LOW;
+	gpio_init_values.Pull		= GPIO_NOPULL;
+	gpio_init_values.Alternate	= GPIO_AF9_CAN1;
+	HAL_GPIO_Init(GPIOA, &gpio_init_values);
+}
+
+static	void	can_peripherial_conf	(void)
+{
+	can_handle.Instance		= CAN1;
+	can_handle.Init.TimeTriggeredMode	= DISABLE;
+	can_handle.Init.AutoBusOff		= DISABLE;
+	can_handle.Init.AutoWakeUp		= DISABLE;
+	can_handle.Init.AutoRetransmission	= ENABLE;
+	can_handle.Init.ReceiveFifoLocked	= DISABLE;
+	can_handle.Init.TransmitFifoPriority	= DISABLE;
+	can_handle.Init.Mode			= CAN_MODE_NORMAL;
+	can_handle.Init.SyncJumpWidth		= CAN_SJW_1TQ;
+	can_handle.Init.TimeSeg1		= CAN_BS1_4TQ;
+	can_handle.Init.TimeSeg2		= CAN_BS2_5TQ;
+	/* CAN clock = 1 MHz = 80 MHz / 80;  Period = 1 us */
+	can_handle.Init.Prescaler		= SystemCoreClock / 1000000u;
+}
+
+static	void	can_filter_conf		(void)
+{
+	can_filter.FilterIdHigh		= 0x0000u;
+	can_filter.FilterIdLow		= 0x0000u;
+	can_filter.FilterMaskIdHigh	= 0x0000u;
+	can_filter.FilterMaskIdLow	= 0x0000u;
+	can_filter.FilterFIFOAssignment	= CAN_FILTER_FIFO0;
+	can_filter.FilterBank		= 5;
+	can_filter.FilterMode		= CAN_FILTERMODE_IDMASK;
+	can_filter.FilterScale		= CAN_FILTERSCALE_16BIT;
+	can_filter.FilterActivation	= ENABLE;
+}
+
+static	void	can_tx_header_conf	(void)
+{
+	can_tx_header.StdId			= 0x3AAu;
+	can_tx_header.ExtId			= 0x00u;
+	can_tx_header.IDE			= CAN_ID_STD;
+	can_tx_header.RTR			= CAN_RTR_DATA;
+	can_tx_header.DLC			= CAN_DATA_LEN;
+	can_tx_header.TransmitGlobalTime	= DISABLE;
+}
 
 
 /******************************************************************************
