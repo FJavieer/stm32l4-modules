@@ -48,11 +48,12 @@
 	/**
 	 * @brief	Initialize base time for PWM using TIM2
 	 *		Sets global variable 'error'
-	 * @param	resolution_s:	divisions in 1 s
-	 * @param	period:		period of the pwm (in resolution_s units).
+	 * @param	resolution_sec:	divisions in 1 s
+	 * @param	period:		period of the pwm
+	 *					(in resolution_sec units).
 	 * @return	None
 	 */
-void	pwm_tim2_init		(uint32_t resolution_s, uint32_t period);
+void	pwm_tim2_init		(uint32_t resolution_sec, uint32_t period);
 
 	/**
 	 * @brief	Set PWM using TIM2

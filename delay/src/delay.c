@@ -128,7 +128,7 @@ static	void	delay_us_delay_init	(uint32_t time_us, uint32_t *overflows)
 
 	*overflows		= (time_us / ((uint32_t)UINT16_MAX + 1u)) + 1u;
 	partial			= time_us % ((uint32_t)UINT16_MAX + 1u);
-	*counter_initial	= (uint32_t)UINT16_MAX + 1u - partial;
+	counter_initial	= (uint32_t)UINT16_MAX + 1u - partial;
 
 	__HAL_TIM_SET_COUNTER(&tim_handle, counter_initial);
 }
