@@ -63,8 +63,6 @@ static	int	clk_sysclk_set_pll	(void);
 	 */
 void	sysclk_config	(void)
 {
-	RCC_ClkInitTypeDef	rcc_clk_init_values;
-
 	/* MSI is enabled after System reset, activate PLL with MSI as source */
 	if (clk_set_pll_from_msi()) {
 		/* Initialization Error */
