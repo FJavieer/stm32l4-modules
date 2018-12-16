@@ -85,6 +85,7 @@ ERRORS_DIR		= $(STM32L4_MODULES_DIR)/errors/
 LED_DIR			= $(STM32L4_MODULES_DIR)/led/
 PWM_DIR			= $(STM32L4_MODULES_DIR)/pwm/
 SERVO_DIR		= $(STM32L4_MODULES_DIR)/servo/
+SPI_DIR			= $(STM32L4_MODULES_DIR)/spi/
 
 LIB_DIR			= $(STM32L4_MODULES_DIR)/lib/
 
@@ -105,6 +106,7 @@ export	ERRORS_DIR
 export	LED_DIR
 export	PWM_DIR
 export	SERVO_DIR
+export	SPI_DIR
 
 ################################################################################
 # target: dependencies
@@ -125,6 +127,8 @@ all:
 	$(Q)make -C $(PWM_DIR)
 	@echo	'	MAKE	modules:	servo'
 	$(Q)make -C $(SERVO_DIR)
+	@echo	'	MAKE	modules:	spi'
+	$(Q)make -C $(SPI_DIR)
 	@echo	'	MAKE	modules:	lib'
 	$(Q)make -C $(LIB_DIR)
 
