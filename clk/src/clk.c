@@ -36,6 +36,8 @@
 /******************************************************************************
  ******* static functions (prototypes) ****************************************
  ******************************************************************************/
+static	int	clk_set_pll_from_msi	(void);
+static	int	clk_sysclk_set_pll	(void);
 
 
 /******************************************************************************
@@ -61,8 +63,35 @@
 	 */
 void	sysclk_config	(void)
 {
-	RCC_OscInitTypeDef	rcc_osc_init_values;
 	RCC_ClkInitTypeDef	rcc_clk_init_values;
+
+	/* MSI is enabled after System reset, activate PLL with MSI as source */
+	if (clk_set_pll_from_msi()) {
+		/* Initialization Error */
+		error	|= ERROR_CLK_HAL_RCC_OSC_CONF;
+		while(true) {
+			;
+		}
+	}
+
+	/* Select PLL as system clock source and configure the HCLK, PCLK1
+	 * and PCLK2 clocks dividers */
+	if (clk_sysclk_set_pll()) {
+		/* Initialization Error */
+		error	|= ERROR_CLK_HAL_RCC_CLK_CONF;
+		while(true) {
+			;
+		}
+	}
+}
+
+
+/******************************************************************************
+ ******* static functions (definitions) ***************************************
+ ******************************************************************************/
+static	int	clk_set_pll_from_msi	(void)
+{
+	RCC_OscInitTypeDef	rcc_osc_init_values;
 
 	/* MSI is enabled after System reset, activate PLL with MSI as source */
 	rcc_osc_init_values.OscillatorType	= RCC_OSCILLATORTYPE_MSI;
@@ -76,13 +105,13 @@ void	sysclk_config	(void)
 	rcc_osc_init_values.PLL.PLLP		= RCC_PLLP_DIV7;
 	rcc_osc_init_values.PLL.PLLQ		= RCC_PLLQ_DIV4;
 	rcc_osc_init_values.PLL.PLLR		= RCC_PLLR_DIV2;
-	if (HAL_RCC_OscConfig(&rcc_osc_init_values) != HAL_OK) {
-		/* Initialization Error */
-		error	|= ERROR_CLK_HAL_RCC_OSC_CONF;
-		while(true) {
-			;
-		}
-	}
+
+	return	HAL_RCC_OscConfig(&rcc_osc_init_values);
+}
+
+static	int	clk_sysclk_set_pll	(void)
+{
+	RCC_ClkInitTypeDef	rcc_clk_init_values;
 
 	/* Select PLL as system clock source and configure the HCLK, PCLK1
 	 * and PCLK2 clocks dividers */
@@ -94,19 +123,9 @@ void	sysclk_config	(void)
 	rcc_clk_init_values.AHBCLKDivider	= RCC_SYSCLK_DIV1;
 	rcc_clk_init_values.APB1CLKDivider	= RCC_HCLK_DIV1;  
 	rcc_clk_init_values.APB2CLKDivider	= RCC_HCLK_DIV1;  
-	if (HAL_RCC_ClockConfig(&rcc_clk_init_values, FLASH_LATENCY_4) != HAL_OK) {
-		/* Initialization Error */
-		error	|= ERROR_CLK_HAL_RCC_CLK_CONF;
-		while(true) {
-			;
-		}
-	}
+
+	return	HAL_RCC_ClockConfig(&rcc_clk_init_values, FLASH_LATENCY_4);
 }
-
-
-/******************************************************************************
- ******* static functions (definitions) ***************************************
- ******************************************************************************/
 
 
 /******************************************************************************
