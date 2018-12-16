@@ -48,16 +48,15 @@ static	void	delay_us_delay_loop	(uint32_t overflows);
 	/**
 	 * @brief	Initialize base time for delay_us()
 	 *		Sets global variable 'error'
-	 * @param	None
-	 * @return	None
+	 * @return	Error
 	 */
-void	delay_us_init	(void)
+int	delay_us_init	(void)
 {
 	if (init_pending) {
 		init_pending	= false;
 	} else {
 		error	|= ERROR_DELAY_INIT;
-		return;
+		return	ERROR_GENERIC;
 	}
 
 	__HAL_RCC_TIM6_CLK_ENABLE();
@@ -74,30 +73,32 @@ void	delay_us_init	(void)
 	if (HAL_TIM_Base_Init(&tim_handle)) {
 		error	|= ERROR_DELAY_HAL_TIM_INIT;
 		error_handle();
-		return;
+		return	ERROR_GENERIC;
 	}
+
+	return	ERROR_OK;
 }
 
 	/**
 	 * @brief	Delay <time_us> microseconds
 	 *		Sets global variable 'error'
 	 * @param	time_us:	Delay value (us)
-	 * @return	None
+	 * @return	Error
 	 */
-void	delay_us	(uint32_t time_us)
+int	delay_us	(uint32_t time_us)
 {
 	uint32_t	overflows;
 
 	if (init_pending) {
 		error	|= ERROR_DELAY_INIT;
 		error_handle();
-		return;
+		return	ERROR_GENERIC;
 	}
 
 	/* Delay == 0;  exit now */
 	if (time_us < 1) {
 		error	|= ERROR_DELAY_NULL;
-		return;
+		return	ERROR_GENERIC;
 	}
 
 	delay_us_delay_init(time_us, &overflows);
@@ -105,7 +106,7 @@ void	delay_us	(uint32_t time_us)
 	if (HAL_TIM_Base_Start(&tim_handle)) {
 		error	|= ERROR_DELAY_HAL_TIM_START;
 		error_handle();
-		return;
+		return	ERROR_GENERIC;
 	}
 
 	delay_us_delay_loop(overflows);
@@ -113,8 +114,10 @@ void	delay_us	(uint32_t time_us)
 	if (HAL_TIM_Base_Stop(&tim_handle)) {
 		error	|= ERROR_DELAY_HAL_TIM_STOP;
 		error_handle();
-		return;
+		return	ERROR_GENERIC;
 	}
+
+	return	ERROR_OK;
 }
 
 

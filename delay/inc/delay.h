@@ -48,10 +48,9 @@
 	/**
 	 * @brief	Initialize base time for delay_us()
 	 *		Sets global variable 'error'
-	 * @param	None
-	 * @return	None
+	 * @return	Error
 	 */
-void	delay_us_init	(void);
+int	delay_us_init	(void);
 
 	/**
 	 * @brief	Delay <time_us> microseconds
@@ -59,7 +58,7 @@ void	delay_us_init	(void);
 	 * @param	time_us:	Delay value (us)
 	 * @return	None
 	 */
-void	delay_us	(uint32_t time_us);
+int	delay_us	(uint32_t time_us);
 
 
 /******************************************************************************
