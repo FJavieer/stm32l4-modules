@@ -47,8 +47,8 @@ static	volatile	bool	can_msg_pending;
  ******************************************************************************/
 static	void	can_clk_activate	(void);
 static	void	can_gpio_init		(void);
-static	void	can_peripherial_conf	(void);
-static	void	can_filter_conf		(void);
+static	int	can_peripherial_init	(void);
+static	int	can_filter_conf		(void);
 static	void	can_tx_header_conf	(void);
 
 
@@ -62,8 +62,6 @@ static	void	can_tx_header_conf	(void);
 	 */
 void	can_init	(void)
 {
-	GPIO_InitTypeDef	gpio_init_values;
-	CAN_FilterTypeDef	can_filter;
 
 	if (init_pending) {
 		init_pending	= false;
@@ -75,28 +73,17 @@ void	can_init	(void)
 	can_msg_pending	= false;
 	can_clk_activate();
 	can_gpio_init();
-	can_peripherial_conf();
-
-	if (HAL_CAN_Init(&can_handle) != HAL_OK) {
-		error	|= ERROR_CAN_HAL_CAN_INIT;
-		error_handle();
+	if (can_peripherial_init()) {
 		return;
 	}
-
-	can_filter_conf();
-
-	if (HAL_CAN_ConfigFilter(&can_handle, &can_filter) != HAL_OK) {
-		error	|= ERROR_CAN_HAL_CAN_FILTER;
-		error_handle();
+	if (can_filter_conf()) {
 		return;
 	}
-
 	if (HAL_CAN_Start(&can_handle) != HAL_OK) {
 		error	|= ERROR_CAN_HAL_CAN_START;
 		error_handle();
 		return;
 	}
-
 	if (HAL_CAN_ActivateNotification(&can_handle, CAN_IT_RX_FIFO0_MSG_PENDING) != HAL_OK) {
 		error	|= ERROR_CAN_HAL_CAN_ACTIVATE_NOTIFICATION;
 		error_handle();
@@ -109,7 +96,7 @@ void	can_init	(void)
 	/**
 	 * @brief	Transmit the message in data through CAN
 	 *		Sets global variable 'error'
-	 * @param	data:		data to transmit
+	 * @param	data:	data to transmit
 	 * @return	None
 	 */
 void	can_msg_write	(uint8_t data [CAN_DATA_LEN])
@@ -137,7 +124,7 @@ void	can_msg_write	(uint8_t data [CAN_DATA_LEN])
 	/**
 	 * @brief	Return the data received
 	 *		Sets global variable 'error'
-	 * @param	data:		array where data is to be written
+	 * @param	data:	array where data is to be written
 	 * @return	None
 	 */
 void	can_msg_read	(uint8_t data [CAN_DATA_LEN])
@@ -197,6 +184,8 @@ static	void	can_clk_activate	(void)
 
 static	void	can_gpio_init		(void)
 {
+	GPIO_InitTypeDef	gpio_init_values;
+
 	/* PA12 -> TX // PA11 -> RX */
 	gpio_init_values.Pin		= GPIO_PIN_12 | GPIO_PIN_11;
 	gpio_init_values.Mode		= GPIO_MODE_AF_OD;
@@ -206,7 +195,7 @@ static	void	can_gpio_init		(void)
 	HAL_GPIO_Init(GPIOA, &gpio_init_values);
 }
 
-static	void	can_peripherial_conf	(void)
+static	int	can_peripherial_init	(void)
 {
 	can_handle.Instance		= CAN1;
 	can_handle.Init.TimeTriggeredMode	= DISABLE;
@@ -221,10 +210,20 @@ static	void	can_peripherial_conf	(void)
 	can_handle.Init.TimeSeg2		= CAN_BS2_5TQ;
 	/* CAN clock = 1 MHz = 80 MHz / 80;  Period = 1 us */
 	can_handle.Init.Prescaler		= SystemCoreClock / 1000000u;
+
+	if (HAL_CAN_Init(&can_handle) != HAL_OK) {
+		error	|= ERROR_CAN_HAL_CAN_INIT;
+		error_handle();
+		return	-1;
+	}
+
+	return	0;
 }
 
-static	void	can_filter_conf		(void)
+static	int	can_filter_conf		(void)
 {
+	CAN_FilterTypeDef	can_filter;
+
 	can_filter.FilterIdHigh		= 0x0000u;
 	can_filter.FilterIdLow		= 0x0000u;
 	can_filter.FilterMaskIdHigh	= 0x0000u;
@@ -234,6 +233,14 @@ static	void	can_filter_conf		(void)
 	can_filter.FilterMode		= CAN_FILTERMODE_IDMASK;
 	can_filter.FilterScale		= CAN_FILTERSCALE_16BIT;
 	can_filter.FilterActivation	= ENABLE;
+
+	if (HAL_CAN_ConfigFilter(&can_handle, &can_filter) != HAL_OK) {
+		error	|= ERROR_CAN_HAL_CAN_FILTER;
+		error_handle();
+		return	-1;
+	}
+
+	return	0;
 }
 
 static	void	can_tx_header_conf	(void)
