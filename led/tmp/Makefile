@@ -38,18 +38,21 @@ LED_TST_INC_CMSIS	= core_cm4.h
 LED_TST_INC_CMSIS_L4	= stm32l4xx.h
 LED_TST_INC_HAL		= stm32l4xx_hal.h
 LED_TST_INC_DELAY	= delay.h
+LED_TST_INC_ERRORS	= errors.h
 LED_TST_INC		= led_test.h	led.h
 LED_TST_DEPS		= $(SRC_DIR)/led_test.c \
 			$(patsubst %,$(STM32_CMSIS_INC_DIR)/%,$(LED_TST_INC_CMSIS)) \
 			$(patsubst %,$(STM32L4_CMSIS_INC_DIR)/%,$(LED_TST_INC_CMSIS_L4)) \
 			$(patsubst %,$(STM32L4_HAL_INC_DIR)/%,$(LED_TST_INC_HAL)) \
 			$(patsubst %,$(DELAY_INC_DIR)/%,$(LED_TST_INC_DELAY)) \
+			$(patsubst %,$(ERRORS_INC_DIR)/%,$(LED_TST_INC_ERRORS)) \
 			$(patsubst %,$(INC_DIR)/%,$(LED_INC))
 LED_TST_INC_DIRS	= -I $(INC_DIR) \
 			-I $(STM32_CMSIS_INC_DIR) \
 			-I $(STM32L4_CMSIS_INC_DIR) \
 			-I $(STM32L4_HAL_INC_DIR) \
-			-I $(DELAY_INC_DIR)
+			-I $(DELAY_INC_DIR) \
+			-I $(ERRORS_INC_DIR)
 
 # target: dependencies
 #	action

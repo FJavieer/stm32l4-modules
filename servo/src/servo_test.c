@@ -8,8 +8,6 @@
  ******* headers **************************************************************
  ******************************************************************************/
 /* Standard C ----------------------------------------------------------------*/
-	#include <stdint.h>
-
 /* Drivers -------------------------------------------------------------------*/
 	#include "stm32l4xx_hal.h"
 
@@ -17,7 +15,7 @@
 
 /* STM32L4 modules -----------------------------------------------------------*/
 	#include "delay.h"
-	#include "led.h"
+	#include "errors.h"
 	#include "servo.h"
 
 	#include "servo_test.h"
@@ -55,41 +53,79 @@
  ******************************************************************************/
 	/**
 	 * @brief	Test servos
-	 * @return	None
+	 * @return	Error
 	 */
-void	servo_test	(void)
+int	servo_test	(void)
 {
 	int	i;
 
 	for (i = 0; i <= 90; i+=10) {
-		led_set();
+		if (servo_sX_position_set(-(i*10), SERVO_S1)) {
+			return	ERROR_NOK;
+		}
+		if (servo_sX_position_set(-(i*10), SERVO_S2)) {
+			return	ERROR_NOK;
+		}
+		if (servo_sX_position_set(-(i*10), SERVO_S3)) {
+			return	ERROR_NOK;
+		}
+		if (servo_sX_position_set(-(i*10), SERVO_S4)) {
+			return	ERROR_NOK;
+		}
+		if (delay_us(1000000u)) {
+			return	ERROR_NOK;
+		}
 
-		servo_sX_position_set(-(i*10), SERVO_S1);
-		servo_sX_position_set(-(i*10), SERVO_S2);
-		servo_sX_position_set(-(i*10), SERVO_S3);
-		servo_sX_position_set(-(i*10), SERVO_S4);
-		delay_us(1000000u);
+		if (servo_sX_position_set(-0, SERVO_S1)) {
+			return	ERROR_NOK;
+		}
+		if (servo_sX_position_set(-0, SERVO_S2)) {
+			return	ERROR_NOK;
+		}
+		if (servo_sX_position_set(-0, SERVO_S3)) {
+			return	ERROR_NOK;
+		}
+		if (servo_sX_position_set(-0, SERVO_S4)) {
+			return	ERROR_NOK;
+		}
+		if (delay_us(1000000u)) {
+			return	ERROR_NOK;
+		}
 
-		servo_sX_position_set(-0, SERVO_S1);
-		servo_sX_position_set(-0, SERVO_S2);
-		servo_sX_position_set(-0, SERVO_S3);
-		servo_sX_position_set(-0, SERVO_S4);
-		delay_us(1000000u);
+		if (servo_sX_position_set((i*10), SERVO_S1)) {
+			return	ERROR_NOK;
+		}
+		if (servo_sX_position_set((i*10), SERVO_S2)) {
+			return	ERROR_NOK;
+		}
+		if (servo_sX_position_set((i*10), SERVO_S3)) {
+			return	ERROR_NOK;
+		}
+		if (servo_sX_position_set((i*10), SERVO_S4)) {
+			return	ERROR_NOK;
+		}
+		if (delay_us(1000000u)) {
+			return	ERROR_NOK;
+		}
 
-		led_reset();
-
-		servo_sX_position_set((i*10), SERVO_S1);
-		servo_sX_position_set((i*10), SERVO_S2);
-		servo_sX_position_set((i*10), SERVO_S3);
-		servo_sX_position_set((i*10), SERVO_S4);
-		delay_us(1000000u);
-
-		servo_sX_position_set(0, SERVO_S1);
-		servo_sX_position_set(0, SERVO_S2);
-		servo_sX_position_set(0, SERVO_S3);
-		servo_sX_position_set(0, SERVO_S4);
-		delay_us(1000000u);
+		if (servo_sX_position_set(0, SERVO_S1)) {
+			return	ERROR_NOK;
+		}
+		if (servo_sX_position_set(0, SERVO_S2)) {
+			return	ERROR_NOK;
+		}
+		if (servo_sX_position_set(0, SERVO_S3)) {
+			return	ERROR_NOK;
+		}
+		if (servo_sX_position_set(0, SERVO_S4)) {
+			return	ERROR_NOK;
+		}
+		if (delay_us(1000000u)) {
+			return	ERROR_NOK;
+		}
 	}
+
+	return	ERROR_OK;
 }
 
 

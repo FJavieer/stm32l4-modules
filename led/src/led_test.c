@@ -8,8 +8,6 @@
  ******* headers **************************************************************
  ******************************************************************************/
 /* Standard C ----------------------------------------------------------------*/
-	#include <stdint.h>
-
 /* Drivers -------------------------------------------------------------------*/
 	#include "stm32l4xx_hal.h"
 
@@ -17,6 +15,7 @@
 
 /* STM32L4 modules -----------------------------------------------------------*/
 	#include "delay.h"
+	#include "errors.h"
 	#include "led.h"
 
 	#include "led_test.h"
@@ -54,19 +53,29 @@
  ******************************************************************************/
 	/**
 	 * @brief	Test LEDs
-	 * @return	None
+	 * @return	Error
 	 */
-void	led_test	(void)
+int	led_test	(void)
 {
 	int		i;
 
 	for (i = 0; i <= 100; i++) {
-		led_set();
-		delay_us(1000u * i);
+		if (led_set()) {
+			return	ERROR_NOK;
+		}
+		if (delay_us(1000u * i)) {
+			return	ERROR_NOK;
+		}
 
-		led_reset();
-		delay_us(1000u * i);
+		if (led_reset()) {
+			return	ERROR_NOK;
+		}
+		if (delay_us(1000u * i)) {
+			return	ERROR_NOK;
+		}
 	}
+
+	return	ERROR_OK;
 }
 
 
