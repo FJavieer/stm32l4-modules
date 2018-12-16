@@ -71,7 +71,7 @@ void	delay_us_init	(void)
 	tim_handle.Init.RepetitionCounter	= 0x00u;
 	tim_handle.Init.AutoReloadPreload	= TIM_AUTORELOAD_PRELOAD_DISABLE;
 
-	if (HAL_TIM_Base_Init(&tim_handle) != HAL_OK) {
+	if (HAL_TIM_Base_Init(&tim_handle)) {
 		error	|= ERROR_DELAY_HAL_TIM_INIT;
 		error_handle();
 		return;
@@ -102,7 +102,7 @@ void	delay_us	(uint32_t time_us)
 
 	delay_us_delay_init(time_us, &overflows);
 
-	if (HAL_TIM_Base_Start(&tim_handle) != HAL_OK) {
+	if (HAL_TIM_Base_Start(&tim_handle)) {
 		error	|= ERROR_DELAY_HAL_TIM_START;
 		error_handle();
 		return;
@@ -110,7 +110,7 @@ void	delay_us	(uint32_t time_us)
 
 	delay_us_delay_loop(overflows);
 
-	if (HAL_TIM_Base_Stop(&tim_handle) != HAL_OK) {
+	if (HAL_TIM_Base_Stop(&tim_handle)) {
 		error	|= ERROR_DELAY_HAL_TIM_STOP;
 		error_handle();
 		return;

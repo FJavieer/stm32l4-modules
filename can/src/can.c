@@ -45,7 +45,7 @@ static	volatile	bool	can_msg_pending;
 /******************************************************************************
  ******* static functions (declarations) **************************************
  ******************************************************************************/
-static	void	can_clk_activate	(void);
+static	void	can_clk_enable		(void);
 static	void	can_gpio_init		(void);
 static	int	can_peripherial_init	(void);
 static	int	can_filter_conf		(void);
@@ -71,7 +71,7 @@ void	can_init	(void)
 	}
 
 	can_msg_pending	= false;
-	can_clk_activate();
+	can_clk_enable();
 	can_gpio_init();
 	if (can_peripherial_init()) {
 		return;
@@ -79,12 +79,12 @@ void	can_init	(void)
 	if (can_filter_conf()) {
 		return;
 	}
-	if (HAL_CAN_Start(&can_handle) != HAL_OK) {
+	if (HAL_CAN_Start(&can_handle)) {
 		error	|= ERROR_CAN_HAL_CAN_START;
 		error_handle();
 		return;
 	}
-	if (HAL_CAN_ActivateNotification(&can_handle, CAN_IT_RX_FIFO0_MSG_PENDING) != HAL_OK) {
+	if (HAL_CAN_ActivateNotification(&can_handle, CAN_IT_RX_FIFO0_MSG_PENDING)) {
 		error	|= ERROR_CAN_HAL_CAN_ACTIVATE_NOTIFICATION;
 		error_handle();
 		return;
@@ -114,7 +114,7 @@ void	can_msg_write	(uint8_t data [CAN_DATA_LEN])
 	}
 
 	if (HAL_CAN_AddTxMessage(&can_handle, &can_tx_header, can_tx_data,
-						&can_tx_mailbox) != HAL_OK) {
+							&can_tx_mailbox)) {
 		error	|= ERROR_CAN_HAL_ADD_TX_MSG;
 		error_handle();
 		return;
@@ -162,7 +162,7 @@ void	can_msg_read	(uint8_t data [CAN_DATA_LEN])
 void	HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *can_handle_ptr)
 {
 	if (HAL_CAN_GetRxMessage(can_handle_ptr, CAN_RX_FIFO0, &can_rx_header,
-						can_rx_data) != HAL_OK) {
+								can_rx_data)) {
 		error	|= ERROR_CAN_HAL_GET_RX_MSG;
 		error_handle();
 	} else if (can_msg_pending) {
@@ -176,7 +176,7 @@ void	HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *can_handle_ptr)
 /******************************************************************************
  ******* static functions (definitions) ***************************************
  ******************************************************************************/
-static	void	can_clk_activate	(void)
+static	void	can_clk_enable		(void)
 {
 	__HAL_RCC_GPIOA_CLK_ENABLE();
 	__CAN1_CLK_ENABLE();
@@ -211,7 +211,7 @@ static	int	can_peripherial_init	(void)
 	/* CAN clock = 1 MHz = 80 MHz / 80;  Period = 1 us */
 	can_handle.Init.Prescaler		= SystemCoreClock / 1000000u;
 
-	if (HAL_CAN_Init(&can_handle) != HAL_OK) {
+	if (HAL_CAN_Init(&can_handle)) {
 		error	|= ERROR_CAN_HAL_CAN_INIT;
 		error_handle();
 		return	-1;
@@ -234,7 +234,7 @@ static	int	can_filter_conf		(void)
 	can_filter.FilterScale		= CAN_FILTERSCALE_16BIT;
 	can_filter.FilterActivation	= ENABLE;
 
-	if (HAL_CAN_ConfigFilter(&can_handle, &can_filter) != HAL_OK) {
+	if (HAL_CAN_ConfigFilter(&can_handle, &can_filter)) {
 		error	|= ERROR_CAN_HAL_CAN_FILTER;
 		error_handle();
 		return	-1;

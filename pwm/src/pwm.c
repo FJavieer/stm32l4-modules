@@ -80,7 +80,7 @@ void	pwm_tim2_init		(uint32_t resolution_s, uint32_t period)
 		error_handle();
 		return;
 	}
-	if (HAL_TIM_PWM_Init(&tim_handle) != HAL_OK) {
+	if (HAL_TIM_PWM_Init(&tim_handle)) {
 		error	|= ERROR_PWM_HAL_TIM_PWM_INIT;
 		error_handle();
 		return;
@@ -111,14 +111,14 @@ void	pwm_tim2_chX_set	(float duty_cycle, uint32_t tim_chan)
 
 	/* Initialize PWN with duty cycle */
 	oc_init.Pulse	= tim_handle.Init.Period * duty_cycle;
-	if (HAL_TIM_PWM_ConfigChannel(&tim_handle, &oc_init, tim_chan) != HAL_OK) {
+	if (HAL_TIM_PWM_ConfigChannel(&tim_handle, &oc_init, tim_chan)) {
 		error	|= ERROR_PWM_HAL_TIM_PWM_CONF;
 		error_handle();
 		return;
 	}
 
 	/* Start PWM */
-	if (HAL_TIM_PWM_Start(&tim_handle, tim_chan) != HAL_OK) {
+	if (HAL_TIM_PWM_Start(&tim_handle, tim_chan)) {
 		error	|= ERROR_PWM_HAL_TIM_PWM_START;
 		error_handle();
 		return;
@@ -139,7 +139,7 @@ void	pwm_tim2_stop		(void)
 	}
 
 	/* Stop timer */
-	if (HAL_TIM_Base_Stop(&tim_handle) != HAL_OK) {
+	if (HAL_TIM_Base_Stop(&tim_handle)) {
 		error	|= ERROR_PWM_HAL_TIM_STOP;
 		error_handle();
 		return;
