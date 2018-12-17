@@ -16,7 +16,7 @@ SRC_DIR = $(DISPLAY_DIR)/src/
 
 # dependencies
 
-ALL	= display.o #display_test.o
+ALL	= display.o display_test.o
 
 DISPLAY_INC_CMSIS		= core_cm4.h
 DISPLAY_INC_CMSIS_L4		= stm32l4xx.h
