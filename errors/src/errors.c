@@ -30,8 +30,8 @@
  ******* macros ***************************************************************
  ******************************************************************************/
 	# define	ERROR_BIT_LEN			(1000000u)
-	# define	ERROR_LONG_PULSE_LEN_US		(800000u)
-	# define	ERROR_SHORT_PULSE_LEN_US	(200000u)
+	# define	ERROR_LONG_PULSE_LEN_US		( 800000u)
+	# define	ERROR_SHORT_PULSE_LEN_US	( 200000u)
 	# define	ERROR_LOOP_FOREVER		(true)
 
 
@@ -106,7 +106,7 @@ static	void	flash_error	(void)
 	bool	bit;
 
 	for (i = 31; i >= 0; i--) {
-		bit	= error & alx_maskgen_u32(i);
+		bit	= (bool)(error & alx_maskgen_u32(i));
 
 		if (bit) {
 			flash_long();

@@ -9,7 +9,6 @@
  ******************************************************************************/
 /* Standard C ----------------------------------------------------------------*/
 	#include <stdbool.h>
-	#include <stdint.h>
 
 /* Drivers -------------------------------------------------------------------*/
 	#include "stm32l4xx_hal.h"
@@ -98,8 +97,8 @@ static	int	clk_set_pll_from_msi	(void)
 	rcc_osc_init_values.MSICalibrationValue	= RCC_MSICALIBRATION_DEFAULT;
 	rcc_osc_init_values.PLL.PLLState	= RCC_PLL_ON;
 	rcc_osc_init_values.PLL.PLLSource	= RCC_PLLSOURCE_MSI;
-	rcc_osc_init_values.PLL.PLLM		= 1;
-	rcc_osc_init_values.PLL.PLLN		= 40;
+	rcc_osc_init_values.PLL.PLLM		= 1u;
+	rcc_osc_init_values.PLL.PLLN		= 40u;
 	rcc_osc_init_values.PLL.PLLP		= RCC_PLLP_DIV7;
 	rcc_osc_init_values.PLL.PLLQ		= RCC_PLLQ_DIV4;
 	rcc_osc_init_values.PLL.PLLR		= RCC_PLLR_DIV2;
