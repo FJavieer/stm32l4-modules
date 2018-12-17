@@ -15,6 +15,8 @@
 	#include "stm32l4xx_hal.h"
 
 /* libalx --------------------------------------------------------------------*/
+	#include "alx_mask.h"
+
 /* STM32L4 modules -----------------------------------------------------------*/
 		/* delay_us_init(), delay_us() */
 	#include "delay.h"

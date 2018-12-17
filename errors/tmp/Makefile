@@ -17,6 +17,7 @@ SRC_DIR = $(ERRORS_DIR)/src/
 
 ALL	= errors.o
 
+ERRORS_INC_LIBALX	= alx_mask.h
 ERRORS_INC_CMSIS	= core_cm4.h
 ERRORS_INC_CMSIS_L4	= stm32l4xx.h
 ERRORS_INC_HAL		= stm32l4xx_hal.h
