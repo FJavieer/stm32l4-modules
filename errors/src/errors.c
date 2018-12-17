@@ -27,9 +27,10 @@
 /******************************************************************************
  ******* macros ***************************************************************
  ******************************************************************************/
-	# define	ERROR_BIT_LEN		(1000000u)
-	# define	ERROR_1_PULSE_LEN_US	(500000u)
-	# define	ERROR_0_PULSE_LEN_US	(100000u)
+	# define	ERROR_BIT_LEN			(1000000u)
+	# define	ERROR_LONG_PULSE_LEN_US		(800000u)
+	# define	ERROR_SHORT_PULSE_LEN_US	(200000u)
+	# define	ERROR_LOOP_FOREVER		(true)
 
 
 /******************************************************************************
@@ -51,8 +52,11 @@
 
 
 /******************************************************************************
- ******* static functions (declarations) **************************************
+ ******* static functions (prototypes) ****************************************
  ******************************************************************************/
+static	void	flash_error	(void);
+static	void	flash_long	(void);
+static	void	flash_short	(void);
 
 
 /******************************************************************************
@@ -67,16 +71,66 @@
 	 */
 void	error_handle	(void)
 {
-	led_set();
-	delay_us(1000u);
-	led_reset();
-	delay_us(1000u);
+	int	i;
+#if (!ERROR_LOOP_FOREVER)
+	int	j;
+#endif
+
+#if (ERROR_LOOP_FOREVER)
+	while (true) {
+#else
+	for (j = 0; j < 3; j++) {
+#endif
+		for (i = 0; i < 10; i++) {
+			led_set();
+			delay_us(50000u);
+			led_reset();
+			delay_us(50000u);
+		}
+
+		flash_error();
+	}
+
+	error	= 0;
 }
 
 
 /******************************************************************************
  ******* static functions (definitions) ***************************************
  ******************************************************************************/
+static	void	flash_error	(void)
+{
+	int	i;
+	bool	bit;
+
+	for (i = 31; i >= 0; i--) {
+		bit	= error & alx_maskgen_u32(i);
+
+		if (bit) {
+			flash_long();
+		} else {
+			flash_short();
+		}
+	}
+}
+
+static	void	flash_long	(void)
+{
+	led_set();
+	delay_us(ERROR_LONG_PULSE_LEN_US);
+
+	led_reset();
+	delay_us(ERROR_BIT_LEN - ERROR_LONG_PULSE_LEN_US);
+}
+
+static	void	flash_short	(void)
+{
+	led_set();
+	delay_us(ERROR_SHORT_PULSE_LEN_US);
+
+	led_reset();
+	delay_us(ERROR_BIT_LEN - ERROR_SHORT_PULSE_LEN_US);
+}
 
 
 /******************************************************************************
