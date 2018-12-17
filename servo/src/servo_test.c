@@ -61,16 +61,16 @@ int	servo_test	(void)
 	int	i;
 
 	for (i = 0; i <= 90; i+=10) {
-		if (servo_sX_position_set(-(i*10), SERVO_S1)) {
+		if (servo_sX_position_set(-(i), SERVO_S1)) {
 			return	ERROR_NOK;
 		}
-		if (servo_sX_position_set(-(i*10), SERVO_S2)) {
+		if (servo_sX_position_set(-(i), SERVO_S2)) {
 			return	ERROR_NOK;
 		}
-		if (servo_sX_position_set(-(i*10), SERVO_S3)) {
+		if (servo_sX_position_set(-(i), SERVO_S3)) {
 			return	ERROR_NOK;
 		}
-		if (servo_sX_position_set(-(i*10), SERVO_S4)) {
+		if (servo_sX_position_set(-(i), SERVO_S4)) {
 			return	ERROR_NOK;
 		}
 		if (delay_us(1000000u)) {
@@ -93,16 +93,16 @@ int	servo_test	(void)
 			return	ERROR_NOK;
 		}
 
-		if (servo_sX_position_set((i*10), SERVO_S1)) {
+		if (servo_sX_position_set((i), SERVO_S1)) {
 			return	ERROR_NOK;
 		}
-		if (servo_sX_position_set((i*10), SERVO_S2)) {
+		if (servo_sX_position_set((i), SERVO_S2)) {
 			return	ERROR_NOK;
 		}
-		if (servo_sX_position_set((i*10), SERVO_S3)) {
+		if (servo_sX_position_set((i), SERVO_S3)) {
 			return	ERROR_NOK;
 		}
-		if (servo_sX_position_set((i*10), SERVO_S4)) {
+		if (servo_sX_position_set((i), SERVO_S4)) {
 			return	ERROR_NOK;
 		}
 		if (delay_us(1000000u)) {

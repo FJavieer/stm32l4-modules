@@ -89,19 +89,19 @@ void	servo_s4_init		(void);
 	/**
 	 * @brief	Set servo position
 	 *		Sets global variable 'error'
-	 * @param	position_decimals:	position (deg) multiplied by 10.
-	 *			valid range: [-900, 900]
+	 * @param	position:	position (deg)
+	 *			valid range: [-90, 90]
 	 * @return	Error
 	 */
-int	servo_sX_position_set	(int16_t position_decimals, int8_t servo);
+int	servo_sX_position_set	(float position, int8_t servo);
 
 	/**
 	 * @brief	Get servo position
 	 *		Sets global variable 'error'
-	 * @param	*position_decimals:	position (deg) multiplied by 10.
+	 * @param	*position:	position (deg)
 	 * @return	Error
 	 */
-int	servo_sX_position_get	(int16_t *position_decimals, int8_t servo);
+int	servo_sX_position_get	(float *position, int8_t servo);
 
 	/**
 	 * @brief	Stop servos

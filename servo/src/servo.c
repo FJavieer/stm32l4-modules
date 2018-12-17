@@ -67,13 +67,13 @@ static	bool	init_pending [SERVO_QTY]	= {true, true, true, true};
  ******************************************************************************/
 	/**
 	 * @brief	Calculate PWM duty cycle for specified servo position
-	 * @param	position_decimals:	position (deg) multiplied by 10.
-	 *			valid range: [-900, 900]
+	 * @param	position:	position (deg)
+	 *				valid range: [-90, 900]
 	 * @param	duty:			Duty cycle
-	 *			valid range: [0, 1]
+	 *				valid range: [0, 1]
 	 * @return	None
 	 */
-static	int	servo_duty_calc	(int16_t position_decimals, float *duty);
+static	int	servo_duty_calc	(float position, float *duty);
 
 
 /******************************************************************************
@@ -211,11 +211,11 @@ void	servo_s4_init		(void)
 	/**
 	 * @brief	Set servo sX position
 	 *		Sets global variable 'error'
-	 * @param	position_decimals:	position (deg) multiplied by 10.
-	 *			valid range: [-900, 900]
+	 * @param	position:	position (deg)
+	 *				valid range: [-90, 90]
 	 * @return	Error
 	 */
-int	servo_sX_position_set	(int16_t position_decimals, int8_t servo)
+int	servo_sX_position_set	(float position, int8_t servo)
 {
 	uint32_t	tim_chan;
 
@@ -245,7 +245,7 @@ int	servo_sX_position_set	(int16_t position_decimals, int8_t servo)
 	}
 
 	/* Calc duty */
-	servo_duty_calc(position_decimals, &duty_cycle[servo]);
+	servo_duty_calc(position, &duty_cycle[servo]);
 	/* set PWM */
 	pwm_tim2_chX_set(duty_cycle[servo], tim_chan);
 
@@ -255,10 +255,10 @@ int	servo_sX_position_set	(int16_t position_decimals, int8_t servo)
 	/**
 	 * @brief	Get servo sX position
 	 *		Sets global variable 'error'
-	 * @param	*position_decimals:	position (deg) multiplied by 10.
+	 * @param	*position:	position (deg)
 	 * @return	Error
 	 */
-int	servo_sX_position_get	(int16_t *position_decimals, int8_t servo)
+int	servo_sX_position_get	(float *position, int8_t servo)
 {
 	/* Check if servo has been initialized */
 	if (init_pending[servo]) {
@@ -266,9 +266,9 @@ int	servo_sX_position_get	(int16_t *position_decimals, int8_t servo)
 		return	ERROR_NOK;
 	}
 
-	*position_decimals	= alx_scale_linear_f(duty_cycle[SERVO_S1],
+	*position	= alx_scale_linear_f(duty_cycle[SERVO_S1],
 				SERVO_PWM_DUTY_MIN, SERVO_PWM_DUTY_MAX,
-				SERVO_ANGLE_MIN * 10, SERVO_ANGLE_MAX * 10);
+				SERVO_ANGLE_MIN, SERVO_ANGLE_MAX);
 
 	return	ERROR_OK;
 }
@@ -293,23 +293,23 @@ void	servo_sALL_stop		(void)
  ******************************************************************************/
 	/**
 	 * @brief	Calculate PWM duty cycle for specified servo position
-	 * @param	position_decimals:	position (deg) multiplied by 10.
-	 *			valid range: [-900, 900]
-	 * @param	duty:			Duty cycle
-	 *			valid range: [0, 1]
+	 * @param	position:	position (deg)
+	 *				valid range: [-90, 90]
+	 * @param	duty:		Duty cycle
+	 *				valid range: [0, 1]
 	 * @return	saturation:	0 =	OK,
 	 *				>0 =	POSITIVE SATURATION,
 	 *				<0 =	NEGATIVE SATURATION
 	 */
-static	int	servo_duty_calc	(int16_t position_decimals, float *duty)
+static	int	servo_duty_calc	(float position, float *duty)
 {
 	int	saturation	= SERVO_SATURATION_OK;
 
 	/* Check if there is saturation */
-	if (position_decimals < (SERVO_ANGLE_MIN * 10)) {
+	if (position < (SERVO_ANGLE_MIN)) {
 		saturation	= SERVO_SATURATION_NEG;
 	}
-	if (position_decimals > (SERVO_ANGLE_MAX * 10)) {
+	if (position > (SERVO_ANGLE_MAX)) {
 		saturation	= SERVO_SATURATION_POS;
 	}
 
@@ -322,8 +322,8 @@ static	int	servo_duty_calc	(int16_t position_decimals, float *duty)
 		*duty	= SERVO_PWM_DUTY_MAX;
 		break;
 	default:
-		*duty	= alx_scale_linear_f(position_decimals,
-				SERVO_ANGLE_MIN * 10, SERVO_ANGLE_MAX * 10,
+		*duty	= alx_scale_linear_f(position,
+				SERVO_ANGLE_MIN, SERVO_ANGLE_MAX,
 				SERVO_PWM_DUTY_MIN, SERVO_PWM_DUTY_MAX);
 		break;
 	}
