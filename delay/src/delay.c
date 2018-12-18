@@ -38,6 +38,7 @@ static	TIM_HandleTypeDef	tim_handle;
 /******************************************************************************
  ******* static functions (declarations) **************************************
  ******************************************************************************/
+static	int	delay_us_tim_init	(void);
 static	void	delay_us_delay_init	(uint32_t time_us, uint32_t *overflows);
 static	void	delay_us_delay_loop	(uint32_t overflows);
 
@@ -60,17 +61,7 @@ int	delay_us_init	(void)
 	}
 
 	__HAL_RCC_TIM6_CLK_ENABLE();
-	
-	/* Resolution: 1 us */
-	tim_handle.Instance		= TIM6; 
-	tim_handle.Init.Prescaler		= SystemCoreClock / 1000000u - 1u;
-	tim_handle.Init.CounterMode		= TIM_COUNTERMODE_UP;
-	tim_handle.Init.Period			= UINT16_MAX;
-	tim_handle.Init.ClockDivision		= TIM_CLOCKDIVISION_DIV1;
-	tim_handle.Init.RepetitionCounter	= 0x00u;
-	tim_handle.Init.AutoReloadPreload	= TIM_AUTORELOAD_PRELOAD_DISABLE;
-
-	if (HAL_TIM_Base_Init(&tim_handle)) {
+	if (delay_us_tim_init()) {
 		error	|= ERROR_DELAY_HAL_TIM_INIT;
 		error_handle();
 		return	ERROR_NOK;
@@ -123,6 +114,22 @@ int	delay_us	(uint32_t time_us)
 /******************************************************************************
  ******* static functions (definitions) ***************************************
  ******************************************************************************/
+static	int	delay_us_tim_init	(void)
+{
+
+	/* Resolution: 1 us */
+	tim_handle.Instance		= TIM6; 
+	tim_handle.Init.Prescaler		= (SystemCoreClock /
+								1000000u) - 1u;
+	tim_handle.Init.CounterMode		= TIM_COUNTERMODE_UP;
+	tim_handle.Init.Period			= UINT16_MAX;
+	tim_handle.Init.ClockDivision		= TIM_CLOCKDIVISION_DIV1;
+	tim_handle.Init.RepetitionCounter	= 0x00u;
+	tim_handle.Init.AutoReloadPreload	= TIM_AUTORELOAD_PRELOAD_DISABLE;
+
+	return	HAL_TIM_Base_Init(&tim_handle);
+}
+
 static	void	delay_us_delay_init	(uint32_t time_us, uint32_t *overflows)
 {
 	uint32_t	counter_initial;

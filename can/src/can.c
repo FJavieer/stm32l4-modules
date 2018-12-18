@@ -44,7 +44,6 @@ static	volatile	bool	can_msg_pending;
 /******************************************************************************
  ******* static functions (declarations) **************************************
  ******************************************************************************/
-static	void	can_clk_enable		(void);
 static	void	can_gpio_init		(void);
 static	int	can_peripherial_init	(void);
 static	int	can_filter_conf		(void);
@@ -70,7 +69,7 @@ int	can_init	(void)
 	}
 
 	can_msg_pending	= false;
-	can_clk_enable();
+	__CAN1_CLK_ENABLE();
 	can_gpio_init();
 	if (can_peripherial_init()) {
 		error	|= ERROR_CAN_HAL_CAN_INIT;
@@ -187,15 +186,11 @@ void	HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *can_handle_ptr)
 /******************************************************************************
  ******* static functions (definitions) ***************************************
  ******************************************************************************/
-static	void	can_clk_enable		(void)
-{
-	__HAL_RCC_GPIOA_CLK_ENABLE();
-	__CAN1_CLK_ENABLE();
-}
-
 static	void	can_gpio_init		(void)
 {
 	GPIO_InitTypeDef	gpio_init_values;
+
+	__HAL_RCC_GPIOA_CLK_ENABLE();
 
 	/* PA12 -> TX // PA11 -> RX */
 	gpio_init_values.Pin		= GPIO_PIN_12 | GPIO_PIN_11;
