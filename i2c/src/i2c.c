@@ -29,6 +29,10 @@
 /******************************************************************************
  ******* macros ***************************************************************
  ******************************************************************************/
+#define I2C_ADDRESS		(0x00F)
+#define I2C_TIMING		(0x00D00E28)
+#define TXBUFFERSIZE            (8)
+#define RXBUFFERSIZE		(8)
 
 
 /******************************************************************************
@@ -39,6 +43,8 @@
 
 /* Static --------------------------------------------------------------------*/
 static	bool			init_pending	= true;
+static	uint8_t			aTxBuffer [8];
+static  uint8_t 		aRxBuffer[8];
 
 /* Volatile ------------------------------------------------------------------*/
 
@@ -75,17 +81,17 @@ int	i2c_init	(void)
 	i2c_msp_init();
 
 	if (i2c_peripherial_init()) {
-		error	|= ERROR_I2C_HAL_I2C_INIT;
+		//error	|= ERROR_I2C_HAL_I2C_INIT;
 		error_handle();
 		return	ERROR_NOK;
 	}
 	if (i2c_filter_analog_conf()) {
-		error	|= ERROR_I2C_HAL_I2C_FILTER_ANALOG;
+		//error	|= ERROR_I2C_HAL_I2C_FILTER_ANALOG;
 		error_handle();
 		return	ERROR_NOK;
 	}
 	if (i2c_filter_digital_conf()) {
-		error	|= ERROR_I2C_HAL_I2C_FILTER_DIGITAL;
+		//error	|= ERROR_I2C_HAL_I2C_FILTER_DIGITAL;
 		error_handle();
 		return	ERROR_NOK;
 	}
@@ -126,19 +132,19 @@ static	void	i2c_gpio_init		(void)
 }
 
 static	void	i2c_nvic_conf		(void)
-{// FIXME
-	HAL_NVIC_SetPriority(CAN1_RX0_IRQn, 1, 0);
-	HAL_NVIC_EnableIRQ(CAN1_RX0_IRQn);
+{
+	HAL_NVIC_SetPriority(I2C1_EV_IRQn, 1, 1);
+	HAL_NVIC_EnableIRQ(I2C1_EV_IRQn);
 }
 
 static	int	i2c_peripherial_init	(void)
 {
-	i2c_handle.Instance		= I2C1;
-	i2c_handle.Init.Timing			= 0x00000004u;
-	i2c_handle.Init.OwnAddress1		= 0;
-	i2c_handle.Init.AddressingMode		= I2C_ADDRESSINGMODE_7BIT;
+	i2c_handle.Instance		        = I2C1;
+	i2c_handle.Init.Timing			= I2C_TIMING;
+	i2c_handle.Init.OwnAddress1		= I2C_ADDRESS;
+	i2c_handle.Init.AddressingMode		= I2C_ADDRESSINGMODE_10BIT;
 	i2c_handle.Init.DualAddressMode		= I2C_DUALADDRESS_DISABLE;
-	i2c_handle.Init.OwnAddress2		= 0;
+	i2c_handle.Init.OwnAddress2		= I2C_ADDRESS;
 	i2c_handle.Init.OwnAddress2Masks	= I2C_OA2_NOMASK;
 	i2c_handle.Init.GeneralCallMode		= I2C_GENERALCALL_DISABLE;
 	i2c_handle.Init.NoStretchMode		= I2C_NOSTRETCH_DISABLE;
@@ -148,16 +154,122 @@ static	int	i2c_peripherial_init	(void)
 
 static	int	i2c_filter_analog_conf	(void)
 {
-	return	HAL_I2CEx_ConfigAnalogFilter(&can_handle,
-						I2C_ANALOGFILTER_ENABLE);
+	return	HAL_I2CEx_ConfigAnalogFilter(&i2c_handle,I2C_ANALOGFILTER_ENABLE);
 }
-
+/*
 static	int	i2c_filter_digital_conf	(void)
 {
-	return	HAL_I2CEx_ConfigDigitalFilter(&hi2c1, 0x00000000u);
+	return	HAL_I2CEx_ConfigDigitalFilter(&i2c_handle, 0x00000000u);
 }
-
+*/
 
 /******************************************************************************
  ******* end of file **********************************************************
  ******************************************************************************/
+
+
+  /* The board sends the message and expects to receive it back */
+  
+  /*##-2- Start the transmission process #####################################*/  
+  /* While the I2C in reception process, user can transmit data through 
+     "aTxBuffer" buffer */
+  do
+  {
+    if(HAL_I2C_Master_Transmit_IT(&I2cHandle, (uint16_t)I2C_ADDRESS, (uint8_t*)aTxBuffer, TXBUFFERSIZE)!= HAL_OK)
+    {
+      /* Error_Handler() function is called when error occurs. */
+      Error_Handler();
+    }
+
+    /*##-3- Wait for the end of the transfer #################################*/  
+    /*  Before starting a new communication transfer, you need to check the current   
+        state of the peripheral; if it’s busy you need to wait for the end of current
+        transfer before starting a new one.
+        For simplicity reasons, this example is just waiting till the end of the 
+        transfer, but application may perform other tasks while transfer operation
+        is ongoing. */  
+    while (HAL_I2C_GetState(&I2cHandle) != HAL_I2C_STATE_READY)
+    {
+    } 
+
+    /* When Acknowledge failure occurs (Slave don't acknowledge it's address)
+       Master restarts communication */
+  }
+  while(HAL_I2C_GetError(&I2cHandle) == HAL_I2C_ERROR_AF);
+  
+  
+  
+  /*##-4- Put I2C peripheral in reception process ###########################*/  
+  do
+  {
+    if(HAL_I2C_Master_Receive_IT(&I2cHandle, (uint16_t)I2C_ADDRESS, (uint8_t *)aRxBuffer, RXBUFFERSIZE) != HAL_OK)
+    {
+      /* Error_Handler() function is called when error occurs. */
+      Error_Handler();
+    }
+
+    /*##-5- Wait for the end of the transfer #################################*/  
+    /*  Before starting a new communication transfer, you need to check the current   
+        state of the peripheral; if it’s busy you need to wait for the end of current
+        transfer before starting a new one.
+        For simplicity reasons, this example is just waiting till the end of the 
+        transfer, but application may perform other tasks while transfer operation
+        is ongoing. */  
+    while (HAL_I2C_GetState(&I2cHandle) != HAL_I2C_STATE_READY)
+    {
+    } 
+
+    /* When Acknowledge failure occurs (Slave don't acknowledge it's address)
+       Master restarts communication */
+  }
+  while(HAL_I2C_GetError(&I2cHandle) == HAL_I2C_ERROR_AF);
+
+  
+  
+  
+  /**
+  * @brief  Rx Transfer completed callback.
+  * @param  I2cHandle: I2C handle
+  * @note   This example shows a simple way to report end of IT Rx transfer, and 
+  *         you can add your own implementation.
+  * @retval None
+  */
+#ifdef MASTER_BOARD
+void HAL_I2C_MasterRxCpltCallback(I2C_HandleTypeDef *I2cHandle)
+{
+  /* Toggle LED2: Transfer in reception process is correct */
+  BSP_LED_Toggle(LED2);
+}
+  
+  /**
+  * @brief  I2C error callbacks.
+  * @param  I2cHandle: I2C handle
+  * @note   This example shows a simple way to report transfer error, and you can
+  *         add your own implementation.
+  * @retval None
+  */
+void HAL_I2C_ErrorCallback(I2C_HandleTypeDef *I2cHandle)
+{
+  /** Error_Handler() function is called when error occurs.
+    * 1- When Slave don't acknowledge it's address, Master restarts communication.
+    * 2- When Master don't acknowledge the last data transferred, Slave don't care in this example.
+    */
+  if (HAL_I2C_GetError(I2cHandle) != HAL_I2C_ERROR_AF)
+  {
+    Error_Handler();
+  }
+}
+
+/**
+  * @brief  Tx Transfer completed callback.
+  * @param  I2cHandle: I2C handle. 
+  * @note   This example shows a simple way to report end of IT Tx transfer, and 
+  *         you can add your own implementation. 
+  * @retval None
+  */
+#ifdef MASTER_BOARD
+void HAL_I2C_MasterTxCpltCallback(I2C_HandleTypeDef *I2cHandle)
+{
+  /* Toggle LED2: Transfer in transmission process is correct */
+  BSP_LED_Toggle(LED2);
+}
