@@ -27,6 +27,16 @@
 
 
 /******************************************************************************
+ ******* enums ****************************************************************
+ ******************************************************************************/
+
+
+/******************************************************************************
+ ******* structs **************************************************************
+ ******************************************************************************/
+
+
+/******************************************************************************
  ******* variables ************************************************************
  ******************************************************************************/
 /* Global --------------------------------------------------------------------*/
@@ -44,13 +54,17 @@ static	int	pwm_tim2_tim_init	(uint32_t resolution_sec,
 static	int	pwm_tim2_clk_conf	(void);
 static	int	pwm_tim2_master_conf	(void);
 static	void	pwm_tim2_oc_conf	(void);
+static	void	pwm_tim2_ch1_gpio_init	(void);
+static	void	pwm_tim2_ch2_gpio_init	(void);
+static	void	pwm_tim2_ch3_gpio_init	(void);
+static	void	pwm_tim2_ch4_gpio_init	(void);
 
 
 /******************************************************************************
  ******* global functions *****************************************************
  ******************************************************************************/
 	/**
-	 * @brief	Initialize base time for PWM using TIM2
+	 * @brief	Initialize PWM using TIM2
 	 *		Sets global variable 'error'
 	 * @param	resolution_s:	divisions in 1 s
 	 * @param	period:		period of the pwm (in resolution_s units)
@@ -88,6 +102,11 @@ int	pwm_tim2_init		(uint32_t resolution_sec, uint32_t period)
 	}
 	pwm_tim2_oc_conf();
 
+	pwm_tim2_ch1_gpio_init();
+	pwm_tim2_ch2_gpio_init();
+	pwm_tim2_ch3_gpio_init();
+	pwm_tim2_ch4_gpio_init();
+
 	return	ERROR_OK;
 }
 
@@ -95,32 +114,33 @@ int	pwm_tim2_init		(uint32_t resolution_sec, uint32_t period)
 	 * @brief	Set PWM using TIM2
 	 *		Sets global variable 'error'
 	 * @param	duty_cycle:	duty cycle value (fraction)
-	 * @param	chan:		channel to be used (1 through 4; 0=ALL)
+	 * @param	chan:		channel to be used (1 through 4)
 	 * @return	Error
 	 */
 int	pwm_tim2_chX_set	(float duty_cycle, uint32_t tim_chan)
 {
-	/* Invalid duty cycle */
-	if (duty_cycle > 1.0 || duty_cycle < 0.0) {
-		error	|= ERROR_PWM_DUTY;
-		return	ERROR_NOK;
-	}
-
 	/* Init pending */
 	if (init_pending) {
 		error	|= ERROR_PWM_INIT;
 		return	ERROR_NOK;
 	}
 
-	/* Initialize PWN with duty cycle */
-	oc_init.Pulse	= tim_handle.Init.Period * duty_cycle;
+	if (duty_cycle > 1.0) {
+		oc_init.Pulse	= tim_handle.Init.Period;
+		error	|= ERROR_PWM_DUTY;
+	} else if (duty_cycle < 0.0) {
+		oc_init.Pulse	= 0;
+		error	|= ERROR_PWM_DUTY;
+	} else {
+		oc_init.Pulse	= tim_handle.Init.Period * duty_cycle;
+	}
+
 	if (HAL_TIM_PWM_ConfigChannel(&tim_handle, &oc_init, tim_chan)) {
 		error	|= ERROR_PWM_HAL_TIM_PWM_CONF;
 		error_handle();
 		return	ERROR_NOK;
 	}
 
-	/* Start PWM */
 	if (HAL_TIM_PWM_Start(&tim_handle, tim_chan)) {
 		error	|= ERROR_PWM_HAL_TIM_PWM_START;
 		error_handle();
@@ -205,6 +225,62 @@ static	void	pwm_tim2_oc_conf	(void)
 	oc_init.OCNIdleState	= TIM_OCNIDLESTATE_RESET;
 	oc_init.OCIdleState	= TIM_OCIDLESTATE_RESET;
 	oc_init.OCIdleState	= TIM_OCIDLESTATE_RESET;
+}
+
+static	void	pwm_tim2_ch1_gpio_init	(void)
+{
+	GPIO_InitTypeDef	gpio_init_values;
+
+	__HAL_RCC_GPIOA_CLK_ENABLE();
+
+	gpio_init_values.Pin		= GPIO_PIN_15;
+	gpio_init_values.Mode		= GPIO_MODE_AF_OD;
+	gpio_init_values.Pull		= GPIO_NOPULL;
+	gpio_init_values.Speed		= GPIO_SPEED_FREQ_LOW;
+	gpio_init_values.Alternate	= GPIO_AF1_TIM2;
+	HAL_GPIO_Init(GPIOA, &gpio_init_values);
+}
+
+static	void	pwm_tim2_ch2_gpio_init	(void)
+{
+	GPIO_InitTypeDef	gpio_init_values;
+
+	__HAL_RCC_GPIOA_CLK_ENABLE();
+
+	gpio_init_values.Pin		= GPIO_PIN_1;
+	gpio_init_values.Mode		= GPIO_MODE_AF_OD;
+	gpio_init_values.Pull		= GPIO_NOPULL;
+	gpio_init_values.Speed		= GPIO_SPEED_FREQ_LOW;
+	gpio_init_values.Alternate	= GPIO_AF1_TIM2;
+	HAL_GPIO_Init(GPIOA, &gpio_init_values);
+}
+
+static	void	pwm_tim2_ch3_gpio_init	(void)
+{
+	GPIO_InitTypeDef	gpio_init_values;
+
+	__HAL_RCC_GPIOB_CLK_ENABLE();
+
+	gpio_init_values.Pin		= GPIO_PIN_10;
+	gpio_init_values.Mode		= GPIO_MODE_AF_OD;
+	gpio_init_values.Pull		= GPIO_NOPULL;
+	gpio_init_values.Speed		= GPIO_SPEED_FREQ_LOW;
+	gpio_init_values.Alternate	= GPIO_AF1_TIM2;
+	HAL_GPIO_Init(GPIOB, &gpio_init_values);
+}
+
+static	void	pwm_tim2_ch4_gpio_init	(void)
+{
+	GPIO_InitTypeDef	gpio_init_values;
+
+	__HAL_RCC_GPIOB_CLK_ENABLE();
+
+	gpio_init_values.Pin		= GPIO_PIN_11;
+	gpio_init_values.Mode		= GPIO_MODE_AF_OD;
+	gpio_init_values.Pull		= GPIO_NOPULL;
+	gpio_init_values.Speed		= GPIO_SPEED_FREQ_LOW;
+	gpio_init_values.Alternate	= GPIO_AF1_TIM2;
+	HAL_GPIO_Init(GPIOB, &gpio_init_values);
 }
 
 

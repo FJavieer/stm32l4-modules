@@ -62,52 +62,26 @@
  ******* functions ************************************************************
  ******************************************************************************/
 	/**
-	 * @brief	Init servo s1 in PA15 using TIM2_CH1
+	 * @brief	Init servos
 	 *		Sets global variable 'error'
 	 * @return	None
 	 */
-void	servo_s1_init		(void);
-	/**
-	 * @brief	Init servo s2 in PA1 using TIM2_CH2
-	 *		Sets global variable 'error'
-	 * @return	None
-	 */
-void	servo_s2_init		(void);
-	/**
-	 * @brief	Init servo s3 in PB10 using TIM2_CH3
-	 *		Sets global variable 'error'
-	 * @return	None
-	 */
-void	servo_s3_init		(void);
-	/**
-	 * @brief	Init servo s4 in PB11 (GPIOB, GPIO_PIN_11)
-	 *		Sets global variable 'error'
-	 * @return	None
-	 */
-void	servo_s4_init		(void);
+void	servo_init		(void);
 
 	/**
-	 * @brief	Set servo position
+	 * @brief	Set servo sX position
 	 *		Sets global variable 'error'
 	 * @param	position:	position (deg)
-	 *			valid range: [-90, 90]
+	 *				valid range: [-90, 90]
 	 * @return	Error
 	 */
 int	servo_sX_position_set	(float position, int8_t servo);
 
 	/**
-	 * @brief	Get servo position
-	 *		Sets global variable 'error'
-	 * @param	*position:	position (deg)
-	 * @return	Error
-	 */
-int	servo_sX_position_get	(float *position, int8_t servo);
-
-	/**
 	 * @brief	Stop servos
 	 * @return	None
 	 */
-void	servo_sALL_stop		(void);
+void	servo_stop		(void);
 
 
 /******************************************************************************

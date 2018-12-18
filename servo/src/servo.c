@@ -59,7 +59,7 @@
 /* Global --------------------------------------------------------------------*/
 /* Static --------------------------------------------------------------------*/
 static	float	duty_cycle [SERVO_QTY];
-static	bool	init_pending [SERVO_QTY]	= {true, true, true, true};
+static	bool	init_pending	= true;
 
 
 /******************************************************************************
@@ -80,131 +80,26 @@ static	int	servo_duty_calc	(float position, float *duty);
  ******* global functions *****************************************************
  ******************************************************************************/
 	/**
-	 * @brief	Init servo s1 in PA15 using TIM2_CH1
+	 * @brief	Init servos
 	 *		Sets global variable 'error'
 	 * @return	None
 	 */
-void	servo_s1_init		(void)
+void	servo_init		(void)
 {
-	GPIO_InitTypeDef	gpio_init_values;
-
 	/* Init pending */
-	if (init_pending[SERVO_S1]) {
-		init_pending[SERVO_S1]	= false;
+	if (init_pending) {
+		init_pending	= false;
 	} else {
 		error	|= ERROR_SERVO_INIT;
 		return;
 	}
 
-	/* Initialize TIM2 for PWM */
 	pwm_tim2_init(SERVO_PWM_RESOLUTION_s, SERVO_PWM_PERIOD_us);
 
-	__HAL_RCC_GPIOA_CLK_ENABLE();
-	/* Configure the GPIO LED pin */
-	gpio_init_values.Pin		= GPIO_PIN_15;
-	gpio_init_values.Mode		= GPIO_MODE_AF_OD;	// alternate function
-	gpio_init_values.Pull		= GPIO_NOPULL;		// no pulls
-	gpio_init_values.Speed		= GPIO_SPEED_FREQ_LOW;
-	gpio_init_values.Alternate	= GPIO_AF1_TIM2;	// Pin connected to TIM2 output
-	HAL_GPIO_Init(GPIOA, &gpio_init_values);
-
-	/* Initialize PWM with default duty cycle (0 DEG) */
+	/* Initialize PWM with duty cycle for (0 DEG) */
 	pwm_tim2_chX_set(SERVO_PWM_DUTY_DEF, TIM_CHANNEL_1);
-}
-	/**
-	 * @brief	Init servo s2 in PA1 using TIM2_CH2
-	 *		Sets global variable 'error'
-	 * @return	None
-	 */
-void	servo_s2_init		(void)
-{
-	GPIO_InitTypeDef	gpio_init_values;
-
-	/* Init pending */
-	if (init_pending[SERVO_S2]) {
-		init_pending[SERVO_S2]	= false;
-	} else {
-		error	|= ERROR_SERVO_INIT;
-		return;
-	}
-
-	/* Initialize TIM2 for PWM */
-	pwm_tim2_init(SERVO_PWM_RESOLUTION_s, SERVO_PWM_PERIOD_us);
-
-	__HAL_RCC_GPIOA_CLK_ENABLE();
-	/* Configure the GPIO LED pin */
-	gpio_init_values.Pin		= GPIO_PIN_1;
-	gpio_init_values.Mode		= GPIO_MODE_AF_OD;	// alternate function
-	gpio_init_values.Pull		= GPIO_NOPULL;		// no pulls
-	gpio_init_values.Speed		= GPIO_SPEED_FREQ_LOW;
-	gpio_init_values.Alternate	= GPIO_AF1_TIM2;	// Pin connected to TIM2 output
-	HAL_GPIO_Init(GPIOA, &gpio_init_values);
-
-	/* Initialize PWM with default duty cycle (0 DEG) */
 	pwm_tim2_chX_set(SERVO_PWM_DUTY_DEF, TIM_CHANNEL_2);
-}
-	/**
-	 * @brief	Init servo s3 in PB10 using TIM2_CH3
-	 *		Sets global variable 'error'
-	 * @return	None
-	 */
-void	servo_s3_init		(void)
-{
-	GPIO_InitTypeDef	gpio_init_values;
-
-	/* Init pending */
-	if (init_pending[SERVO_S3]) {
-		init_pending[SERVO_S3]	= false;
-	} else {
-		error	|= ERROR_SERVO_INIT;
-		return;
-	}
-
-	/* Initialize TIM2 for PWM */
-	pwm_tim2_init(SERVO_PWM_RESOLUTION_s, SERVO_PWM_PERIOD_us);
-
-	__HAL_RCC_GPIOB_CLK_ENABLE();
-	/* Configure the GPIO LED pin */
-	gpio_init_values.Pin		= GPIO_PIN_10;
-	gpio_init_values.Mode		= GPIO_MODE_AF_OD;	// alternate function
-	gpio_init_values.Pull		= GPIO_NOPULL;		// no pulls
-	gpio_init_values.Speed		= GPIO_SPEED_FREQ_LOW;
-	gpio_init_values.Alternate	= GPIO_AF1_TIM2;	// Pin connected to TIM2 output
-	HAL_GPIO_Init(GPIOB, &gpio_init_values);
-
-	/* Initialize PWM with default duty cycle (0 DEG) */
 	pwm_tim2_chX_set(SERVO_PWM_DUTY_DEF, TIM_CHANNEL_3);
-}
-	/**
-	 * @brief	Init servo s4 in PB11 using TIM2_CH4
-	 *		Sets global variable 'error'
-	 * @return	None
-	 */
-void	servo_s4_init		(void)
-{
-	GPIO_InitTypeDef	gpio_init_values;
-
-	/* Init pending */
-	if (init_pending[SERVO_S4]) {
-		init_pending[SERVO_S4]		= false;
-	} else {
-		error	|= ERROR_SERVO_INIT;
-		return;
-	}
-
-	/* Initialize TIM2 for PWM */
-	pwm_tim2_init(SERVO_PWM_RESOLUTION_s, SERVO_PWM_PERIOD_us);
-
-	__HAL_RCC_GPIOB_CLK_ENABLE();
-	/* Configure the GPIO LED pin */
-	gpio_init_values.Pin		= GPIO_PIN_11;
-	gpio_init_values.Mode		= GPIO_MODE_AF_OD;	// alternate function
-	gpio_init_values.Pull		= GPIO_NOPULL;		// no pulls
-	gpio_init_values.Speed		= GPIO_SPEED_FREQ_LOW;
-	gpio_init_values.Alternate	= GPIO_AF1_TIM2;	// Pin connected to TIM2 output
-	HAL_GPIO_Init(GPIOB, &gpio_init_values);
-
-	/* Initialize PWM with default duty cycle (0 DEG) */
 	pwm_tim2_chX_set(SERVO_PWM_DUTY_DEF, TIM_CHANNEL_4);
 }
 
@@ -220,7 +115,7 @@ int	servo_sX_position_set	(float position, int8_t servo)
 	uint32_t	tim_chan;
 
 	/* Check if servo has been initialized */
-	if (init_pending[servo]) {
+	if (init_pending) {
 		error	|= ERROR_SERVO_INIT;
 		return	ERROR_NOK;
 	}
@@ -253,38 +148,14 @@ int	servo_sX_position_set	(float position, int8_t servo)
 }
 
 	/**
-	 * @brief	Get servo sX position
-	 *		Sets global variable 'error'
-	 * @param	*position:	position (deg)
-	 * @return	Error
-	 */
-int	servo_sX_position_get	(float *position, int8_t servo)
-{
-	/* Check if servo has been initialized */
-	if (init_pending[servo]) {
-		error	|= ERROR_SERVO_INIT;
-		return	ERROR_NOK;
-	}
-
-	*position	= alx_scale_linear_f(duty_cycle[SERVO_S1],
-				SERVO_PWM_DUTY_MIN, SERVO_PWM_DUTY_MAX,
-				SERVO_ANGLE_MIN, SERVO_ANGLE_MAX);
-
-	return	ERROR_OK;
-}
-
-	/**
 	 * @brief	Stop servos
 	 * @return	None
 	 */
-void	servo_sALL_stop		(void)
+void	servo_stop		(void)
 {
 	pwm_tim2_stop();
 
-	init_pending[SERVO_S1]		= true;
-	init_pending[SERVO_S2]		= true;
-	init_pending[SERVO_S3]		= true;
-	init_pending[SERVO_S4]		= true;
+	init_pending	= true;
 }
 
 
