@@ -38,23 +38,18 @@
 /* Static --------------------------------------------------------------------*/
 static	bool			init_pending	= true;
 static	I2C_HandleTypeDef	i2c_handle;
-/*
-static	CAN_TxHeaderTypeDef	can_tx_header;
-static	CAN_RxHeaderTypeDef	can_rx_header;
-static	uint8_t			can_rx_data [CAN_DATA_LEN];
-static	uint32_t		can_tx_mailbox;
-*/
 /* Volatile ------------------------------------------------------------------*/
-static	volatile	bool	can_msg_pending;
+static	volatile	bool	i2c_msg_pending;
 
 
 /******************************************************************************
  ******* static functions (declarations) **************************************
  ******************************************************************************/
-static	void	can_gpio_init		(void);
-static	int	can_peripherial_init	(void);
-static	int	can_filter_conf		(void);
-static	void	can_tx_header_conf	(void);
+static	void	i2c_gpio_init		(void);
+static	void	i2c_nvic_conf		(void);
+static	int	i2c_peripherial_init	(void);
+static	int	i2c_filter_analog_conf	(void);
+static	int	i2c_filter_digital_conf	(void);
 
 
 /******************************************************************************
@@ -76,6 +71,7 @@ int	i2c_init	(void)
 
 	__HAL_RCC_I2C1_CLK_ENABLE();
 	i2c_gpio_init();
+	i2c_nvic_conf();
 	if (i2c_peripherial_init()) {
 		error	|= ERROR_I2C_HAL_I2C_INIT;
 		error_handle();
@@ -91,21 +87,7 @@ int	i2c_init	(void)
 		error_handle();
 		return	ERROR_NOK;
 	}
-	if (HAL_CAN_Start(&can_handle)) {
-		error	|= ERROR_CAN_HAL_CAN_START;
-		error_handle();
-		return	ERROR_NOK;
-	}
-	if (HAL_CAN_ActivateNotification(&can_handle, CAN_IT_RX_FIFO0_MSG_PENDING)) {
-		error	|= ERROR_CAN_HAL_CAN_ACTIVATE_NOTIFICATION;
-		error_handle();
-		return	ERROR_NOK;
-	}
 
-	can_tx_header_conf();
-
-	HAL_NVIC_SetPriority(CAN1_RX0_IRQn, 1, 0);
-	HAL_NVIC_EnableIRQ(CAN1_RX0_IRQn);
 
 	return	ERROR_OK;
 }
@@ -209,6 +191,12 @@ static	void	i2c_gpio_init		(void)
 	gpio_init_values.Pull		= GPIO_NOPULL;
 	gpio_init_values.Alternate	= GPIO_AF4_I2C1;
 	HAL_GPIO_Init(GPIOB, &gpio_init_values);
+}
+
+static	void	i2c_nvic_conf		(void)
+{// FIXME
+	HAL_NVIC_SetPriority(CAN1_RX0_IRQn, 1, 0);
+	HAL_NVIC_EnableIRQ(CAN1_RX0_IRQn);
 }
 
 static	int	i2c_peripherial_init	(void)
