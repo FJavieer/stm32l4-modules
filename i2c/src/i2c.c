@@ -1,6 +1,11 @@
-/******************************************************************************
- *	can.c								      *
- *	2018/dec/11							      *
+/**
+ ******************************************************************************
+ *	@file	i2c.c							      *
+ *	@author	Colomar Andrés, Alejandro				      *
+ *	@brief	I2C							      *
+ ******************************************************************************
+ *	Copyright (C) 2018	Alejandro Colomar Andrés		      *
+ *	LGPL-v2.0 only							      *
  ******************************************************************************/
 
 
@@ -46,7 +51,6 @@ static	volatile	bool	can_msg_pending;
 /******************************************************************************
  ******* static functions (declarations) **************************************
  ******************************************************************************/
-static	void	can_clk_enable		(void);
 static	void	can_gpio_init		(void);
 static	int	can_peripherial_init	(void);
 static	int	can_filter_conf		(void);
@@ -70,8 +74,7 @@ int	i2c_init	(void)
 		return	ERROR_OK;
 	}
 
-	i2c_msg_pending	= false;
-	i2c_clk_enable();
+	__HAL_RCC_I2C1_CLK_ENABLE();
 	i2c_gpio_init();
 	if (i2c_peripherial_init()) {
 		error	|= ERROR_I2C_HAL_I2C_INIT;
@@ -193,14 +196,11 @@ void	HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *can_handle_ptr)
 /******************************************************************************
  ******* static functions (definitions) ***************************************
  ******************************************************************************/
-static	void	i2c_clk_enable		(void)
-{
-	HAL_RCC_I2C1_CLK_ENABLE();
-}
-
 static	void	i2c_gpio_init		(void)
 {
 	GPIO_InitTypeDef	gpio_init_values;
+
+	__HAL_RCC_GPIOB_CLK_ENABLE();
 
 	/* PB6 -> I2C1_SCL // PB7 -> I2C1_SDA */
 	gpio_init_values.Pin		= GPIO_PIN_6 | GPIO_PIN_7;
@@ -213,15 +213,15 @@ static	void	i2c_gpio_init		(void)
 
 static	int	i2c_peripherial_init	(void)
 {
-	can_handle.Instance		= I2C1;
-	can_handle.Init.Timing			= 0x00000004u;
-	can_handle.Init.OwnAddress1		= 0;
-	can_handle.Init.AddressingMode		= I2C_ADDRESSINGMODE_7BIT;
-	can_handle.Init.DualAddressMode		= I2C_DUALADDRESS_DISABLE;
-	can_handle.Init.OwnAddress2		= 0;
-	can_handle.Init.OwnAddress2Masks	= I2C_OA2_NOMASK;
-	can_handle.Init.GeneralCallMode		= I2C_GENERALCALL_DISABLE;
-	can_handle.Init.NoStretchMode		= I2C_NOSTRETCH_DISABLE;
+	i2c_handle.Instance		= I2C1;
+	i2c_handle.Init.Timing			= 0x00000004u;
+	i2c_handle.Init.OwnAddress1		= 0;
+	i2c_handle.Init.AddressingMode		= I2C_ADDRESSINGMODE_7BIT;
+	i2c_handle.Init.DualAddressMode		= I2C_DUALADDRESS_DISABLE;
+	i2c_handle.Init.OwnAddress2		= 0;
+	i2c_handle.Init.OwnAddress2Masks	= I2C_OA2_NOMASK;
+	i2c_handle.Init.GeneralCallMode		= I2C_GENERALCALL_DISABLE;
+	i2c_handle.Init.NoStretchMode		= I2C_NOSTRETCH_DISABLE;
 
 	return	HAL_I2C_Init(&i2c_handle);
 }
@@ -235,16 +235,6 @@ static	int	i2c_filter_analog_conf	(void)
 static	int	i2c_filter_digital_conf	(void)
 {
 	return	HAL_I2CEx_ConfigDigitalFilter(&hi2c1, 0x00000000u);
-}
-
-static	void	can_tx_header_conf	(void)
-{
-	can_tx_header.StdId			= 0x3AAu;
-	can_tx_header.ExtId			= 0x00u;
-	can_tx_header.IDE			= CAN_ID_STD;
-	can_tx_header.RTR			= CAN_RTR_DATA;
-	can_tx_header.DLC			= CAN_DATA_LEN;
-	can_tx_header.TransmitGlobalTime	= DISABLE;
 }
 
 
