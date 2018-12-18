@@ -67,7 +67,9 @@
 	};
 
 	enum	Error_Stm32l4_Modules_I2c {
-		ERROR_I2C_INIT				= 0x00100001u
+		ERROR_I2C_HAL_I2C_INIT			= 0x00100001u,
+		ERROR_I2C_HAL_I2C_FILTER_ANALOG		= 0x00100002u,
+		ERROR_I2C_HAL_I2C_FILTER_DIGITAL	= 0x00100004u
 	};
 
 	enum	Error_Stm32l4_Modules_Joystick {
