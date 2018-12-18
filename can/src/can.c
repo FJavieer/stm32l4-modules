@@ -45,6 +45,7 @@ static	volatile	bool	can_msg_pending;
  ******* static functions (declarations) **************************************
  ******************************************************************************/
 static	void	can_gpio_init		(void);
+static	void	can_nvic_conf		(void);
 static	int	can_peripherial_init	(void);
 static	int	can_filter_conf		(void);
 static	void	can_tx_header_conf	(void);
@@ -71,6 +72,7 @@ int	can_init	(void)
 	can_msg_pending	= false;
 	__CAN1_CLK_ENABLE();
 	can_gpio_init();
+	can_nvic_conf();
 	if (can_peripherial_init()) {
 		error	|= ERROR_CAN_HAL_CAN_INIT;
 		error_handle();
@@ -93,9 +95,6 @@ int	can_init	(void)
 	}
 
 	can_tx_header_conf();
-
-	HAL_NVIC_SetPriority(CAN1_RX0_IRQn, 1, 0);
-	HAL_NVIC_EnableIRQ(CAN1_RX0_IRQn);
 
 	return	ERROR_OK;
 }
@@ -199,6 +198,12 @@ static	void	can_gpio_init		(void)
 	gpio_init_values.Pull		= GPIO_NOPULL;
 	gpio_init_values.Alternate	= GPIO_AF9_CAN1;
 	HAL_GPIO_Init(GPIOA, &gpio_init_values);
+}
+
+static	void	can_nvic_conf		(void)
+{// FIXME
+	HAL_NVIC_SetPriority(CAN1_RX0_IRQn, 1, 0);
+	HAL_NVIC_EnableIRQ(CAN1_RX0_IRQn);
 }
 
 static	int	can_peripherial_init	(void)
