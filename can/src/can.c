@@ -30,9 +30,10 @@
  ******* variables ************************************************************
  ******************************************************************************/
 /* Global --------------------------------------------------------------------*/
+	CAN_HandleTypeDef	can_handle;
+
 /* Static --------------------------------------------------------------------*/
 static	bool			init_pending	= true;
-static	CAN_HandleTypeDef	can_handle;
 static	CAN_TxHeaderTypeDef	can_tx_header;
 static	CAN_RxHeaderTypeDef	can_rx_header;
 static	uint8_t			can_rx_data [CAN_DATA_LEN];
@@ -44,8 +45,10 @@ static	volatile	bool	can_msg_pending;
 /******************************************************************************
  ******* static functions (declarations) **************************************
  ******************************************************************************/
+static	void	can_msp_init		(void);
 static	void	can_gpio_init		(void);
 static	void	can_nvic_conf		(void);
+
 static	int	can_peripherial_init	(void);
 static	int	can_filter_conf		(void);
 static	void	can_tx_header_conf	(void);
@@ -70,9 +73,9 @@ int	can_init	(void)
 	}
 
 	can_msg_pending	= false;
-	__CAN1_CLK_ENABLE();
-	can_gpio_init();
-	can_nvic_conf();
+
+	can_msp_init();
+
 	if (can_peripherial_init()) {
 		error	|= ERROR_CAN_HAL_CAN_INIT;
 		error_handle();
@@ -185,6 +188,13 @@ void	HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *can_handle_ptr)
 /******************************************************************************
  ******* static functions (definitions) ***************************************
  ******************************************************************************/
+static	void	can_msp_init		(void)
+{
+	__HAL_RCC_CAN1_CLK_ENABLE();
+	can_gpio_init();
+	can_nvic_conf();
+}
+
 static	void	can_gpio_init		(void)
 {
 	GPIO_InitTypeDef	gpio_init_values;
@@ -201,7 +211,7 @@ static	void	can_gpio_init		(void)
 }
 
 static	void	can_nvic_conf		(void)
-{// FIXME
+{
 	HAL_NVIC_SetPriority(CAN1_RX0_IRQn, 1, 0);
 	HAL_NVIC_EnableIRQ(CAN1_RX0_IRQn);
 }
