@@ -46,6 +46,7 @@ static	bool	init_pending	= true;
 /******************************************************************************
  ******* static functions (declarations) **************************************
  ******************************************************************************/
+static	void	led_gpio_init	(void);
 
 
 /******************************************************************************
@@ -64,15 +65,8 @@ void	led_init	(void)
 		error	|= ERROR_LED_INIT;
 		return;
 	}
-	
-	__HAL_RCC_GPIOA_CLK_ENABLE();
 
-	GPIO_InitTypeDef	gpio_init_values;
-	gpio_init_values.Pin		= GPIO_PIN_5;
-	gpio_init_values.Mode		= GPIO_MODE_OUTPUT_PP;
-	gpio_init_values.Pull		= GPIO_NOPULL;
-	gpio_init_values.Speed		= GPIO_SPEED_FREQ_LOW;
-	HAL_GPIO_Init(GPIOA, &gpio_init_values);
+	led_gpio_init();
 
 	led_reset();
 }
@@ -115,6 +109,18 @@ int	led_reset	(void)
 /******************************************************************************
  ******* static functions (definitions) ***************************************
  ******************************************************************************/
+static	void	led_gpio_init	(void)
+{
+	GPIO_InitTypeDef	gpio_init_values;
+	
+	__HAL_RCC_GPIOA_CLK_ENABLE();
+
+	gpio_init_values.Pin	= GPIO_PIN_5;
+	gpio_init_values.Mode	= GPIO_MODE_OUTPUT_PP;
+	gpio_init_values.Pull	= GPIO_NOPULL;
+	gpio_init_values.Speed	= GPIO_SPEED_FREQ_LOW;
+	HAL_GPIO_Init(GPIOA, &gpio_init_values);
+}
 
 
 /******************************************************************************
