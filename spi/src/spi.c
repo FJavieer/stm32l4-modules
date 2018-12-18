@@ -39,7 +39,6 @@ static	SPI_HandleTypeDef	spi_handle;
 /******************************************************************************
  ******* static functions (declarations) **************************************
  ******************************************************************************/
-static	void	spi_clk_enable		(void);
 static	void	spi_gpio_init		(void);
 static	int	spi_peripherial_init	(void);
 
@@ -61,7 +60,7 @@ int	spi_init	(void)
 		return	ERROR_OK;
 	}
 
-	spi_clk_enable();
+	__SPI2_CLK_ENABLE();
 	spi_gpio_init();
 	if (spi_peripherial_init()) {
 		error	|= ERROR_SPI_HAL_SPI_INIT;
@@ -110,16 +109,11 @@ int	spi_msg_write	(uint16_t data)
 /******************************************************************************
  ******* static functions (definitions) ***************************************
  ******************************************************************************/
-static	void	spi_clk_enable		(void)
-{
-	__HAL_RCC_GPIOB_CLK_ENABLE ();
-	__HAL_RCC_GPIOC_CLK_ENABLE ();
-	__SPI2_CLK_ENABLE();
-}
-
 static	void	spi_gpio_init		(void)
 {
 	GPIO_InitTypeDef gpio_init_values;
+
+	__HAL_RCC_GPIOB_CLK_ENABLE ();
 
 	gpio_init_values.Pin		= GPIO_PIN_13;                
 	gpio_init_values.Mode		= GPIO_MODE_AF_PP;
@@ -127,6 +121,8 @@ static	void	spi_gpio_init		(void)
 	gpio_init_values.Pull		= GPIO_NOPULL;
 	gpio_init_values.Alternate	= GPIO_AF5_SPI2;
 	HAL_GPIO_Init(GPIOB, &gpio_init_values);
+
+	__HAL_RCC_GPIOC_CLK_ENABLE ();
 
 	gpio_init_values.Pin		= GPIO_PIN_3;                
 	gpio_init_values.Mode		= GPIO_MODE_AF_PP;
@@ -140,6 +136,7 @@ static	void	spi_gpio_init		(void)
 	gpio_init_values.Speed		= GPIO_SPEED_FREQ_HIGH;
 	gpio_init_values.Pull		= GPIO_NOPULL;
 	HAL_GPIO_Init(GPIOC, &gpio_init_values);
+
 	HAL_GPIO_WritePin(GPIOC, GPIO_PIN_2, GPIO_PIN_SET);
 }
 
