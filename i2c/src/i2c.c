@@ -126,13 +126,15 @@ static	void	i2c_gpio_init		(void)
 }
 
 static	void	i2c_nvic_conf		(void)
-{// FIXME
-	HAL_NVIC_SetPriority(CAN1_RX0_IRQn, 1, 0);
-	HAL_NVIC_EnableIRQ(CAN1_RX0_IRQn);
+{
+	HAL_NVIC_SetPriority(I2C1_EV_IRQn, 1, 1);
+	HAL_NVIC_EnableIRQ(I2C1_EV_IRQn);
 }
 
 static	int	i2c_peripherial_init	(void)
 {
+	// Wii works @ 100 kHz FIXME
+
 	i2c_handle.Instance		= I2C1;
 	i2c_handle.Init.Timing			= 0x00000004u;
 	i2c_handle.Init.OwnAddress1		= 0;
