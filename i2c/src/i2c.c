@@ -2,9 +2,11 @@
  ******************************************************************************
  *	@file	i2c.c							      *
  *	@author	Colomar Andrés, Alejandro				      *
+ *	@author	Javi							      *
  *	@brief	I2C							      *
  ******************************************************************************
  *	Copyright (C) 2018	Alejandro Colomar Andrés		      *
+ *	Copyright (C) 2018	Javi					      *
  *	LGPL-v2.0 only							      *
  ******************************************************************************/
 
@@ -29,22 +31,20 @@
 /******************************************************************************
  ******* macros ***************************************************************
  ******************************************************************************/
-#define I2C_ADDRESS		(0x00F)
-#define I2C_TIMING		(0x00D00E28)
-#define TXBUFFERSIZE            (8)
-#define RXBUFFERSIZE		(8)
+	# define	I2C_ADDRESS_OWN		(UINT16_C(0x00F))
+	# define	I2C_ADDRESS_JOYSTICK	(UINT16_C(/*FIXME*/))
+	# define	I2C_TIMING		(0x00D00E28u)
+	# define	TX_BUFF_SIZE		(8u)
+	# define	RX_BUFF_SIZE		(8u)
 
 
 /******************************************************************************
  ******* variables ************************************************************
  ******************************************************************************/
 /* Global --------------------------------------------------------------------*/
-	I2C_HandleTypeDef	i2c_handle;
-
 /* Static --------------------------------------------------------------------*/
 static	bool			init_pending	= true;
-static	uint8_t			aTxBuffer [8];
-static  uint8_t 		aRxBuffer[8];
+static	I2C_HandleTypeDef	i2c_handle;
 
 /* Volatile ------------------------------------------------------------------*/
 
@@ -100,30 +100,142 @@ int	i2c_init	(void)
 	return	ERROR_OK;
 }
 
+	/**
+	 * @brief	Transmit the message in data through I2C
+	 *		Sets global variable 'error'
+	 * @param	data:	data to transmit
+	 * @return	Error
+	 */
+int	can_msg_write	(uint8_t data [TX_BUFF_SIZE])
+{
+	uint8_t	i2c_tx_buff [TX_BUFF_SIZE];
+	int	i;
+
+	if (init_pending) {
+		error	|= ERROR_I2C_INIT;
+		return	ERROR_NOK;
+	}
+
+	for (i = 0; i < TX_BUFF_SIZE; i++) {
+		i2c_tx_buff[i]	= data[i];
+	}
+
+	do {
+		if (HAL_I2C_Master_Transmit_IT(&i2c_handle, I2C_ADDRESS_JOYSTICK,
+						i2c_tx_buff, TX_BUFF_SIZE)) {
+			error	|= ;
+			error_handle();
+			return	ERROR_NOK;
+		}
+
+		while (HAL_I2C_GetState(&i2c_handle) != HAL_I2C_STATE_READY) {
+		}
+	} while (HAL_I2C_GetError(&i2c_handle) == HAL_I2C_ERROR_AF);
+
+	return	ERROR_OK;
+}
+
+	/**
+	 * @brief	Read the data received
+	 *		Sets global variable 'error'
+	 * @param	data:	array where data is to be written
+	 * @return	Error
+	 */
+int	can_msg_read	(uint8_t data [RX_BUFF_SIZE])
+{
+	int	i;
+
+	if (init_pending) {
+		error	|= ERROR_I2C_INIT;
+		return	ERROR_NOK;
+	}
+/*
+	if (!can_msg_pending) {
+		error	|= ERROR_CAN_NO_MSG;
+		return	ERROR_NOK;
+	}
+*/
+	do {
+		if (HAL_I2C_Master_Receive_IT(&i2c_handle, I2C_ADDRESS_JOYSTICK,
+					i2c_rx_buff, RX_BUFF_SIZE)) {
+			error	|= ;
+			error_handle();
+			return	ERROR_NOK;
+		}
+
+		while (HAL_I2C_GetState(&i2c_handle) != HAL_I2C_STATE_READY) {
+		}
+	} while (HAL_I2C_GetError(&i2c_handle) == HAL_I2C_ERROR_AF);
+
+	for (i = 0; i < RX_BUFF_SIZE; i++) {
+		data[i]	= can_rx_data[i];
+	}
+
+	can_msg_pending	= false;
+
+	return	ERROR_OK;
+}
+
 
 /******************************************************************************
  ******* HAL weak functions (redefinitions) ***********************************
  ******************************************************************************/
-/**
-  * @brief  This function handles I2C event interrupt request.
-  * @param  None
-  * @retval None
-  * @Note   This function is redefined in "main.h" and related to I2C data transmission
-  */
-void I2Cx_EV_IRQHandler(void)
+	/**
+	 * @brief	This function handles I2C event interrupt request
+	 * @return	None
+	 */
+void	I2Cx_EV_IRQHandler		(void)
 {
-  HAL_I2C_EV_IRQHandler(&I2cHandle);
+	HAL_I2C_EV_IRQHandler(&i2c_handle);
 }
 
-/**
-  * @brief  This function handles I2C error interrupt request.
-  * @param  None
-  * @retval None
-  * @Note   This function is redefined in "main.h" and related to I2C error
-  */
-void I2Cx_ER_IRQHandler(void)
+	/**
+	 * @brief	This function handles I2C error interrupt request
+	 * @return	None
+	 */
+void	I2Cx_ER_IRQHandler		(void)
 {
-  HAL_I2C_ER_IRQHandler(&I2cHandle);
+	HAL_I2C_ER_IRQHandler(&i2c_handle);
+}
+
+	/**
+	 * @brief	Rx Transfer completed callback.
+	 * @param	I2cHandle: I2C handle
+	 * @note	This example shows a simple way to report end of IT Rx transfer, and 
+	 *		you can add your own implementation.
+	 * @return	None
+	 */
+void	HAL_I2C_MasterRxCpltCallback	(I2C_HandleTypeDef *i2c_handle_ptr)
+{
+}
+
+	/**
+	 * @brief	I2C error callbacks.
+	 * @param	I2cHandle: I2C handle
+	 * @note	This example shows a simple way to report transfer error, and you can
+	 *		add your own implementation.
+	 * @return	None
+	 */
+void	HAL_I2C_ErrorCallback		(I2C_HandleTypeDef *i2c_handle_ptr)
+{
+	/** Error_Handler() function is called when error occurs.
+	 * 1- When Slave don't acknowledge it's address, Master restarts communication.
+	 * 2- When Master don't acknowledge the last data transferred, Slave don't care in this example.
+	 */
+	if (HAL_I2C_GetError(i2c_handle_ptr) != HAL_I2C_ERROR_AF) {
+		Error_Handler();
+	}
+}
+
+	/**
+	 * @brief	Tx Transfer completed callback.
+	 * @param	I2cHandle: I2C handle. 
+	 * @note	This example shows a simple way to report end of IT Tx transfer, and 
+	 *		you can add your own implementation. 
+	 * @return	None
+	 */
+void	HAL_I2C_MasterTxCpltCallback	(I2C_HandleTypeDef *i2c_handle_ptr)
+{
 }
 
 
@@ -189,110 +301,3 @@ static	int	i2c_filter_digital_conf	(void)
 /******************************************************************************
  ******* end of file **********************************************************
  ******************************************************************************/
-
-
-  /* The board sends the message and expects to receive it back */
-  
-  /*##-2- Start the transmission process #####################################*/  
-  /* While the I2C in reception process, user can transmit data through 
-     "aTxBuffer" buffer */
-  do
-  {
-    if(HAL_I2C_Master_Transmit_IT(&I2cHandle, (uint16_t)I2C_ADDRESS, (uint8_t*)aTxBuffer, TXBUFFERSIZE)!= HAL_OK)
-    {
-      /* Error_Handler() function is called when error occurs. */
-      Error_Handler();
-    }
-
-    /*##-3- Wait for the end of the transfer #################################*/  
-    /*  Before starting a new communication transfer, you need to check the current   
-        state of the peripheral; if it’s busy you need to wait for the end of current
-        transfer before starting a new one.
-        For simplicity reasons, this example is just waiting till the end of the 
-        transfer, but application may perform other tasks while transfer operation
-        is ongoing. */  
-    while (HAL_I2C_GetState(&I2cHandle) != HAL_I2C_STATE_READY)
-    {
-    } 
-
-    /* When Acknowledge failure occurs (Slave don't acknowledge it's address)
-       Master restarts communication */
-  }
-  while(HAL_I2C_GetError(&I2cHandle) == HAL_I2C_ERROR_AF);
-  
-  
-  
-  /*##-4- Put I2C peripheral in reception process ###########################*/  
-  do
-  {
-    if(HAL_I2C_Master_Receive_IT(&I2cHandle, (uint16_t)I2C_ADDRESS, (uint8_t *)aRxBuffer, RXBUFFERSIZE) != HAL_OK)
-    {
-      /* Error_Handler() function is called when error occurs. */
-      Error_Handler();
-    }
-
-    /*##-5- Wait for the end of the transfer #################################*/  
-    /*  Before starting a new communication transfer, you need to check the current   
-        state of the peripheral; if it’s busy you need to wait for the end of current
-        transfer before starting a new one.
-        For simplicity reasons, this example is just waiting till the end of the 
-        transfer, but application may perform other tasks while transfer operation
-        is ongoing. */  
-    while (HAL_I2C_GetState(&I2cHandle) != HAL_I2C_STATE_READY)
-    {
-    } 
-
-    /* When Acknowledge failure occurs (Slave don't acknowledge it's address)
-       Master restarts communication */
-  }
-  while(HAL_I2C_GetError(&I2cHandle) == HAL_I2C_ERROR_AF);
-
-  
-  
-  
-  /**
-  * @brief  Rx Transfer completed callback.
-  * @param  I2cHandle: I2C handle
-  * @note   This example shows a simple way to report end of IT Rx transfer, and 
-  *         you can add your own implementation.
-  * @retval None
-  */
-#ifdef MASTER_BOARD
-void HAL_I2C_MasterRxCpltCallback(I2C_HandleTypeDef *I2cHandle)
-{
-  /* Toggle LED2: Transfer in reception process is correct */
-  BSP_LED_Toggle(LED2);
-}
-  
-  /**
-  * @brief  I2C error callbacks.
-  * @param  I2cHandle: I2C handle
-  * @note   This example shows a simple way to report transfer error, and you can
-  *         add your own implementation.
-  * @retval None
-  */
-void HAL_I2C_ErrorCallback(I2C_HandleTypeDef *I2cHandle)
-{
-  /** Error_Handler() function is called when error occurs.
-    * 1- When Slave don't acknowledge it's address, Master restarts communication.
-    * 2- When Master don't acknowledge the last data transferred, Slave don't care in this example.
-    */
-  if (HAL_I2C_GetError(I2cHandle) != HAL_I2C_ERROR_AF)
-  {
-    Error_Handler();
-  }
-}
-
-/**
-  * @brief  Tx Transfer completed callback.
-  * @param  I2cHandle: I2C handle. 
-  * @note   This example shows a simple way to report end of IT Tx transfer, and 
-  *         you can add your own implementation. 
-  * @retval None
-  */
-#ifdef MASTER_BOARD
-void HAL_I2C_MasterTxCpltCallback(I2C_HandleTypeDef *I2cHandle)
-{
-  /* Toggle LED2: Transfer in transmission process is correct */
-  BSP_LED_Toggle(LED2);
-}
