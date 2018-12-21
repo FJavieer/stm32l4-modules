@@ -36,6 +36,7 @@
 	# define	I2C_TIMING		(0x00D00E28u)
 	# define	TX_BUFF_SIZE		(8u)
 	# define	RX_BUFF_SIZE		(8u)
+	# define	I2C_CR2_SADD_7BIT_SHIFT	(1)
 
 
 /******************************************************************************
@@ -81,17 +82,17 @@ int	i2c_init	(void)
 	i2c_msp_init();
 
 	if (i2c_peripherial_init()) {
-		//error	|= ERROR_I2C_HAL_I2C_INIT;
+		error	|= ERROR_I2C_HAL_I2C_INIT;
 		error_handle();
 		return	ERROR_NOK;
 	}
 	if (i2c_filter_analog_conf()) {
-		//error	|= ERROR_I2C_HAL_I2C_FILTER_ANALOG;
+		error	|= ERROR_I2C_HAL_I2C_FILTER_ANALOG;
 		error_handle();
 		return	ERROR_NOK;
 	}
 	if (i2c_filter_digital_conf()) {
-		//error	|= ERROR_I2C_HAL_I2C_FILTER_DIGITAL;
+		error	|= ERROR_I2C_HAL_I2C_FILTER_DIGITAL;
 		error_handle();
 		return	ERROR_NOK;
 	}
@@ -121,7 +122,9 @@ int	can_msg_write	(uint8_t data [TX_BUFF_SIZE])
 	}
 
 	do {
-		if (HAL_I2C_Master_Transmit_IT(&i2c_handle, I2C_ADDRESS_JOYSTICK,
+		if (HAL_I2C_Master_Transmit_IT(&i2c_handle,
+						I2C_ADDRESS_JOYSTICK <<
+							I2C_CR2_SADD_7BIT_SHIFT,
 						i2c_tx_buff, TX_BUFF_SIZE)) {
 			error	|= ;
 			error_handle();
@@ -156,8 +159,10 @@ int	can_msg_read	(uint8_t data [RX_BUFF_SIZE])
 	}
 */
 	do {
-		if (HAL_I2C_Master_Receive_IT(&i2c_handle, I2C_ADDRESS_JOYSTICK,
-					i2c_rx_buff, RX_BUFF_SIZE)) {
+		if (HAL_I2C_Master_Receive_IT(&i2c_handle,
+						I2C_ADDRESS_JOYSTICK <<
+							I2C_CR2_SADD_7BIT_SHIFT,
+						i2c_rx_buff, RX_BUFF_SIZE)) {
 			error	|= ;
 			error_handle();
 			return	ERROR_NOK;
@@ -199,17 +204,6 @@ void	I2Cx_ER_IRQHandler		(void)
 }
 
 	/**
-	 * @brief	Rx Transfer completed callback.
-	 * @param	I2cHandle: I2C handle
-	 * @note	This example shows a simple way to report end of IT Rx transfer, and 
-	 *		you can add your own implementation.
-	 * @return	None
-	 */
-void	HAL_I2C_MasterRxCpltCallback	(I2C_HandleTypeDef *i2c_handle_ptr)
-{
-}
-
-	/**
 	 * @brief	I2C error callbacks.
 	 * @param	I2cHandle: I2C handle
 	 * @note	This example shows a simple way to report transfer error, and you can
@@ -225,17 +219,6 @@ void	HAL_I2C_ErrorCallback		(I2C_HandleTypeDef *i2c_handle_ptr)
 	if (HAL_I2C_GetError(i2c_handle_ptr) != HAL_I2C_ERROR_AF) {
 		Error_Handler();
 	}
-}
-
-	/**
-	 * @brief	Tx Transfer completed callback.
-	 * @param	I2cHandle: I2C handle. 
-	 * @note	This example shows a simple way to report end of IT Tx transfer, and 
-	 *		you can add your own implementation. 
-	 * @return	None
-	 */
-void	HAL_I2C_MasterTxCpltCallback	(I2C_HandleTypeDef *i2c_handle_ptr)
-{
 }
 
 
@@ -273,13 +256,11 @@ static	void	i2c_nvic_conf		(void)
 static	int	i2c_peripherial_init	(void)
 {
 	// Wii works @ 100 kHz FIXME
-
 	i2c_handle.Instance		= I2C1;
 	i2c_handle.Init.Timing			= I2C_TIMING;
 	i2c_handle.Init.OwnAddress1		= I2C_ADDRESS;
 	i2c_handle.Init.AddressingMode		= I2C_ADDRESSINGMODE_10BIT;
 	i2c_handle.Init.DualAddressMode		= I2C_DUALADDRESS_DISABLE;
-	i2c_handle.Init.OwnAddress2		= I2C_ADDRESS;
 	i2c_handle.Init.OwnAddress2Masks	= I2C_OA2_NOMASK;
 	i2c_handle.Init.GeneralCallMode		= I2C_GENERALCALL_DISABLE;
 	i2c_handle.Init.NoStretchMode		= I2C_NOSTRETCH_DISABLE;
@@ -289,14 +270,15 @@ static	int	i2c_peripherial_init	(void)
 
 static	int	i2c_filter_analog_conf	(void)
 {
-	return	HAL_I2CEx_ConfigAnalogFilter(&i2c_handle,I2C_ANALOGFILTER_ENABLE);
+	return	HAL_I2CEx_ConfigAnalogFilter(&i2c_handle,
+						I2C_ANALOGFILTER_ENABLE);
 }
-/*
+
 static	int	i2c_filter_digital_conf	(void)
 {
 	return	HAL_I2CEx_ConfigDigitalFilter(&i2c_handle, 0x00000000u);
 }
-*/
+
 
 /******************************************************************************
  ******* end of file **********************************************************
