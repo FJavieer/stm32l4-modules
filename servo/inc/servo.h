@@ -61,26 +61,8 @@
 /******************************************************************************
  ******* functions ************************************************************
  ******************************************************************************/
-	/**
-	 * @brief	Init servos
-	 *		Sets global variable 'error'
-	 * @return	None
-	 */
 void	servo_init		(void);
-
-	/**
-	 * @brief	Set servo sX position
-	 *		Sets global variable 'error'
-	 * @param	position:	position (deg)
-	 *				valid range: [-90, 90]
-	 * @return	Error
-	 */
 int	servo_sX_position_set	(float position, int8_t servo);
-
-	/**
-	 * @brief	Stop servos
-	 * @return	None
-	 */
 void	servo_stop		(void);
 
 

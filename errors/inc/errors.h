@@ -119,13 +119,6 @@ extern	uint32_t	error;
 /******************************************************************************
  ******* functions ************************************************************
  ******************************************************************************/
-	/**
-	 * @brief	Handle error
-	 *		Displays the error value by flashing a led from MSB
-	 *		to LSB.  A long flash is a 1 and a short flash is a 0.
-	 *		After displaying the value, it resets 'error'.
-	 * @return	None
-	 */
 void	error_handle	(void);
 
 

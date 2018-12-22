@@ -45,19 +45,7 @@
 /******************************************************************************
  ******* functions ************************************************************
  ******************************************************************************/
-	/**
-	 * @brief	Initialize base time for delay_us()
-	 *		Sets global variable 'error'
-	 * @return	Error
-	 */
 int	delay_us_init	(void);
-
-	/**
-	 * @brief	Delay <time_us> microseconds
-	 *		Sets global variable 'error'
-	 * @param	time_us:	Delay value (us)
-	 * @return	None
-	 */
 int	delay_us	(uint32_t time_us);
 
 

@@ -43,22 +43,7 @@
 /******************************************************************************
  ******* functions ************************************************************
  ******************************************************************************/
-	/**
-	 * @brief	Init LED matrix display using SPI
-	 *		PB13 -> SCK
-	 *		PC3 -> MOSI
-	 *		PC2 -> SELECT
-	 *		Sets global variable 'error'
-	 * @return	Error
-	 */
 int	display_init	(void);
-
-	/**
-	 * @brief	Show @param ch on the display
-	 *		Sets global variable 'error'
-	 * @param	ch:	The character to be displayed
-	 * @return	Error
-	 */
 int	display_set	(char ch);
 
 

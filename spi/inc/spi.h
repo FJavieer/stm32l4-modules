@@ -45,19 +45,7 @@
 /******************************************************************************
  ******* functions ************************************************************
  ******************************************************************************/
-	/**
-	 * @brief	Initialize SPI
-	 *		Sets global variable 'error'
-	 * @return	Error
-	 */
 int	spi_init	(void);
-
-	/**
-	 * @brief	Transmit the message in data through SPI
-	 *		Sets global variable 'error'
-	 * @param	data:	data to transmit
-	 * @return	Error
-	 */
 int	spi_msg_write	(uint16_t data);
 
 
