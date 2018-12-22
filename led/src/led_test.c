@@ -61,16 +61,12 @@ int	led_test	(void)
 	int		i;
 
 	for (i = 0; i <= 100; i++) {
-		if (led_set()) {
-			return	ERROR_NOK;
-		}
+		led_set();
 		if (delay_us(1000u * i)) {
 			return	ERROR_NOK;
 		}
 
-		if (led_reset()) {
-			return	ERROR_NOK;
-		}
+		led_reset();
 		if (delay_us(1000u * i)) {
 			return	ERROR_NOK;
 		}

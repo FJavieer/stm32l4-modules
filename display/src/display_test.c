@@ -61,7 +61,7 @@ int	display_test	(void)
 	int	i;
 	char	ch;
 
-	for (i = 0; i < 10; i++) {
+	for (i = 0; i <= 9; i++) {
 		ch	= i + '0';
 
 		if (display_set(ch)) {

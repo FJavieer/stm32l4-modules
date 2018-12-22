@@ -61,64 +61,64 @@ int	servo_test	(void)
 	int	i;
 
 	for (i = 0; i <= 90; i+=10) {
-		if (servo_sX_position_set(-(i), SERVO_S1)) {
+		if (servo_position_set(SERVO_S1, -i)) {
 			return	ERROR_NOK;
 		}
-		if (servo_sX_position_set(-(i), SERVO_S2)) {
+		if (servo_position_set(SERVO_S2, -i)) {
 			return	ERROR_NOK;
 		}
-		if (servo_sX_position_set(-(i), SERVO_S3)) {
+		if (servo_position_set(SERVO_S3, -i)) {
 			return	ERROR_NOK;
 		}
-		if (servo_sX_position_set(-(i), SERVO_S4)) {
-			return	ERROR_NOK;
-		}
-		if (delay_us(1000000u)) {
-			return	ERROR_NOK;
-		}
-
-		if (servo_sX_position_set(-0, SERVO_S1)) {
-			return	ERROR_NOK;
-		}
-		if (servo_sX_position_set(-0, SERVO_S2)) {
-			return	ERROR_NOK;
-		}
-		if (servo_sX_position_set(-0, SERVO_S3)) {
-			return	ERROR_NOK;
-		}
-		if (servo_sX_position_set(-0, SERVO_S4)) {
+		if (servo_position_set(SERVO_S4, -i)) {
 			return	ERROR_NOK;
 		}
 		if (delay_us(1000000u)) {
 			return	ERROR_NOK;
 		}
 
-		if (servo_sX_position_set((i), SERVO_S1)) {
+		if (servo_position_set(SERVO_S1, 0)) {
 			return	ERROR_NOK;
 		}
-		if (servo_sX_position_set((i), SERVO_S2)) {
+		if (servo_position_set(SERVO_S2, 0)) {
 			return	ERROR_NOK;
 		}
-		if (servo_sX_position_set((i), SERVO_S3)) {
+		if (servo_position_set(SERVO_S3, 0)) {
 			return	ERROR_NOK;
 		}
-		if (servo_sX_position_set((i), SERVO_S4)) {
+		if (servo_position_set(SERVO_S4, 0)) {
 			return	ERROR_NOK;
 		}
 		if (delay_us(1000000u)) {
 			return	ERROR_NOK;
 		}
 
-		if (servo_sX_position_set(0, SERVO_S1)) {
+		if (servo_position_set(SERVO_S1, i)) {
 			return	ERROR_NOK;
 		}
-		if (servo_sX_position_set(0, SERVO_S2)) {
+		if (servo_position_set(SERVO_S2, i)) {
 			return	ERROR_NOK;
 		}
-		if (servo_sX_position_set(0, SERVO_S3)) {
+		if (servo_position_set(SERVO_S3, i)) {
 			return	ERROR_NOK;
 		}
-		if (servo_sX_position_set(0, SERVO_S4)) {
+		if (servo_position_set(SERVO_S4, i)) {
+			return	ERROR_NOK;
+		}
+		if (delay_us(1000000u)) {
+			return	ERROR_NOK;
+		}
+
+		if (servo_position_set(SERVO_S1, 0)) {
+			return	ERROR_NOK;
+		}
+		if (servo_position_set(SERVO_S2, 0)) {
+			return	ERROR_NOK;
+		}
+		if (servo_position_set(SERVO_S3, 0)) {
+			return	ERROR_NOK;
+		}
+		if (servo_position_set(SERVO_S4, 0)) {
 			return	ERROR_NOK;
 		}
 		if (delay_us(1000000u)) {

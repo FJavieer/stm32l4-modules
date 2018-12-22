@@ -25,6 +25,12 @@
 /******************************************************************************
  ******* macros ***************************************************************
  ******************************************************************************/
+	# define	DISPLAY_CODE_DISABLE_MAX7219	(0x0C00u)
+	# define	DISPLAY_CODE_DISABLE_TEST_MODE	(0x0F00u)
+	# define	DISPLAY_CODE_ENABLE_8_DIGITS	(0x0BFFu)
+	# define	DISPLAY_CODE_SET_MAX_BRIGHTNESS	(0x0A0Fu)
+	# define	DISPLAY_CODE_DISABLE_BCD_MODE	(0x0900u)
+	# define	DISPLAY_CODE_ENABLE_MAX7219	(0x0C01u)
 
 
 /******************************************************************************
@@ -48,8 +54,8 @@ static	bool	init_pending	= true;
 /******************************************************************************
  ******* static functions (declarations) **************************************
  ******************************************************************************/
-static	int	display_display_start	(void);
-static	int	display_data_set	(char ch, uint16_t data [8]);
+static	int	display_start		(void);
+static	int	display_data_set	(char ch, uint16_t data [DISPLAY_LINES]);
 
 
 /******************************************************************************
@@ -57,19 +63,14 @@ static	int	display_data_set	(char ch, uint16_t data [8]);
  ******************************************************************************/
 	/**
 	 * @brief	Init LED matrix display using SPI
-	 *		PB13 -> SCK
-	 *		PC3 -> MOSI
-	 *		PC2 -> SELECT
 	 *		Sets global variable 'error'
 	 * @return	Error
 	 */
 int	display_init	(void)
 {
-	/* Init pending */
 	if (init_pending) {
 		init_pending	= false;
 	} else {
-		error	|= ERROR_DISPLAY_INIT;
 		return	ERROR_OK;
 	}
 
@@ -78,8 +79,8 @@ int	display_init	(void)
 		error_handle();
 		return	ERROR_NOK;
 	}
-	if (display_display_start()) {
-		error	|= ERROR_DISPLAY_SPI_MSG_WRITE;
+	if (display_start()) {
+		error	|= ERROR_DISPLAY_START;
 		error_handle();
 		return	ERROR_NOK;
 	}
@@ -88,20 +89,22 @@ int	display_init	(void)
 }
 
 	/**
-	 * @brief	Show @param ch on the display
+	 * @brief	Show ch on the display
 	 *		Sets global variable 'error'
 	 * @param	ch:	The character to be displayed
 	 * @return	Error
 	 */
 int	display_set	(char ch)
 {
-	uint16_t	data [8];
+	uint16_t	data [DISPLAY_LINES];
 	int		i;
 
-	/* Check if display has been initialized */
 	if (init_pending) {
-		error	|= ERROR_DISPLAY_INIT;
-		return	ERROR_NOK;
+		if (display_init()) {
+			error	|= ERROR_DISPLAY_INIT;
+			error_handle();
+			return	ERROR_NOK;
+		}
 	}
 
 	if (display_data_set(ch, data)) {
@@ -110,7 +113,7 @@ int	display_set	(char ch)
 		return	ERROR_NOK;
 	}
 
-	for (i = 0; i < 8; i++) {
+	for (i = 0; i < DISPLAY_LINES; i++) {
 		if (spi_msg_write(data[i])) {
 			error	|= ERROR_DISPLAY_SPI_MSG_WRITE;
 			error_handle();
@@ -126,50 +129,36 @@ int	display_set	(char ch)
  ******* static functions (definitions) ***************************************
  ******************************************************************************/
 
-static	int	display_display_start	(void)
+static	int	display_start		(void)
 {
-	uint16_t data;
-
-	/* Disable MAX7219 */
-	data	= 0x0C00;
-	if (spi_msg_write(data)) {
+	if (spi_msg_write(DISPLAY_CODE_DISABLE_MAX7219)) {
 		return	ERROR_NOK;
 	}
 
-	/* Disable Test Mode */
-	data	= 0x0F00;
-	if (spi_msg_write(data)) {
+	if (spi_msg_write(DISPLAY_CODE_DISABLE_TEST_MODE)) {
 		return	ERROR_NOK;
 	}
 
-	/* Enable 8 Digits */
-	data	= 0x0BFF;
-	if (spi_msg_write(data)) {
+	if (spi_msg_write(DISPLAY_CODE_ENABLE_8_DIGITS)) {
 		return	ERROR_NOK;
 	}
 
-	/* Set highest brightness */
-	data	= 0x0A0F;
-	if (spi_msg_write(data)) {
+	if (spi_msg_write(DISPLAY_CODE_SET_MAX_BRIGHTNESS)) {
 		return	ERROR_NOK;
 	}
 
-	/* Disable Mode BCD */
-	data	= 0x0900;
-	if (spi_msg_write(data)) {
+	if (spi_msg_write(DISPLAY_CODE_DISABLE_BCD_MODE)) {
 		return	ERROR_NOK;
 	}
 
-	/* Enable MAX7219 */
-	data	= 0x0C01;
-	if (spi_msg_write(data)) {
+	if (spi_msg_write(DISPLAY_CODE_ENABLE_MAX7219)) {
 		return	ERROR_NOK;
 	}
 
 	return	ERROR_OK;
 }
 
-static	int	display_data_set	(char ch, uint16_t data [8])
+static	int	display_data_set	(char ch, uint16_t data [DISPLAY_LINES])
 {
 	switch (ch) {
 	case '0':
@@ -271,6 +260,16 @@ static	int	display_data_set	(char ch, uint16_t data [8])
 		data[5]	= 0x0604u;
 		data[6]	= 0x0744u;
 		data[7]	= 0x0838u;
+		break;
+	case ' ':
+		data[0]	= 0x0100u;
+		data[1]	= 0x0200u;
+		data[2]	= 0x0300u;
+		data[3]	= 0x0400u;
+		data[4]	= 0x0500u;
+		data[5]	= 0x0600u;
+		data[6]	= 0x0700u;
+		data[7]	= 0x0800u;
 		break;
 	default:
 		data[0]	= 0x0100u;
