@@ -60,6 +60,9 @@ int	led_test	(void)
 {
 	int		i;
 
+	delay_us_init();
+	led_init();
+
 	for (i = 0; i <= 100; i++) {
 		led_set();
 		if (delay_us(1000u * i)) {

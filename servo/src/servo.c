@@ -196,15 +196,15 @@ int	servo_stop		(void)
 /******************************************************************************
  ******* static functions (definitions) ***************************************
  ******************************************************************************/
-	/**
-	 * @brief	Calculate PWM duty cycle for specified servo position
-	 * @param	position:	position (deg)
-	 *				valid range: [-90, 90]
-	 * @param	duty:		Duty cycle
-	 *				valid range: [0, 1]
-	 * @return	saturation:	0 =	OK,
-	 *				>0 =	POSITIVE SATURATION,
-	 *				<0 =	NEGATIVE SATURATION
+	/*
+	 * Calculate PWM duty cycle for specified servo position
+	 * position:	position (deg)
+	 *		valid range: [-90, 90]
+	 * duty:		Duty cycle
+	 *		valid range: [0, 1]
+	 * saturation:	0 =	OK,
+	 *		>0 =	POSITIVE SATURATION,
+	 *		<0 =	NEGATIVE SATURATION
 	 */
 static	int	servo_duty_calc	(float position, float *duty)
 {

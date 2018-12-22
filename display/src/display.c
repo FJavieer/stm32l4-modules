@@ -10,6 +10,8 @@
 /* Standard C ----------------------------------------------------------------*/
 	#include <stdbool.h>
 	#include <stdint.h>
+		/* memcpy() */
+	#include <string.h>
 
 /* Drivers -------------------------------------------------------------------*/
 	#include "stm32l4xx_hal.h"
@@ -32,6 +34,128 @@
 	# define	DISPLAY_CODE_DISABLE_BCD_MODE	(0x0900u)
 	# define	DISPLAY_CODE_ENABLE_MAX7219	(0x0C01u)
 
+	# define	DISPLAY_DATA_CHAR_0	\
+				((uint16_t [DISPLAY_ROWS]) {		\
+					0x38u | DISPLAY_ROW(0),		\
+					0x44u | DISPLAY_ROW(1),		\
+					0x44u | DISPLAY_ROW(2),		\
+					0x44u | DISPLAY_ROW(3),		\
+					0x44u | DISPLAY_ROW(4),		\
+					0x44u | DISPLAY_ROW(5),		\
+					0x44u | DISPLAY_ROW(6),		\
+					0x38u | DISPLAY_ROW(7),		\
+				})
+	# define	DISPLAY_DATA_CHAR_1	\
+				((uint16_t [DISPLAY_ROWS]) {		\
+					0x10u | DISPLAY_ROW(0),		\
+					0x30u | DISPLAY_ROW(1),		\
+					0x10u | DISPLAY_ROW(2),		\
+					0x10u | DISPLAY_ROW(3),		\
+					0x10u | DISPLAY_ROW(4),		\
+					0x10u | DISPLAY_ROW(5),		\
+					0x10u | DISPLAY_ROW(6),		\
+					0x38u | DISPLAY_ROW(7),		\
+				})
+	# define	DISPLAY_DATA_CHAR_2	\
+				((uint16_t [DISPLAY_ROWS]) {		\
+					0x38u | DISPLAY_ROW(0),		\
+					0x44u | DISPLAY_ROW(1),		\
+					0x04u | DISPLAY_ROW(2),		\
+					0x04u | DISPLAY_ROW(3),		\
+					0x08u | DISPLAY_ROW(4),		\
+					0x10u | DISPLAY_ROW(5),		\
+					0x20u | DISPLAY_ROW(6),		\
+					0x7Cu | DISPLAY_ROW(7),		\
+				})
+	# define	DISPLAY_DATA_CHAR_3	\
+				((uint16_t [DISPLAY_ROWS]) {		\
+					0x38u | DISPLAY_ROW(0),		\
+					0x44u | DISPLAY_ROW(1),		\
+					0x04u | DISPLAY_ROW(2),		\
+					0x18u | DISPLAY_ROW(3),		\
+					0x04u | DISPLAY_ROW(4),		\
+					0x04u | DISPLAY_ROW(5),		\
+					0x44u | DISPLAY_ROW(6),		\
+					0x38u | DISPLAY_ROW(7),		\
+				})
+	# define	DISPLAY_DATA_CHAR_4	\
+				((uint16_t [DISPLAY_ROWS]) {		\
+					0x04u | DISPLAY_ROW(0),		\
+					0x0Cu | DISPLAY_ROW(1),		\
+					0x14u | DISPLAY_ROW(2),		\
+					0x24u | DISPLAY_ROW(3),		\
+					0x44u | DISPLAY_ROW(4),		\
+					0x7Cu | DISPLAY_ROW(5),		\
+					0x04u | DISPLAY_ROW(6),		\
+					0x04u | DISPLAY_ROW(7),		\
+				})
+	# define	DISPLAY_DATA_CHAR_5	\
+				((uint16_t [DISPLAY_ROWS]) {		\
+					0x7Cu | DISPLAY_ROW(0),		\
+					0x40u | DISPLAY_ROW(1),		\
+					0x40u | DISPLAY_ROW(2),		\
+					0x78u | DISPLAY_ROW(3),		\
+					0x04u | DISPLAY_ROW(4),		\
+					0x04u | DISPLAY_ROW(5),		\
+					0x44u | DISPLAY_ROW(6),		\
+					0x38u | DISPLAY_ROW(7),		\
+				})
+	# define	DISPLAY_DATA_CHAR_6	\
+				((uint16_t [DISPLAY_ROWS]) {		\
+					0x38u | DISPLAY_ROW(0),		\
+					0x44u | DISPLAY_ROW(1),		\
+					0x40u | DISPLAY_ROW(2),		\
+					0x78u | DISPLAY_ROW(3),		\
+					0x44u | DISPLAY_ROW(4),		\
+					0x44u | DISPLAY_ROW(5),		\
+					0x44u | DISPLAY_ROW(6),		\
+					0x38u | DISPLAY_ROW(7),		\
+				})
+	# define	DISPLAY_DATA_CHAR_7	\
+				((uint16_t [DISPLAY_ROWS]) {		\
+					0x7Cu | DISPLAY_ROW(0),		\
+					0x04u | DISPLAY_ROW(1),		\
+					0x04u | DISPLAY_ROW(2),		\
+					0x08u | DISPLAY_ROW(3),		\
+					0x10u | DISPLAY_ROW(4),		\
+					0x20u | DISPLAY_ROW(5),		\
+					0x20u | DISPLAY_ROW(6),		\
+					0x20u | DISPLAY_ROW(7),		\
+				})
+	# define	DISPLAY_DATA_CHAR_8	\
+				((uint16_t [DISPLAY_ROWS]) {		\
+					0x38u | DISPLAY_ROW(0),		\
+					0x44u | DISPLAY_ROW(1),		\
+					0x44u | DISPLAY_ROW(2),		\
+					0x38u | DISPLAY_ROW(3),		\
+					0x44u | DISPLAY_ROW(4),		\
+					0x44u | DISPLAY_ROW(5),		\
+					0x44u | DISPLAY_ROW(6),		\
+					0x38u | DISPLAY_ROW(7),		\
+				})
+	# define	DISPLAY_DATA_CHAR_9	\
+				((uint16_t [DISPLAY_ROWS]) {		\
+					0x38u | DISPLAY_ROW(0),		\
+					0x44u | DISPLAY_ROW(1),		\
+					0x44u | DISPLAY_ROW(2),		\
+					0x44u | DISPLAY_ROW(3),		\
+					0x3Cu | DISPLAY_ROW(4),		\
+					0x04u | DISPLAY_ROW(5),		\
+					0x44u | DISPLAY_ROW(6),		\
+					0x38u | DISPLAY_ROW(7),		\
+				})
+	# define	DISPLAY_DATA_CHAR_BLANK	\
+				((uint16_t [DISPLAY_ROWS]) {		\
+					0x00u | DISPLAY_ROW(0),		\
+					0x00u | DISPLAY_ROW(1),		\
+					0x00u | DISPLAY_ROW(2),		\
+					0x00u | DISPLAY_ROW(3),		\
+					0x00u | DISPLAY_ROW(4),		\
+					0x00u | DISPLAY_ROW(5),		\
+					0x00u | DISPLAY_ROW(6),		\
+					0x00u | DISPLAY_ROW(7),		\
+				})
+
 
 /******************************************************************************
  ******* enums ****************************************************************
@@ -52,10 +176,10 @@ static	bool	init_pending	= true;
 
 
 /******************************************************************************
- ******* static functions (declarations) **************************************
+ ******* static functions (prototypes) ****************************************
  ******************************************************************************/
 static	int	display_start		(void);
-static	int	display_data_set	(char ch, uint16_t data [DISPLAY_LINES]);
+static	int	display_data_set	(char ch, uint16_t data [DISPLAY_ROWS]);
 
 
 /******************************************************************************
@@ -89,15 +213,43 @@ int	display_init	(void)
 }
 
 	/**
+	 * @brief	Set the display manually
+	 *		Sets global variable 'error'
+	 * @param	data:	Data to be sent to display
+	 * @return	Error
+	 */
+int	display_set	(uint16_t data [DISPLAY_ROWS])
+{
+	int		i;
+
+	if (init_pending) {
+		if (display_init()) {
+			error	|= ERROR_DISPLAY_INIT;
+			error_handle();
+			return	ERROR_NOK;
+		}
+	}
+
+	for (i = 0; i < DISPLAY_ROWS; i++) {
+		if (spi_msg_write(data[i])) {
+			error	|= ERROR_DISPLAY_SPI_MSG_WRITE;
+			error_handle();
+			return	ERROR_NOK;
+		}
+	}
+
+	return	ERROR_OK;
+}
+
+	/**
 	 * @brief	Show ch on the display
 	 *		Sets global variable 'error'
 	 * @param	ch:	The character to be displayed
 	 * @return	Error
 	 */
-int	display_set	(char ch)
+int	display_set_ch	(char ch)
 {
-	uint16_t	data [DISPLAY_LINES];
-	int		i;
+	uint16_t	data [DISPLAY_ROWS];
 
 	if (init_pending) {
 		if (display_init()) {
@@ -113,13 +265,7 @@ int	display_set	(char ch)
 		return	ERROR_NOK;
 	}
 
-	for (i = 0; i < DISPLAY_LINES; i++) {
-		if (spi_msg_write(data[i])) {
-			error	|= ERROR_DISPLAY_SPI_MSG_WRITE;
-			error_handle();
-			return	ERROR_NOK;
-		}
-	}
+	display_set(data);
 
 	return	ERROR_OK;
 }
@@ -128,7 +274,6 @@ int	display_set	(char ch)
 /******************************************************************************
  ******* static functions (definitions) ***************************************
  ******************************************************************************/
-
 static	int	display_start		(void)
 {
 	if (spi_msg_write(DISPLAY_CODE_DISABLE_MAX7219)) {
@@ -158,128 +303,44 @@ static	int	display_start		(void)
 	return	ERROR_OK;
 }
 
-static	int	display_data_set	(char ch, uint16_t data [DISPLAY_LINES])
+static	int	display_data_set	(char ch, uint16_t data [DISPLAY_ROWS])
 {
 	switch (ch) {
 	case '0':
-		data[0]	= 0x0138u;
-		data[1]	= 0x0244u;
-		data[2]	= 0x0344u;
-		data[3]	= 0x0444u;
-		data[4]	= 0x0544u;
-		data[5]	= 0x0644u;
-		data[6]	= 0x0744u;
-		data[7]	= 0x0838u;
+		memcpy(data, DISPLAY_DATA_CHAR_0, sizeof(DISPLAY_DATA_CHAR_0));
 		break;
 	case '1':
-		data[0]	= 0x0110u;
-		data[1]	= 0x0230u;
-		data[2]	= 0x0310u;
-		data[3]	= 0x0410u;
-		data[4]	= 0x0510u;
-		data[5]	= 0x0610u;
-		data[6]	= 0x0710u;
-		data[7]	= 0x0838u;
+		memcpy(data, DISPLAY_DATA_CHAR_1, sizeof(DISPLAY_DATA_CHAR_1));
 		break;
 	case '2':
-		data[0]	= 0x0138u;
-		data[1]	= 0x0244u;
-		data[2]	= 0x0304u;
-		data[3]	= 0x0404u;
-		data[4]	= 0x0508u;
-		data[5]	= 0x0610u;
-		data[6]	= 0x0720u;
-		data[7]	= 0x087Cu;
+		memcpy(data, DISPLAY_DATA_CHAR_2, sizeof(DISPLAY_DATA_CHAR_2));
 		break;
 	case '3':
-		data[0]	= 0x0138u;
-		data[1]	= 0x0244u;
-		data[2]	= 0x0304u;
-		data[3]	= 0x0418u;
-		data[4]	= 0x0504u;
-		data[5]	= 0x0604u;
-		data[6]	= 0x0744u;
-		data[7]	= 0x0838u;
+		memcpy(data, DISPLAY_DATA_CHAR_3, sizeof(DISPLAY_DATA_CHAR_3));
 		break;
 	case '4':
-		data[0]	= 0x0104u;
-		data[1]	= 0x020Cu;
-		data[2]	= 0x0314u;
-		data[3]	= 0x0424u;
-		data[4]	= 0x0544u;
-		data[5]	= 0x067Cu;
-		data[6]	= 0x0704u;
-		data[7]	= 0x0804u;
+		memcpy(data, DISPLAY_DATA_CHAR_4, sizeof(DISPLAY_DATA_CHAR_4));
 		break;
 	case '5':
-		data[0]	= 0x017Cu;
-		data[1]	= 0x0240u;
-		data[2]	= 0x0340u;
-		data[3]	= 0x0478u;
-		data[4]	= 0x0504u;
-		data[5]	= 0x0604u;
-		data[6]	= 0x0744u;
-		data[7]	= 0x0838u;
+		memcpy(data, DISPLAY_DATA_CHAR_5, sizeof(DISPLAY_DATA_CHAR_5));
 		break;
 	case '6':
-		data[0]	= 0x0138u;
-		data[1]	= 0x0244u;
-		data[2]	= 0x0340u;
-		data[3]	= 0x0478u;
-		data[4]	= 0x0544u;
-		data[5]	= 0x0644u;
-		data[6]	= 0x0744u;
-		data[7]	= 0x0838u;
+		memcpy(data, DISPLAY_DATA_CHAR_6, sizeof(DISPLAY_DATA_CHAR_6));
 		break;
 	case '7':
-		data[0]	= 0x017Cu;
-		data[1]	= 0x0204u;
-		data[2]	= 0x0304u;
-		data[3]	= 0x0408u;
-		data[4]	= 0x0510u;
-		data[5]	= 0x0620u;
-		data[6]	= 0x0720u;
-		data[7]	= 0x0820u;
+		memcpy(data, DISPLAY_DATA_CHAR_7, sizeof(DISPLAY_DATA_CHAR_7));
 		break;
 	case '8':
-		data[0]	= 0x0138u;
-		data[1]	= 0x0244u;
-		data[2]	= 0x0344u;
-		data[3]	= 0x0438u;
-		data[4]	= 0x0544u;
-		data[5]	= 0x0644u;
-		data[6]	= 0x0744u;
-		data[7]	= 0x0838u;
+		memcpy(data, DISPLAY_DATA_CHAR_8, sizeof(DISPLAY_DATA_CHAR_8));
 		break;
 	case '9':
-		data[0]	= 0x0138u;
-		data[1]	= 0x0244u;
-		data[2]	= 0x0344u;
-		data[3]	= 0x0444u;
-		data[4]	= 0x053Cu;
-		data[5]	= 0x0604u;
-		data[6]	= 0x0744u;
-		data[7]	= 0x0838u;
+		memcpy(data, DISPLAY_DATA_CHAR_9, sizeof(DISPLAY_DATA_CHAR_9));
 		break;
 	case ' ':
-		data[0]	= 0x0100u;
-		data[1]	= 0x0200u;
-		data[2]	= 0x0300u;
-		data[3]	= 0x0400u;
-		data[4]	= 0x0500u;
-		data[5]	= 0x0600u;
-		data[6]	= 0x0700u;
-		data[7]	= 0x0800u;
+		memcpy(data, DISPLAY_DATA_CHAR_BLANK, sizeof(DISPLAY_DATA_CHAR_BLANK));
 		break;
 	default:
-		data[0]	= 0x0100u;
-		data[1]	= 0x0200u;
-		data[2]	= 0x0300u;
-		data[3]	= 0x0400u;
-		data[4]	= 0x0500u;
-		data[5]	= 0x0600u;
-		data[6]	= 0x0700u;
-		data[7]	= 0x0800u;
+		memcpy(data, DISPLAY_DATA_CHAR_BLANK, sizeof(DISPLAY_DATA_CHAR_BLANK));
 		return	ERROR_NOK;
 	}
 
