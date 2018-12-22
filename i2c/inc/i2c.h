@@ -26,6 +26,10 @@
 /******************************************************************************
  ******* macros ***************************************************************
  ******************************************************************************/
+	# define	I2C_TIMING	(0x00D00E28u)
+	# define	I2C_BUFF_LEN	(0x1000u)
+	# define	I2C_PRIORITY	(1)
+	# define	I2C_SUBPRIORITY	(1)
 
 
 /******************************************************************************
@@ -47,8 +51,8 @@
  ******* functions ************************************************************
  ******************************************************************************/
 int	i2c_init	(void);
-int	i2c_msg_write	(uint8_t data_len, uint8_t data [data_len]);
-int	i2c_msg_ask	(uint8_t data_len);
+int	i2c_msg_write	(uint8_t addr, uint8_t data_len, uint8_t data [data_len]);
+int	i2c_msg_ask	(uint8_t addr, uint8_t data_len);
 bool	i2c_msg_ready	(void);
 int	i2c_msg_read	(uint8_t data_len, uint8_t data [data_len]);
 

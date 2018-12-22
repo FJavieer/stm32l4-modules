@@ -31,10 +31,7 @@
 /******************************************************************************
  ******* macros ***************************************************************
  ******************************************************************************/
-	# define	I2C_ADDRESS_OWN		(UINT16_C(0x000))
-	# define	I2C_ADDRESS_JOYSTICK	(UINT16_C(/*FIXME*/))
 	# define	I2C_TIMING		(0x00D00E28u)
-	# define	I2C_BUFF_LEN		(0x1000u)
 
 
 /******************************************************************************
@@ -74,7 +71,6 @@ int	i2c_init	(void)
 	if (init_pending) {
 		init_pending	= false;
 	} else {
-		error	|= ERROR_I2C_INIT;
 		return	ERROR_OK;
 	}
 
@@ -103,15 +99,19 @@ int	i2c_init	(void)
 	/**
 	 * @brief	Transmit the message in data through I2C
 	 *		Sets global variable 'error'
+	 * @param	addr:		address of slave
 	 * @param	data_len:	length of data
 	 * @param	data:		data to transmit
 	 * @return	Error
 	 */
-int	i2c_msg_write	(uint8_t data_len, uint8_t data [data_len])
+int	i2c_msg_write	(uint8_t addr, uint8_t data_len, uint8_t data [data_len])
 {
 	if (init_pending) {
-		error	|= ERROR_I2C_INIT;
-		return	ERROR_NOK;
+		if (i2c_init()) {
+			error	|= ERROR_I2C_INIT;
+			error_handle();
+			return	ERROR_NOK;
+		}
 	}
 
 	if (data_len > I2C_BUFF_SIZE) {
@@ -123,9 +123,8 @@ int	i2c_msg_write	(uint8_t data_len, uint8_t data [data_len])
 		buff[i]	= data[i];
 	}
 
-	/*  << 1 is because of HAL bug */
-	if (HAL_I2C_Master_Transmit_IT(&i2c_handle, I2C_ADDRESS_JOYSTICK << 1,
-							buff, data_len)) {
+	/*  <<1 is because of HAL bug */
+	if (HAL_I2C_Master_Transmit_IT(&i2c_handle, addr <<1, buff, data_len)) {
 		error	|= ;
 		error_handle();
 		return	ERROR_NOK;
@@ -137,14 +136,18 @@ int	i2c_msg_write	(uint8_t data_len, uint8_t data [data_len])
 	/**
 	 * @brief	Read the data received
 	 *		Sets global variable 'error'
+	 * @param	addr:		address of slave
 	 * @param	data_len:	length of data to be received
 	 * @return	Error
 	 */
-int	i2c_msg_ask	(uint8_t data_len)
+int	i2c_msg_ask	(uint8_t addr, uint8_t data_len)
 {
 	if (init_pending) {
-		error	|= ERROR_I2C_INIT;
-		return	ERROR_NOK;
+		if (i2c_init()) {
+			error	|= ERROR_I2C_INIT;
+			error_handle();
+			return	ERROR_NOK;
+		}
 	}
 
 	if (data_len > I2C_BUFF_SIZE) {
@@ -152,9 +155,8 @@ int	i2c_msg_ask	(uint8_t data_len)
 		return	ERROR_NOK;
 	}
 
-	/*  << 1 is because of HAL bug */
-	if (HAL_I2C_Master_Receive_IT(&i2c_handle, I2C_ADDRESS_JOYSTICK << 1,
-							buff, data_len)) {
+	/*  <<1 is because of HAL bug */
+	if (HAL_I2C_Master_Receive_IT(&i2c_handle, addr <<1, buff, data_len)) {
 		error	|= ;
 		error_handle();
 		return	ERROR_NOK;
@@ -184,8 +186,11 @@ int	i2c_msg_read	(uint8_t data_len, uint8_t data [data_len])
 	int	i;
 
 	if (init_pending) {
-		error	|= ERROR_I2C_INIT;
-		return	ERROR_NOK;
+		if (i2c_init()) {
+			error	|= ERROR_I2C_INIT;
+			error_handle();
+			return	ERROR_NOK;
+		}
 	}
 
 	if (!i2c_msg_ready()) {
@@ -234,7 +239,6 @@ static	void	i2c_gpio_init		(void)
 
 	__HAL_RCC_GPIOB_CLK_ENABLE();
 
-	/* PB6 -> I2C1_SCL // PB7 -> I2C1_SDA */
 	gpio_init_values.Pin		= GPIO_PIN_6 | GPIO_PIN_7;
 	gpio_init_values.Mode		= GPIO_MODE_AF_OD;
 	gpio_init_values.Speed		= GPIO_SPEED_FREQ_VERY_HIGH;
@@ -245,7 +249,7 @@ static	void	i2c_gpio_init		(void)
 
 static	void	i2c_nvic_conf		(void)
 {
-	HAL_NVIC_SetPriority(I2C1_EV_IRQn, 1, 1);
+	HAL_NVIC_SetPriority(I2C1_EV_IRQn, I2C_PRIORITY, I2C_SUBPRIORITY);
 	HAL_NVIC_EnableIRQ(I2C1_EV_IRQn);
 }
 
@@ -254,10 +258,7 @@ static	int	i2c_peripherial_init	(void)
 	// Wii works @ 100 kHz FIXME
 	i2c_handle.Instance		= I2C1;
 	i2c_handle.Init.Timing			= I2C_TIMING;
-	i2c_handle.Init.OwnAddress1		= I2C_ADDRESS_OWN;
-	i2c_handle.Init.AddressingMode		= I2C_ADDRESSINGMODE_10BIT;
 	i2c_handle.Init.DualAddressMode		= I2C_DUALADDRESS_DISABLE;
-	i2c_handle.Init.OwnAddress2Masks	= I2C_OA2_NOMASK;
 	i2c_handle.Init.GeneralCallMode		= I2C_GENERALCALL_DISABLE;
 	i2c_handle.Init.NoStretchMode		= I2C_NOSTRETCH_DISABLE;
 
@@ -272,7 +273,7 @@ static	int	i2c_filter_analog_conf	(void)
 
 static	int	i2c_filter_digital_conf	(void)
 {
-	return	HAL_I2CEx_ConfigDigitalFilter(&i2c_handle, 0x00000000u);
+	return	HAL_I2CEx_ConfigDigitalFilter(&i2c_handle, 0);
 }
 
 
