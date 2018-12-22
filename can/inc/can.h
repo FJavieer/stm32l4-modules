@@ -46,27 +46,8 @@
 /******************************************************************************
  ******* functions ************************************************************
  ******************************************************************************/
-	/**
-	 * @brief	Initialize CAN
-	 *		Sets global variable 'error'
-	 * @return	Error
-	 */
 int	can_init	(void);
-
-	/**
-	 * @brief	Transmit the message in data through CAN
-	 *		Sets global variable 'error'
-	 * @param	data:		data to transmit
-	 * @return	Error
-	 */
 int	can_msg_write	(uint8_t data [CAN_DATA_LEN]);
-
-	/**
-	 * @brief	Return the data received
-	 *		Sets global variable 'error'
-	 * @param	data:		array where data is to be stored
-	 * @return	Error
-	 */
 int	can_msg_read	(uint8_t data [CAN_DATA_LEN]);
 
 
