@@ -31,18 +31,17 @@
 /******************************************************************************
  ******* macros ***************************************************************
  ******************************************************************************/
-	# define	I2C_ADDRESS_OWN		(UINT16_C(0x00F))
+	# define	I2C_ADDRESS_OWN		(UINT16_C(0x000))
 	# define	I2C_ADDRESS_JOYSTICK	(UINT16_C(/*FIXME*/))
 	# define	I2C_TIMING		(0x00D00E28u)
-	# define	TX_BUFF_SIZE		(8u)
-	# define	RX_BUFF_SIZE		(8u)
-	# define	I2C_CR2_SADD_7BIT_SHIFT	(1)
+	# define	I2C_BUFF_LEN		(0x1000u)
 
 
 /******************************************************************************
  ******* variables ************************************************************
  ******************************************************************************/
 /* Global --------------------------------------------------------------------*/
+	uint8_t			i2c_buff [I2C_BUFF_LEN];
 /* Static --------------------------------------------------------------------*/
 static	bool			init_pending	= true;
 static	I2C_HandleTypeDef	i2c_handle;
@@ -104,36 +103,33 @@ int	i2c_init	(void)
 	/**
 	 * @brief	Transmit the message in data through I2C
 	 *		Sets global variable 'error'
-	 * @param	data:	data to transmit
+	 * @param	data_len:	length of data
+	 * @param	data:		data to transmit
 	 * @return	Error
 	 */
-int	can_msg_write	(uint8_t data [TX_BUFF_SIZE])
+int	i2c_msg_write	(uint8_t data_len, uint8_t data [data_len])
 {
-	uint8_t	i2c_tx_buff [TX_BUFF_SIZE];
-	int	i;
-
 	if (init_pending) {
 		error	|= ERROR_I2C_INIT;
 		return	ERROR_NOK;
 	}
 
-	for (i = 0; i < TX_BUFF_SIZE; i++) {
-		i2c_tx_buff[i]	= data[i];
+	if (data_len > I2C_BUFF_SIZE) {
+		error	|= ERROR_I2C_BUFF;
+		return	ERROR_NOK;
 	}
 
-	do {
-		if (HAL_I2C_Master_Transmit_IT(&i2c_handle,
-						I2C_ADDRESS_JOYSTICK <<
-							I2C_CR2_SADD_7BIT_SHIFT,
-						i2c_tx_buff, TX_BUFF_SIZE)) {
-			error	|= ;
-			error_handle();
-			return	ERROR_NOK;
-		}
+	for (i = 0; i < data_len; i++) {
+		buff[i]	= data[i];
+	}
 
-		while (HAL_I2C_GetState(&i2c_handle) != HAL_I2C_STATE_READY) {
-		}
-	} while (HAL_I2C_GetError(&i2c_handle) == HAL_I2C_ERROR_AF);
+	/*  << 1 is because of HAL bug */
+	if (HAL_I2C_Master_Transmit_IT(&i2c_handle, I2C_ADDRESS_JOYSTICK << 1,
+							buff, data_len)) {
+		error	|= ;
+		error_handle();
+		return	ERROR_NOK;
+	}
 
 	return	ERROR_OK;
 }
@@ -141,10 +137,49 @@ int	can_msg_write	(uint8_t data [TX_BUFF_SIZE])
 	/**
 	 * @brief	Read the data received
 	 *		Sets global variable 'error'
-	 * @param	data:	array where data is to be written
+	 * @param	data_len:	length of data to be received
 	 * @return	Error
 	 */
-int	can_msg_read	(uint8_t data [RX_BUFF_SIZE])
+int	i2c_msg_ask	(uint8_t data_len)
+{
+	if (init_pending) {
+		error	|= ERROR_I2C_INIT;
+		return	ERROR_NOK;
+	}
+
+	if (data_len > I2C_BUFF_SIZE) {
+		error	|= ERROR_I2C_BUFF;
+		return	ERROR_NOK;
+	}
+
+	/*  << 1 is because of HAL bug */
+	if (HAL_I2C_Master_Receive_IT(&i2c_handle, I2C_ADDRESS_JOYSTICK << 1,
+							buff, data_len)) {
+		error	|= ;
+		error_handle();
+		return	ERROR_NOK;
+	}
+
+	return	ERROR_OK;
+}
+
+	/**
+	 * @brief	returns true if transmit has finished
+	 * @return	ready:	true if ready
+	 */
+bool	i2c_msg_ready	(void)
+{
+	return	(HAL_I2C_GetState(&i2c_handle) == HAL_I2C_STATE_READY);
+}
+
+	/**
+	 * @brief	Read the data received
+	 *		Sets global variable 'error'
+	 * @param	data_len:	length of data
+	 * @param	data:		array where data is to be written
+	 * @return	Error
+	 */
+int	i2c_msg_read	(uint8_t data_len, uint8_t data [data_len])
 {
 	int	i;
 
@@ -152,31 +187,20 @@ int	can_msg_read	(uint8_t data [RX_BUFF_SIZE])
 		error	|= ERROR_I2C_INIT;
 		return	ERROR_NOK;
 	}
-/*
-	if (!can_msg_pending) {
-		error	|= ERROR_CAN_NO_MSG;
+
+	if (!i2c_msg_ready()) {
+		error	|= ERROR_I2C_NOT_READY;
 		return	ERROR_NOK;
 	}
-*/
-	do {
-		if (HAL_I2C_Master_Receive_IT(&i2c_handle,
-						I2C_ADDRESS_JOYSTICK <<
-							I2C_CR2_SADD_7BIT_SHIFT,
-						i2c_rx_buff, RX_BUFF_SIZE)) {
-			error	|= ;
-			error_handle();
-			return	ERROR_NOK;
-		}
 
-		while (HAL_I2C_GetState(&i2c_handle) != HAL_I2C_STATE_READY) {
-		}
-	} while (HAL_I2C_GetError(&i2c_handle) == HAL_I2C_ERROR_AF);
-
-	for (i = 0; i < RX_BUFF_SIZE; i++) {
-		data[i]	= can_rx_data[i];
+	if (data_len > I2C_BUFF_SIZE) {
+		error	|= ERROR_I2C_BUFF;
+		return	ERROR_NOK;
 	}
 
-	can_msg_pending	= false;
+	for (i = 0; i < data_len; i++) {
+		data[i]	= buff[i];
+	}
 
 	return	ERROR_OK;
 }
@@ -187,38 +211,10 @@ int	can_msg_read	(uint8_t data [RX_BUFF_SIZE])
  ******************************************************************************/
 	/**
 	 * @brief	This function handles I2C event interrupt request
-	 * @return	None
 	 */
 void	I2Cx_EV_IRQHandler		(void)
 {
 	HAL_I2C_EV_IRQHandler(&i2c_handle);
-}
-
-	/**
-	 * @brief	This function handles I2C error interrupt request
-	 * @return	None
-	 */
-void	I2Cx_ER_IRQHandler		(void)
-{
-	HAL_I2C_ER_IRQHandler(&i2c_handle);
-}
-
-	/**
-	 * @brief	I2C error callbacks.
-	 * @param	I2cHandle: I2C handle
-	 * @note	This example shows a simple way to report transfer error, and you can
-	 *		add your own implementation.
-	 * @return	None
-	 */
-void	HAL_I2C_ErrorCallback		(I2C_HandleTypeDef *i2c_handle_ptr)
-{
-	/** Error_Handler() function is called when error occurs.
-	 * 1- When Slave don't acknowledge it's address, Master restarts communication.
-	 * 2- When Master don't acknowledge the last data transferred, Slave don't care in this example.
-	 */
-	if (HAL_I2C_GetError(i2c_handle_ptr) != HAL_I2C_ERROR_AF) {
-		Error_Handler();
-	}
 }
 
 
@@ -258,7 +254,7 @@ static	int	i2c_peripherial_init	(void)
 	// Wii works @ 100 kHz FIXME
 	i2c_handle.Instance		= I2C1;
 	i2c_handle.Init.Timing			= I2C_TIMING;
-	i2c_handle.Init.OwnAddress1		= I2C_ADDRESS;
+	i2c_handle.Init.OwnAddress1		= I2C_ADDRESS_OWN;
 	i2c_handle.Init.AddressingMode		= I2C_ADDRESSINGMODE_10BIT;
 	i2c_handle.Init.DualAddressMode		= I2C_DUALADDRESS_DISABLE;
 	i2c_handle.Init.OwnAddress2Masks	= I2C_OA2_NOMASK;
