@@ -75,7 +75,6 @@ int	pwm_tim2_init		(uint32_t resolution_sec, uint32_t period)
 	if (init_pending) {
 		init_pending	= false;
 	} else {
-		error	|= ERROR_PWM_INIT;
 		return	ERROR_OK;
 	}
 
@@ -119,9 +118,9 @@ int	pwm_tim2_init		(uint32_t resolution_sec, uint32_t period)
 	 */
 int	pwm_tim2_chX_set	(float duty_cycle, uint32_t tim_chan)
 {
-	/* Init pending */
 	if (init_pending) {
 		error	|= ERROR_PWM_INIT;
+		error_handle();
 		return	ERROR_NOK;
 	}
 
@@ -157,13 +156,12 @@ int	pwm_tim2_chX_set	(float duty_cycle, uint32_t tim_chan)
 	 */
 int	pwm_tim2_stop		(void)
 {
-	/* Initialize base time */
 	if (init_pending) {
 		error	|= ERROR_PWM_INIT;
+		error_handle();
 		return	ERROR_NOK;
 	}
 
-	/* Stop timer */
 	if (HAL_TIM_Base_Stop(&tim_handle)) {
 		error	|= ERROR_PWM_HAL_TIM_STOP;
 		error_handle();
@@ -180,14 +178,13 @@ int	pwm_tim2_stop		(void)
 static	int	pwm_tim2_tim_init	(uint32_t resolution_sec,
 								uint32_t period)
 {
-	/* Resolution: 1 us;  Periode: 1 ms */
 	tim_handle.Instance		= TIM2;
 	tim_handle.Init.Prescaler		= (SystemCoreClock /
 							resolution_sec) - 1u;
 	tim_handle.Init.CounterMode		= TIM_COUNTERMODE_UP;
 	tim_handle.Init.Period			= period - 1u;
 	tim_handle.Init.ClockDivision		= TIM_CLOCKDIVISION_DIV1;
-	tim_handle.Init.RepetitionCounter	= 0x00u;
+	tim_handle.Init.RepetitionCounter	= 0;
 	tim_handle.Init.AutoReloadPreload	= TIM_AUTORELOAD_PRELOAD_DISABLE;
 
 	return	HAL_TIM_Base_Init(&tim_handle);
