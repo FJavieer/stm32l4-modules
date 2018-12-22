@@ -2,7 +2,7 @@
 
 # directories
 
-TMP_DIR = $(CAN_DIR)/tmp/
+TMP_DIR = $(I2C_DIR)/tmp/
 
 # target: dependencies
 #	action

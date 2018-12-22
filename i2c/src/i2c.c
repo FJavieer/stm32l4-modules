@@ -38,7 +38,7 @@
  ******* variables ************************************************************
  ******************************************************************************/
 /* Global --------------------------------------------------------------------*/
-	uint8_t			i2c_buff [I2C_BUFF_LEN];
+	uint8_t			i2c_buff [I2C_BUFF_SIZE];
 /* Static --------------------------------------------------------------------*/
 static	bool			init_pending	= true;
 static	I2C_HandleTypeDef	i2c_handle;
@@ -82,12 +82,12 @@ int	i2c_init	(void)
 		return	ERROR_NOK;
 	}
 	if (i2c_filter_analog_conf()) {
-		error	|= ERROR_I2C_HAL_I2C_FILTER_ANALOG;
+		error	|= ERROR_I2C_HAL_I2C_FILTER_A;
 		error_handle();
 		return	ERROR_NOK;
 	}
 	if (i2c_filter_digital_conf()) {
-		error	|= ERROR_I2C_HAL_I2C_FILTER_DIGITAL;
+		error	|= ERROR_I2C_HAL_I2C_FILTER_D;
 		error_handle();
 		return	ERROR_NOK;
 	}
@@ -106,6 +106,8 @@ int	i2c_init	(void)
 	 */
 int	i2c_msg_write	(uint8_t addr, uint8_t data_len, uint8_t data [data_len])
 {
+	int	i;
+
 	if (init_pending) {
 		if (i2c_init()) {
 			error	|= ERROR_I2C_INIT;
@@ -114,18 +116,14 @@ int	i2c_msg_write	(uint8_t addr, uint8_t data_len, uint8_t data [data_len])
 		}
 	}
 
-	if (data_len > I2C_BUFF_SIZE) {
-		error	|= ERROR_I2C_BUFF;
-		return	ERROR_NOK;
-	}
-
 	for (i = 0; i < data_len; i++) {
-		buff[i]	= data[i];
+		i2c_buff[i]	= data[i];
 	}
 
-	/*  <<1 is because of HAL bug */
-	if (HAL_I2C_Master_Transmit_IT(&i2c_handle, addr <<1, buff, data_len)) {
-		error	|= ;
+	/*  << 1 is because of HAL bug */
+	if (HAL_I2C_Master_Transmit_IT(&i2c_handle, addr << 1, i2c_buff,
+								data_len)) {
+		error	|= ERROR_I2C_TRANSMIT;
 		error_handle();
 		return	ERROR_NOK;
 	}
@@ -150,14 +148,10 @@ int	i2c_msg_ask	(uint8_t addr, uint8_t data_len)
 		}
 	}
 
-	if (data_len > I2C_BUFF_SIZE) {
-		error	|= ERROR_I2C_BUFF;
-		return	ERROR_NOK;
-	}
-
-	/*  <<1 is because of HAL bug */
-	if (HAL_I2C_Master_Receive_IT(&i2c_handle, addr <<1, buff, data_len)) {
-		error	|= ;
+	/*  << 1 is because of HAL bug */
+	if (HAL_I2C_Master_Receive_IT(&i2c_handle, addr << 1, i2c_buff,
+								data_len)) {
+		error	|= ERROR_I2C_RECEIVE;
 		error_handle();
 		return	ERROR_NOK;
 	}
@@ -198,13 +192,8 @@ int	i2c_msg_read	(uint8_t data_len, uint8_t data [data_len])
 		return	ERROR_NOK;
 	}
 
-	if (data_len > I2C_BUFF_SIZE) {
-		error	|= ERROR_I2C_BUFF;
-		return	ERROR_NOK;
-	}
-
 	for (i = 0; i < data_len; i++) {
-		data[i]	= buff[i];
+		data[i]	= i2c_buff[i];
 	}
 
 	return	ERROR_OK;

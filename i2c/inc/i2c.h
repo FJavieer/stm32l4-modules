@@ -27,7 +27,7 @@
  ******* macros ***************************************************************
  ******************************************************************************/
 	# define	I2C_TIMING	(0x00D00E28u)
-	# define	I2C_BUFF_LEN	(0x1000u)
+	# define	I2C_BUFF_SIZE	(UINT8_MAX)
 	# define	I2C_PRIORITY	(1)
 	# define	I2C_SUBPRIORITY	(1)
 
