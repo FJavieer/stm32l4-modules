@@ -67,7 +67,6 @@ int	can_init	(void)
 	if (init_pending) {
 		init_pending	= false;
 	} else {
-		error	|= ERROR_CAN_INIT;
 		return	ERROR_OK;
 	}
 
@@ -91,7 +90,7 @@ int	can_init	(void)
 		return	ERROR_NOK;
 	}
 	if (HAL_CAN_ActivateNotification(&can_handle, CAN_IT_RX_FIFO0_MSG_PENDING)) {
-		error	|= ERROR_CAN_HAL_CAN_ACTIVATE_NOTIFICATION;
+		error	|= ERROR_CAN_HAL_CAN_ACTI_NOTIF;
 		error_handle();
 		return	ERROR_NOK;
 	}
@@ -113,8 +112,11 @@ int	can_msg_write	(uint8_t data [CAN_DATA_LEN])
 	int	i;
 
 	if (init_pending) {
-		error	|= ERROR_CAN_INIT;
-		return	ERROR_NOK;
+		if (can_init()) {
+			error	|= ERROR_CAN_INIT;
+			error_handle();
+			return	ERROR_NOK;
+		}
 	}
 
 	for (i = 0; i < CAN_DATA_LEN; i++) {
@@ -142,8 +144,11 @@ int	can_msg_read	(uint8_t data [CAN_DATA_LEN])
 	int	i;
 
 	if (init_pending) {
-		error	|= ERROR_CAN_INIT;
-		return	ERROR_NOK;
+		if (can_init()) {
+			error	|= ERROR_CAN_INIT;
+			error_handle();
+			return	ERROR_NOK;
+		}
 	}
 
 	if (!can_msg_pending) {
