@@ -61,9 +61,9 @@
 /******************************************************************************
  ******* functions ************************************************************
  ******************************************************************************/
-void	servo_init		(void);
-int	servo_sX_position_set	(float position, int8_t servo);
-void	servo_stop		(void);
+int	servo_init		(void);
+int	servo_position_set	(int8_t servo, float position);
+int	servo_stop		(void);
 
 
 /******************************************************************************
