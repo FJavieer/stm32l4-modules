@@ -83,7 +83,9 @@ CLK_DIR			= $(STM32L4_MODULES_DIR)/clk/
 DELAY_DIR		= $(STM32L4_MODULES_DIR)/delay/
 DISPLAY_DIR		= $(STM32L4_MODULES_DIR)/display/
 ERRORS_DIR		= $(STM32L4_MODULES_DIR)/errors/
+I2C_DIR			= $(STM32L4_MODULES_DIR)/i2c/
 LED_DIR			= $(STM32L4_MODULES_DIR)/led/
+NUNCHUK_DIR		= $(STM32L4_MODULES_DIR)/nunchuk/
 PWM_DIR			= $(STM32L4_MODULES_DIR)/pwm/
 SERVO_DIR		= $(STM32L4_MODULES_DIR)/servo/
 SPI_DIR			= $(STM32L4_MODULES_DIR)/spi/
@@ -105,7 +107,9 @@ export	CLK_DIR
 export	DELAY_DIR
 export	DISPLAY_DIR
 export	ERRORS_DIR
+export	I2C_DIR
 export	LED_DIR
+export	NUNCHUK_DIR
 export	PWM_DIR
 export	SERVO_DIR
 export	SPI_DIR
@@ -125,8 +129,12 @@ all:
 	$(Q)make -C $(DISPLAY_DIR)
 	@echo	'	MAKE	modules:	errors'
 	$(Q)make -C $(ERRORS_DIR)
+	@echo	'	MAKE	modules:	i2c'
+	$(Q)make -C $(I2C_DIR)
 	@echo	'	MAKE	modules:	led'
 	$(Q)make -C $(LED_DIR)
+	@echo	'	MAKE	modules:	nunchuk'
+	$(Q)make -C $(NUNCHUK_DIR)
 	@echo	'	MAKE	modules:	pwm'
 	$(Q)make -C $(PWM_DIR)
 	@echo	'	MAKE	modules:	servo'
