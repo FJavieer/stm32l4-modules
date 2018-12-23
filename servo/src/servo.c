@@ -82,45 +82,66 @@ static	int	servo_duty_calc	(float position, float *duty);
 	/**
 	 * @brief	Init servos
 	 *		Sets global variable 'error'
-	 * @return	None
+	 * @return	Error
 	 */
-void	servo_init		(void)
+int	servo_init		(void)
 {
-	/* Init pending */
 	if (init_pending) {
 		init_pending	= false;
 	} else {
-		error	|= ERROR_SERVO_INIT;
-		return;
+		return	ERROR_OK;
 	}
 
-	pwm_tim2_init(SERVO_PWM_RESOLUTION_s, SERVO_PWM_PERIOD_us);
+	if (pwm_tim2_init(SERVO_PWM_RESOLUTION_s, SERVO_PWM_PERIOD_us)) {
+		error	|= ERROR_SERVO_PWM_INIT;
+		error_handle();
+		return	ERROR_NOK;
+	}
 
-	/* Initialize PWM with duty cycle for (0 DEG) */
-	pwm_tim2_chX_set(SERVO_PWM_DUTY_DEF, TIM_CHANNEL_1);
-	pwm_tim2_chX_set(SERVO_PWM_DUTY_DEF, TIM_CHANNEL_2);
-	pwm_tim2_chX_set(SERVO_PWM_DUTY_DEF, TIM_CHANNEL_3);
-	pwm_tim2_chX_set(SERVO_PWM_DUTY_DEF, TIM_CHANNEL_4);
+	if (pwm_tim2_chX_set(SERVO_PWM_DUTY_DEF, TIM_CHANNEL_1)) {
+		error	|= ERROR_SERVO_PWM_SET;
+		error_handle();
+		return	ERROR_NOK;
+	}
+	if (pwm_tim2_chX_set(SERVO_PWM_DUTY_DEF, TIM_CHANNEL_2)) {
+		error	|= ERROR_SERVO_PWM_SET;
+		error_handle();
+		return	ERROR_NOK;
+	}
+	if (pwm_tim2_chX_set(SERVO_PWM_DUTY_DEF, TIM_CHANNEL_3)) {
+		error	|= ERROR_SERVO_PWM_SET;
+		error_handle();
+		return	ERROR_NOK;
+	}
+	if (pwm_tim2_chX_set(SERVO_PWM_DUTY_DEF, TIM_CHANNEL_4)) {
+		error	|= ERROR_SERVO_PWM_SET;
+		error_handle();
+		return	ERROR_NOK;
+	}
+
+	return	ERROR_OK;
 }
 
 	/**
 	 * @brief	Set servo sX position
 	 *		Sets global variable 'error'
+	 * @param	servo:		servo to set
 	 * @param	position:	position (deg)
 	 *				valid range: [-90, 90]
 	 * @return	Error
 	 */
-int	servo_sX_position_set	(float position, int8_t servo)
+int	servo_position_set	(int8_t servo, float position)
 {
 	uint32_t	tim_chan;
 
-	/* Check if servo has been initialized */
 	if (init_pending) {
-		error	|= ERROR_SERVO_INIT;
-		return	ERROR_NOK;
+		if (servo_init()) {
+			error	|= ERROR_SERVO_INIT;
+			error_handle();
+			return	ERROR_NOK;
+		}
 	}
 
-	/* Select channel */
 	switch (servo) {
 	case SERVO_S1:
 		tim_chan	= TIM_CHANNEL_1;
@@ -136,41 +157,54 @@ int	servo_sX_position_set	(float position, int8_t servo)
 		break;
 	default:
 		error	|= ERROR_SERVO_ID;
+		error_handle();
 		return	ERROR_NOK;
 	}
 
-	/* Calc duty */
 	servo_duty_calc(position, &duty_cycle[servo]);
-	/* set PWM */
-	pwm_tim2_chX_set(duty_cycle[servo], tim_chan);
+	if (pwm_tim2_chX_set(duty_cycle[servo], tim_chan)) {
+		error	|= ERROR_SERVO_PWM_SET;
+		error_handle();
+		return	ERROR_NOK;
+	}
 
 	return	ERROR_OK;
 }
 
 	/**
 	 * @brief	Stop servos
-	 * @return	None
+	 * @return	Error
 	 */
-void	servo_stop		(void)
+int	servo_stop		(void)
 {
-	pwm_tim2_stop();
+	if (init_pending) {
+		return	ERROR_OK;
+	}
+
+	if (pwm_tim2_stop()) {
+		error	|= ERROR_SERVO_PWM_STOP;
+		error_handle();
+		return	ERROR_NOK;
+	}
 
 	init_pending	= true;
+
+	return	ERROR_OK;
 }
 
 
 /******************************************************************************
  ******* static functions (definitions) ***************************************
  ******************************************************************************/
-	/**
-	 * @brief	Calculate PWM duty cycle for specified servo position
-	 * @param	position:	position (deg)
-	 *				valid range: [-90, 90]
-	 * @param	duty:		Duty cycle
-	 *				valid range: [0, 1]
-	 * @return	saturation:	0 =	OK,
-	 *				>0 =	POSITIVE SATURATION,
-	 *				<0 =	NEGATIVE SATURATION
+	/*
+	 * Calculate PWM duty cycle for specified servo position
+	 * position:	position (deg)
+	 *		valid range: [-90, 90]
+	 * duty:		Duty cycle
+	 *		valid range: [0, 1]
+	 * saturation:	0 =	OK,
+	 *		>0 =	POSITIVE SATURATION,
+	 *		<0 =	NEGATIVE SATURATION
 	 */
 static	int	servo_duty_calc	(float position, float *duty)
 {

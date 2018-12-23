@@ -30,10 +30,9 @@
  ******* variables ************************************************************
  ******************************************************************************/
 /* Global --------------------------------------------------------------------*/
-	CAN_HandleTypeDef	can_handle;
-
 /* Static --------------------------------------------------------------------*/
 static	bool			init_pending	= true;
+static	CAN_HandleTypeDef	can_handle;
 static	CAN_TxHeaderTypeDef	can_tx_header;
 static	CAN_RxHeaderTypeDef	can_rx_header;
 static	uint8_t			can_rx_data [CAN_DATA_LEN];
@@ -68,7 +67,6 @@ int	can_init	(void)
 	if (init_pending) {
 		init_pending	= false;
 	} else {
-		error	|= ERROR_CAN_INIT;
 		return	ERROR_OK;
 	}
 
@@ -92,7 +90,7 @@ int	can_init	(void)
 		return	ERROR_NOK;
 	}
 	if (HAL_CAN_ActivateNotification(&can_handle, CAN_IT_RX_FIFO0_MSG_PENDING)) {
-		error	|= ERROR_CAN_HAL_CAN_ACTIVATE_NOTIFICATION;
+		error	|= ERROR_CAN_HAL_CAN_ACTI_NOTIF;
 		error_handle();
 		return	ERROR_NOK;
 	}
@@ -114,8 +112,11 @@ int	can_msg_write	(uint8_t data [CAN_DATA_LEN])
 	int	i;
 
 	if (init_pending) {
-		error	|= ERROR_CAN_INIT;
-		return	ERROR_NOK;
+		if (can_init()) {
+			error	|= ERROR_CAN_INIT;
+			error_handle();
+			return	ERROR_NOK;
+		}
 	}
 
 	for (i = 0; i < CAN_DATA_LEN; i++) {
@@ -133,7 +134,7 @@ int	can_msg_write	(uint8_t data [CAN_DATA_LEN])
 }
 
 	/**
-	 * @brief	Return the data received
+	 * @brief	Read the data received
 	 *		Sets global variable 'error'
 	 * @param	data:	array where data is to be written
 	 * @return	Error
@@ -143,8 +144,11 @@ int	can_msg_read	(uint8_t data [CAN_DATA_LEN])
 	int	i;
 
 	if (init_pending) {
-		error	|= ERROR_CAN_INIT;
-		return	ERROR_NOK;
+		if (can_init()) {
+			error	|= ERROR_CAN_INIT;
+			error_handle();
+			return	ERROR_NOK;
+		}
 	}
 
 	if (!can_msg_pending) {
@@ -166,12 +170,21 @@ int	can_msg_read	(uint8_t data [CAN_DATA_LEN])
  ******* HAL weak functions (redefinitions) ***********************************
  ******************************************************************************/
 /**
+* @brief	This function handles CAN1 RX0 interrupt request.
+* @return	None
+*/
+void	CAN1_RX0_IRQHandler			(void)
+{
+	HAL_CAN_IRQHandler(&can_handle);
+}
+
+/**
  * @brief	Rx Fifo 0 message pending callback
- * @param	hcan: pointer to a CAN_HandleTypeDef structure that contains
- *		the configuration information for the specified CAN.
+ * @param	can_handle_ptr:	pointer to a CAN_HandleTypeDef structure that
+ *		contains the configuration information for the specified CAN.
  * @return	None
  */
-void	HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *can_handle_ptr)
+void	HAL_CAN_RxFifo0MsgPendingCallback	(CAN_HandleTypeDef *can_handle_ptr)
 {
 	if (HAL_CAN_GetRxMessage(can_handle_ptr, CAN_RX_FIFO0, &can_rx_header,
 								can_rx_data)) {

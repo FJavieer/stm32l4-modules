@@ -24,6 +24,7 @@
 /******************************************************************************
  ******* macros ***************************************************************
  ******************************************************************************/
+	# define	RESOLUTION_1_US		(1000000u)
 
 
 /******************************************************************************
@@ -81,14 +82,15 @@ int	delay_us	(uint32_t time_us)
 	uint32_t	overflows;
 
 	if (init_pending) {
-		error	|= ERROR_DELAY_INIT;
-		return	ERROR_NOK;
+		if (delay_us_init()) {
+			error	|= ERROR_DELAY_INIT;
+			error_handle();
+			return	ERROR_NOK;
+		}
 	}
 
-	/* Delay == 0;  exit now */
-	if (time_us < 1) {
-		error	|= ERROR_DELAY_NULL;
-		return	ERROR_NOK;
+	if (!time_us) {
+		return	ERROR_OK;
 	}
 
 	delay_us_delay_init(time_us, &overflows);
@@ -116,15 +118,14 @@ int	delay_us	(uint32_t time_us)
  ******************************************************************************/
 static	int	delay_us_tim_init	(void)
 {
-
 	/* Resolution: 1 us */
 	tim_handle.Instance		= TIM6; 
 	tim_handle.Init.Prescaler		= (SystemCoreClock /
-								1000000u) - 1u;
+							RESOLUTION_1_US) - 1u;
 	tim_handle.Init.CounterMode		= TIM_COUNTERMODE_UP;
 	tim_handle.Init.Period			= UINT16_MAX;
 	tim_handle.Init.ClockDivision		= TIM_CLOCKDIVISION_DIV1;
-	tim_handle.Init.RepetitionCounter	= 0x00u;
+	tim_handle.Init.RepetitionCounter	= 0;
 	tim_handle.Init.AutoReloadPreload	= TIM_AUTORELOAD_PRELOAD_DISABLE;
 
 	return	HAL_TIM_Base_Init(&tim_handle);

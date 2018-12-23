@@ -1,6 +1,6 @@
 /******************************************************************************
- *	led_test.c							      *
- *	2018/dec/13							      *
+ *	servo.c								      *
+ *	2018/nov/27							      *
  ******************************************************************************/
 
 
@@ -8,23 +8,33 @@
  ******* headers **************************************************************
  ******************************************************************************/
 /* Standard C ----------------------------------------------------------------*/
+	#include <stdbool.h>
+	#include <stdint.h>
+
 /* Drivers -------------------------------------------------------------------*/
 	#include "stm32l4xx_hal.h"
 
 /* libalx --------------------------------------------------------------------*/
-
 /* STM32L4 modules -----------------------------------------------------------*/
-	#include "delay.h"
 	#include "errors.h"
+	#include "i2c.h"
 
-	#include "led.h"
-
-	#include "led_test.h"
+	#include "nunchuk.h"
 
 
 /******************************************************************************
  ******* macros ***************************************************************
  ******************************************************************************/
+	# define	NUNCHUK_ADDRESS			(0x52u)
+
+	# define	NUNCHUK_COMMAND_START_LEN	(2)
+	# define	NUNCHUK_COMMAND_START_DATA	(uint8_t [2]){0x40, 0x00}
+
+	# define	NUNCHUK_COMMAND_GETDATA_LEN	(1)
+	# define	NUNCHUK_COMMAND_GETDATA_DATA	(uint8_t [1]){0x00}
+
+	# define	NUNCHUK_DATA_LEN		(6)
+	# define	NUNCHUK_DATA_KEY		(UINT8_C(0x17))
 
 
 /******************************************************************************
@@ -42,38 +52,91 @@
  ******************************************************************************/
 /* Global --------------------------------------------------------------------*/
 /* Static --------------------------------------------------------------------*/
+static	bool	init_pending	= true;
 
 
 /******************************************************************************
- ******* static functions (declarations) **************************************
+ ******* static functions (prototypes) ****************************************
  ******************************************************************************/
+static	int	nunchuk_start		(void);
+static	void	nunchuk_decrypt		(uint8_t buff [NUNCHUK_DATA_LEN]);
+static	void	nunchuk_extract_data	(uint8_t buff [NUNCHUK_DATA_LEN],
+						Nunchuk_Data_s  *data);
 
 
 /******************************************************************************
  ******* global functions *****************************************************
  ******************************************************************************/
 	/**
-	 * @brief	Test LEDs
+	 * @brief	Init nunchuk
+	 *		Sets global variable 'error'
 	 * @return	Error
 	 */
-int	led_test	(void)
+int	nunchuk_init	(void)
 {
-	int		i;
+	if (init_pending) {
+		init_pending	= false;
+	} else {
+		return	ERROR_OK;
+	}
 
-	delay_us_init();
-	led_init();
+	if (i2c_init()) {
+		error	|= ERROR_NUNCHUK_I2C_INIT;
+		error_handle();
+		return	ERROR_NOK;
+	}
+	if (nunchuk_start()) {
+		error	|= ERROR_NUNCHUK_START;
+		error_handle();
+		return	ERROR_NOK;
+	}
 
-	for (i = 0; i <= 100; i++) {
-		led_set();
-		if (delay_us(1000u * i)) {
-			return	ERROR_NOK;
-		}
+	return	ERROR_OK;
+}
 
-		led_reset();
-		if (delay_us(1000u * i)) {
+	/**
+	 * @brief	Read nunchuk data
+	 *		Sets global variable 'error'
+	 * @param	data:	struct that holds all nunchuk data
+	 * @return	Error
+	 */
+int	nunchuk_read	(Nunchuk_Data_s *data)
+{
+	uint8_t		buff [NUNCHUK_DATA_LEN];
+
+	if (init_pending) {
+		if (nunchuk_init()) {
+			error	|= ERROR_NUNCHUK_INIT;
+			error_handle();
 			return	ERROR_NOK;
 		}
 	}
+
+	if (i2c_msg_write(NUNCHUK_ADDRESS, NUNCHUK_COMMAND_GETDATA_LEN,
+						NUNCHUK_COMMAND_GETDATA_DATA)) {
+		error	|= ERROR_NUNCHUK_I2C_TRANSMIT;
+		error_handle();
+		return	ERROR_NOK;
+	}
+
+	if (i2c_msg_ask(NUNCHUK_ADDRESS, NUNCHUK_DATA_LEN)) {
+		error	|= ERROR_NUNCHUK_I2C_ASK;
+		error_handle();
+		return	ERROR_NOK;
+	}
+
+	while (!i2c_msg_ready()) {
+		__WFE();
+	}
+
+	if (i2c_msg_read(NUNCHUK_DATA_LEN, buff)) {
+		error	|= ERROR_NUNCHUK_I2C_READ;
+		error_handle();
+		return	ERROR_NOK;
+	}
+
+	nunchuk_decrypt(buff);
+	nunchuk_extract_data(buff, data);
 
 	return	ERROR_OK;
 }
@@ -82,6 +145,41 @@ int	led_test	(void)
 /******************************************************************************
  ******* static functions (definitions) ***************************************
  ******************************************************************************/
+static	int	nunchuk_start		(void)
+{
+	if (i2c_msg_write(NUNCHUK_ADDRESS, NUNCHUK_COMMAND_START_LEN,
+						NUNCHUK_COMMAND_START_DATA)) {
+		error	|= ERROR_NUNCHUK_I2C_TRANSMIT;
+		error_handle();
+		return	ERROR_NOK;
+	}
+
+	return	ERROR_OK;
+}
+
+static	void	nunchuk_decrypt		(uint8_t buff [NUNCHUK_DATA_LEN])
+{
+	int	i;
+
+	for (i = 0; i < NUNCHUK_DATA_LEN; i++) {
+		buff[i]	^= NUNCHUK_DATA_KEY;
+	}
+}
+
+static	void	nunchuk_extract_data	(uint8_t buff [NUNCHUK_DATA_LEN],
+						Nunchuk_Data_s  *data)
+{
+	data->jst.x	= buff[0];
+	data->jst.y	= buff[1];
+	data->acc.x8	= buff[2];
+	data->acc.y8	= buff[3];
+	data->acc.z8	= buff[4];
+	data->acc.x10	= (buff[2] << 2) | (buff[6] & 0x0Cu);
+	data->acc.y10	= (buff[3] << 2) | (buff[6] & 0x30u);
+	data->acc.z10	= (buff[4] << 2) | (buff[6] & 0xC0u);
+	data->btn_c	= !(buff[6] & 0x02);
+	data->btn_z	= !(buff[6] & 0x01);
+}
 
 
 /******************************************************************************

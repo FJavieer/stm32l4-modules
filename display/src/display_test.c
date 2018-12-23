@@ -61,10 +61,13 @@ int	display_test	(void)
 	int	i;
 	char	ch;
 
-	for (i = 0; i < 10; i++) {
+	delay_us_init();
+	display_init();
+
+	for (i = 0; i <= 9; i++) {
 		ch	= i + '0';
 
-		if (display_set(ch)) {
+		if (display_set_ch(ch)) {
 			return	ERROR_NOK;
 		}
 		if (delay_us(1000000u)) {

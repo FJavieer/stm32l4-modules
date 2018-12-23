@@ -1,23 +1,27 @@
 /******************************************************************************
- *	led.h								      *
- *	2018/dec/17							      *
+ *	nunchuk_test.c							      *
+ *	2018/dec/22							      *
  ******************************************************************************/
-
-
-/******************************************************************************
- ******* include guard ********************************************************
- ******************************************************************************/
-# ifndef		LED_H
-	# define	LED_H
 
 
 /******************************************************************************
  ******* headers **************************************************************
  ******************************************************************************/
 /* Standard C ----------------------------------------------------------------*/
+	#include <stdint.h>
+
 /* Drivers -------------------------------------------------------------------*/
+	#include "stm32l4xx_hal.h"
+
 /* libalx --------------------------------------------------------------------*/
 /* STM32L4 modules -----------------------------------------------------------*/
+	#include "display.h"
+	#include "delay.h"
+	#include "errors.h"
+
+	#include "nunchuk.h"
+
+	#include "nunchuk_test.h"
 
 
 /******************************************************************************
@@ -38,20 +42,80 @@
 /******************************************************************************
  ******* variables ************************************************************
  ******************************************************************************/
+/* Global --------------------------------------------------------------------*/
+/* Static --------------------------------------------------------------------*/
 
 
 /******************************************************************************
- ******* functions ************************************************************
+ ******* static functions (prototypes) ****************************************
  ******************************************************************************/
-void	led_init	(void);
-void	led_set		(void);
-void	led_reset	(void);
+static	void	display_data_clear	(uint16_t display_data[DISPLAY_ROWS]);
+static	void	display_data_set	(Nunchuk_Data_s	nunchuk_data,
+					uint16_t display_data[DISPLAY_ROWS]);
 
 
 /******************************************************************************
- ******* include guard ********************************************************
+ ******* global functions *****************************************************
  ******************************************************************************/
-# endif			/* led.h */
+	/**
+	 * @brief	Test nunchuk
+	 * @return	Error
+	 */
+int	nunchuk_test	(void)
+{
+	Nunchuk_Data_s	nunchuk_data;
+	uint16_t	display_data [DISPLAY_ROWS];
+
+	delay_us_init();
+	display_init();
+	nunchuk_init();
+
+	do {
+		if (nunchuk_read(&nunchuk_data)) {
+			return	ERROR_NOK;
+		}
+
+		display_data_set(nunchuk_data, display_data);
+
+		if (delay_us(1000000u)) {
+			return	ERROR_NOK;
+		}
+	} while (!nunchuk_data.btn_z);
+
+	return	ERROR_OK;
+}
+
+
+/******************************************************************************
+ ******* static functions (definitions) ***************************************
+ ******************************************************************************/
+static	void	display_data_clear	(uint16_t display_data[DISPLAY_ROWS])
+{
+	int	i;
+
+	for (i = 0; i < DISPLAY_ROWS; i++) {
+		display_data[i]	= DISPLAY_ROW(i);
+	}
+}
+
+static	void	display_data_set	(Nunchuk_Data_s	nunchuk_data,
+					uint16_t display_data[DISPLAY_ROWS])
+{
+	display_data_clear(display_data);
+
+	display_data[0]	|= nunchuk_data.jst.x;
+	display_data[1]	|= nunchuk_data.jst.y;
+
+	if (!nunchuk_data.btn_c) {
+		display_data[2]	|= nunchuk_data.acc.x8;
+		display_data[3]	|= nunchuk_data.acc.y8;
+		display_data[4]	|= nunchuk_data.acc.z8;
+	} else {
+		display_data[5]	|= (nunchuk_data.acc.x10 >> 2);
+		display_data[6]	|= (nunchuk_data.acc.y10 >> 2);
+		display_data[7]	|= (nunchuk_data.acc.z10 >> 2);
+	}
+}
 
 
 /******************************************************************************

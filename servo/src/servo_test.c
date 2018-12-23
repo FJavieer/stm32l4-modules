@@ -47,6 +47,7 @@
 /******************************************************************************
  ******* static functions (declarations) **************************************
  ******************************************************************************/
+static	int	servo_test_position	(float pos);
 
 
 /******************************************************************************
@@ -60,68 +61,22 @@ int	servo_test	(void)
 {
 	int	i;
 
+	servo_init();
+
 	for (i = 0; i <= 90; i+=10) {
-		if (servo_sX_position_set(-(i), SERVO_S1)) {
-			return	ERROR_NOK;
-		}
-		if (servo_sX_position_set(-(i), SERVO_S2)) {
-			return	ERROR_NOK;
-		}
-		if (servo_sX_position_set(-(i), SERVO_S3)) {
-			return	ERROR_NOK;
-		}
-		if (servo_sX_position_set(-(i), SERVO_S4)) {
-			return	ERROR_NOK;
-		}
-		if (delay_us(1000000u)) {
+		if (servo_test_position(-i)) {
 			return	ERROR_NOK;
 		}
 
-		if (servo_sX_position_set(-0, SERVO_S1)) {
-			return	ERROR_NOK;
-		}
-		if (servo_sX_position_set(-0, SERVO_S2)) {
-			return	ERROR_NOK;
-		}
-		if (servo_sX_position_set(-0, SERVO_S3)) {
-			return	ERROR_NOK;
-		}
-		if (servo_sX_position_set(-0, SERVO_S4)) {
-			return	ERROR_NOK;
-		}
-		if (delay_us(1000000u)) {
+		if (servo_test_position(0)) {
 			return	ERROR_NOK;
 		}
 
-		if (servo_sX_position_set((i), SERVO_S1)) {
-			return	ERROR_NOK;
-		}
-		if (servo_sX_position_set((i), SERVO_S2)) {
-			return	ERROR_NOK;
-		}
-		if (servo_sX_position_set((i), SERVO_S3)) {
-			return	ERROR_NOK;
-		}
-		if (servo_sX_position_set((i), SERVO_S4)) {
-			return	ERROR_NOK;
-		}
-		if (delay_us(1000000u)) {
+		if (servo_test_position(i)) {
 			return	ERROR_NOK;
 		}
 
-		if (servo_sX_position_set(0, SERVO_S1)) {
-			return	ERROR_NOK;
-		}
-		if (servo_sX_position_set(0, SERVO_S2)) {
-			return	ERROR_NOK;
-		}
-		if (servo_sX_position_set(0, SERVO_S3)) {
-			return	ERROR_NOK;
-		}
-		if (servo_sX_position_set(0, SERVO_S4)) {
-			return	ERROR_NOK;
-		}
-		if (delay_us(1000000u)) {
+		if (servo_test_position(0)) {
 			return	ERROR_NOK;
 		}
 	}
@@ -133,6 +88,27 @@ int	servo_test	(void)
 /******************************************************************************
  ******* static functions (definitions) ***************************************
  ******************************************************************************/
+static	int	servo_test_position	(float pos)
+{
+	if (servo_position_set(SERVO_S1, pos)) {
+		return	ERROR_NOK;
+	}
+	if (servo_position_set(SERVO_S2, pos)) {
+		return	ERROR_NOK;
+	}
+	if (servo_position_set(SERVO_S3, pos)) {
+		return	ERROR_NOK;
+	}
+	if (servo_position_set(SERVO_S4, pos)) {
+		return	ERROR_NOK;
+	}
+
+	if (delay_us(1000000u)) {
+		return	ERROR_NOK;
+	}
+
+	return	ERROR_OK;
+}
 
 
 /******************************************************************************

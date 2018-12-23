@@ -56,7 +56,6 @@ int	spi_init	(void)
 	if (init_pending) {
 		init_pending	= false;
 	} else {
-		error	|= ERROR_SPI_INIT;
 		return	ERROR_OK;
 	}
 
@@ -82,8 +81,11 @@ int	spi_msg_write	(uint16_t data)
 	uint8_t	spi_data [sizeof(uint16_t) / sizeof(uint8_t)];
 
 	if (init_pending) {
-		error	|= ERROR_SPI_INIT;
-		return	ERROR_NOK;
+		if (spi_init()) {
+			error	|= ERROR_SPI_INIT;
+			error_handle();
+			return	ERROR_NOK;
+		}
 	}
 
 	spi_data[0]	= data / (UINT8_MAX + 1u);
