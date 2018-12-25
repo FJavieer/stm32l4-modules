@@ -15,6 +15,7 @@ NUNCHUK_TMP_DIR	= $(NUNCHUK_DIR)/tmp/
 PWM_TMP_DIR	= $(PWM_DIR)/tmp/
 SERVO_TMP_DIR	= $(SERVO_DIR)/tmp/
 SPI_TMP_DIR	= $(SPI_DIR)/tmp/
+TIM_TMP_DIR	= $(TIM_DIR)/tmp/
 
 # dependencies
 
@@ -31,6 +32,7 @@ MODS_OBJ_NUNCHUK	= nunchuk.o nunchuk_test.o
 MODS_OBJ_PWM		= pwm.o
 MODS_OBJ_SERVO		= servo.o servo_test.o
 MODS_OBJ_SPI		= spi.o
+MODS_OBJ_TIM		= tim.o
 MODS_OBJS		= \
 			$(patsubst %,$(CAN_TMP_DIR)/%,$(MODS_OBJ_CAN)) \
 			$(patsubst %,$(CLK_TMP_DIR)/%,$(MODS_OBJ_CLK)) \
@@ -42,7 +44,8 @@ MODS_OBJS		= \
 			$(patsubst %,$(NUNCHUK_TMP_DIR)/%,$(MODS_OBJ_NUNCHUK)) \
 			$(patsubst %,$(PWM_TMP_DIR)/%,$(MODS_OBJ_PWM)) \
 			$(patsubst %,$(SERVO_TMP_DIR)/%,$(MODS_OBJ_SERVO)) \
-			$(patsubst %,$(SPI_TMP_DIR)/%,$(MODS_OBJ_SPI))
+			$(patsubst %,$(SPI_TMP_DIR)/%,$(MODS_OBJ_SPI)) \
+			$(patsubst %,$(TIM_TMP_DIR)/%,$(MODS_OBJ_TIM))
 
 # target: dependencies
 #	action
