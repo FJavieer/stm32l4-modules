@@ -86,40 +86,38 @@ void	sysclk_config	(void)
  ******************************************************************************/
 static	int	clk_set_pll_from_msi	(void)
 {
-	RCC_OscInitTypeDef	rcc_osc_init_values;
+	RCC_OscInitTypeDef	rcc_osc;
 
 	/* MSI is enabled after System reset, activate PLL with MSI as source */
-	rcc_osc_init_values.OscillatorType	= RCC_OSCILLATORTYPE_MSI;
-	rcc_osc_init_values.MSIState		= RCC_MSI_ON;
-	rcc_osc_init_values.MSIClockRange	= RCC_MSIRANGE_6;
-	rcc_osc_init_values.MSICalibrationValue	= RCC_MSICALIBRATION_DEFAULT;
-	rcc_osc_init_values.PLL.PLLState	= RCC_PLL_ON;
-	rcc_osc_init_values.PLL.PLLSource	= RCC_PLLSOURCE_MSI;
-	rcc_osc_init_values.PLL.PLLM		= 1u;
-	rcc_osc_init_values.PLL.PLLN		= 40u;
-	rcc_osc_init_values.PLL.PLLP		= RCC_PLLP_DIV7;
-	rcc_osc_init_values.PLL.PLLQ		= RCC_PLLQ_DIV4;
-	rcc_osc_init_values.PLL.PLLR		= RCC_PLLR_DIV2;
+	rcc_osc.OscillatorType		= RCC_OSCILLATORTYPE_MSI;
+	rcc_osc.MSIState		= RCC_MSI_ON;
+	rcc_osc.MSIClockRange		= RCC_MSIRANGE_6;
+	rcc_osc.MSICalibrationValue	= RCC_MSICALIBRATION_DEFAULT;
+	rcc_osc.PLL.PLLState		= RCC_PLL_ON;
+	rcc_osc.PLL.PLLSource		= RCC_PLLSOURCE_MSI;
+	rcc_osc.PLL.PLLM		= 1u;
+	rcc_osc.PLL.PLLN		= 40u;
+	rcc_osc.PLL.PLLP		= RCC_PLLP_DIV7;
+	rcc_osc.PLL.PLLQ		= RCC_PLLQ_DIV4;
+	rcc_osc.PLL.PLLR		= RCC_PLLR_DIV2;
 
-	return	HAL_RCC_OscConfig(&rcc_osc_init_values);
+	return	HAL_RCC_OscConfig(&rcc_osc);
 }
 
 static	int	clk_sysclk_set_pll	(void)
 {
-	RCC_ClkInitTypeDef	rcc_clk_init_values;
+	RCC_ClkInitTypeDef	rcc_clk;
 
 	/* Select PLL as system clock source and configure the HCLK, PCLK1
 	 * and PCLK2 clocks dividers */
-	rcc_clk_init_values.ClockType		= (RCC_CLOCKTYPE_SYSCLK |
-							RCC_CLOCKTYPE_HCLK |
-							RCC_CLOCKTYPE_PCLK1 |
-							RCC_CLOCKTYPE_PCLK2);
-	rcc_clk_init_values.SYSCLKSource	= RCC_SYSCLKSOURCE_PLLCLK;
-	rcc_clk_init_values.AHBCLKDivider	= RCC_SYSCLK_DIV1;
-	rcc_clk_init_values.APB1CLKDivider	= RCC_HCLK_DIV1;  
-	rcc_clk_init_values.APB2CLKDivider	= RCC_HCLK_DIV1;  
+	rcc_clk.ClockType	= (RCC_CLOCKTYPE_SYSCLK | RCC_CLOCKTYPE_HCLK |
+				RCC_CLOCKTYPE_PCLK1 | RCC_CLOCKTYPE_PCLK2);
+	rcc_clk.SYSCLKSource	= RCC_SYSCLKSOURCE_PLLCLK;
+	rcc_clk.AHBCLKDivider	= RCC_SYSCLK_DIV1;
+	rcc_clk.APB1CLKDivider	= RCC_HCLK_DIV1;  
+	rcc_clk.APB2CLKDivider	= RCC_HCLK_DIV1;  
 
-	return	HAL_RCC_ClockConfig(&rcc_clk_init_values, FLASH_LATENCY_4);
+	return	HAL_RCC_ClockConfig(&rcc_clk, FLASH_LATENCY_4);
 }
 
 
