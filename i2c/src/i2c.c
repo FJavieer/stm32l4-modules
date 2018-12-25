@@ -41,7 +41,7 @@
 	uint8_t			i2c_buff [I2C_BUFF_SIZE];
 /* Static --------------------------------------------------------------------*/
 static	bool			init_pending	= true;
-static	I2C_HandleTypeDef	i2c_handle;
+static	I2C_HandleTypeDef	i2c;
 
 /* Volatile ------------------------------------------------------------------*/
 
@@ -121,8 +121,7 @@ int	i2c_msg_write	(uint8_t addr, uint8_t data_len, uint8_t data [data_len])
 	}
 
 	/*  << 1 is because of HAL bug */
-	if (HAL_I2C_Master_Transmit_IT(&i2c_handle, addr << 1, i2c_buff,
-								data_len)) {
+	if (HAL_I2C_Master_Transmit_IT(&i2c, addr << 1, i2c_buff, data_len)) {
 		error	|= ERROR_I2C_TRANSMIT;
 		error_handle();
 		return	ERROR_NOK;
@@ -149,8 +148,7 @@ int	i2c_msg_ask	(uint8_t addr, uint8_t data_len)
 	}
 
 	/*  << 1 is because of HAL bug */
-	if (HAL_I2C_Master_Receive_IT(&i2c_handle, addr << 1, i2c_buff,
-								data_len)) {
+	if (HAL_I2C_Master_Receive_IT(&i2c, addr << 1, i2c_buff, data_len)) {
 		error	|= ERROR_I2C_RECEIVE;
 		error_handle();
 		return	ERROR_NOK;
@@ -165,7 +163,7 @@ int	i2c_msg_ask	(uint8_t addr, uint8_t data_len)
 	 */
 bool	i2c_msg_ready	(void)
 {
-	return	(HAL_I2C_GetState(&i2c_handle) == HAL_I2C_STATE_READY);
+	return	(HAL_I2C_GetState(&i2c) == HAL_I2C_STATE_READY);
 }
 
 	/**
@@ -208,7 +206,7 @@ int	i2c_msg_read	(uint8_t data_len, uint8_t data [data_len])
 	 */
 void	I2Cx_EV_IRQHandler		(void)
 {
-	HAL_I2C_EV_IRQHandler(&i2c_handle);
+	HAL_I2C_EV_IRQHandler(&i2c);
 }
 
 
@@ -224,16 +222,16 @@ static	void	i2c_msp_init		(void)
 
 static	void	i2c_gpio_init		(void)
 {
-	GPIO_InitTypeDef	gpio_init_values;
+	GPIO_InitTypeDef	gpio;
 
 	__HAL_RCC_GPIOB_CLK_ENABLE();
 
-	gpio_init_values.Pin		= GPIO_PIN_6 | GPIO_PIN_7;
-	gpio_init_values.Mode		= GPIO_MODE_AF_OD;
-	gpio_init_values.Speed		= GPIO_SPEED_FREQ_VERY_HIGH;
-	gpio_init_values.Pull		= GPIO_NOPULL;
-	gpio_init_values.Alternate	= GPIO_AF4_I2C1;
-	HAL_GPIO_Init(GPIOB, &gpio_init_values);
+	gpio.Pin	= GPIO_PIN_6 | GPIO_PIN_7;
+	gpio.Mode	= GPIO_MODE_AF_OD;
+	gpio.Speed	= GPIO_SPEED_FREQ_VERY_HIGH;
+	gpio.Pull	= GPIO_NOPULL;
+	gpio.Alternate	= GPIO_AF4_I2C1;
+	HAL_GPIO_Init(GPIOB, &gpio);
 }
 
 static	void	i2c_nvic_conf		(void)
@@ -245,24 +243,24 @@ static	void	i2c_nvic_conf		(void)
 static	int	i2c_peripherial_init	(void)
 {
 	// Wii works @ 100 kHz FIXME
-	i2c_handle.Instance		= I2C1;
-	i2c_handle.Init.Timing			= I2C_TIMING;
-	i2c_handle.Init.DualAddressMode		= I2C_DUALADDRESS_DISABLE;
-	i2c_handle.Init.GeneralCallMode		= I2C_GENERALCALL_DISABLE;
-	i2c_handle.Init.NoStretchMode		= I2C_NOSTRETCH_DISABLE;
+	i2c.Instance		= I2C1;
+	i2c.Init.Timing			= I2C_TIMING;
+	i2c.Init.DualAddressMode	= I2C_DUALADDRESS_DISABLE;
+	i2c.Init.GeneralCallMode	= I2C_GENERALCALL_DISABLE;
+	i2c.Init.NoStretchMode		= I2C_NOSTRETCH_DISABLE;
 
-	return	HAL_I2C_Init(&i2c_handle);
+	return	HAL_I2C_Init(&i2c);
 }
 
 static	int	i2c_filter_analog_conf	(void)
 {
-	return	HAL_I2CEx_ConfigAnalogFilter(&i2c_handle,
+	return	HAL_I2CEx_ConfigAnalogFilter(&i2c,
 						I2C_ANALOGFILTER_ENABLE);
 }
 
 static	int	i2c_filter_digital_conf	(void)
 {
-	return	HAL_I2CEx_ConfigDigitalFilter(&i2c_handle, 0);
+	return	HAL_I2CEx_ConfigDigitalFilter(&i2c, 0);
 }
 
 
