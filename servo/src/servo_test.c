@@ -45,7 +45,7 @@
 
 
 /******************************************************************************
- ******* static functions (declarations) **************************************
+ ******* static functions (prototypes) ****************************************
  ******************************************************************************/
 static	int	servo_test_position	(float pos);
 
@@ -61,7 +61,9 @@ int	servo_test	(void)
 {
 	int	i;
 
-	servo_init();
+	if (servo_init()) {
+		return	ERROR_NOK;
+	}
 
 	for (i = 0; i <= 90; i+=10) {
 		if (servo_test_position(-i)) {

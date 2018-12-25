@@ -63,7 +63,7 @@ static	bool	init_pending	= true;
 
 
 /******************************************************************************
- ******* static functions (declarations) **************************************
+ ******* static functions (prototypes) ****************************************
  ******************************************************************************/
 	/**
 	 * @brief	Calculate PWM duty cycle for specified servo position
