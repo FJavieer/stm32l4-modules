@@ -44,7 +44,7 @@ static	bool	init_pending	= true;
 
 
 /******************************************************************************
- ******* static functions (declarations) **************************************
+ ******* static functions (prototypes) ****************************************
  ******************************************************************************/
 static	void	led_gpio_init	(void);
 
@@ -98,15 +98,15 @@ void	led_reset	(void)
  ******************************************************************************/
 static	void	led_gpio_init	(void)
 {
-	GPIO_InitTypeDef	gpio_init_values;
+	GPIO_InitTypeDef	gpio;
 	
 	__HAL_RCC_GPIOA_CLK_ENABLE();
 
-	gpio_init_values.Pin	= GPIO_PIN_5;
-	gpio_init_values.Mode	= GPIO_MODE_OUTPUT_PP;
-	gpio_init_values.Pull	= GPIO_NOPULL;
-	gpio_init_values.Speed	= GPIO_SPEED_FREQ_LOW;
-	HAL_GPIO_Init(GPIOA, &gpio_init_values);
+	gpio.Pin	= GPIO_PIN_5;
+	gpio.Mode	= GPIO_MODE_OUTPUT_PP;
+	gpio.Pull	= GPIO_NOPULL;
+	gpio.Speed	= GPIO_SPEED_FREQ_LOW;
+	HAL_GPIO_Init(GPIOA, &gpio);
 }
 
 
