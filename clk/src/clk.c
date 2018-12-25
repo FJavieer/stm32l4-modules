@@ -114,8 +114,8 @@ static	int	clk_sysclk_set_pll	(void)
 				RCC_CLOCKTYPE_PCLK1 | RCC_CLOCKTYPE_PCLK2);
 	rcc_clk.SYSCLKSource	= RCC_SYSCLKSOURCE_PLLCLK;
 	rcc_clk.AHBCLKDivider	= RCC_SYSCLK_DIV1;
-	rcc_clk.APB1CLKDivider	= RCC_HCLK_DIV1;  
-	rcc_clk.APB2CLKDivider	= RCC_HCLK_DIV1;  
+	rcc_clk.APB1CLKDivider	= RCC_HCLK_DIV1;
+	rcc_clk.APB2CLKDivider	= RCC_HCLK_DIV1;
 
 	return	HAL_RCC_ClockConfig(&rcc_clk, FLASH_LATENCY_4);
 }
