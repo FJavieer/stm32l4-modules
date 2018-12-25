@@ -29,9 +29,9 @@
 /******************************************************************************
  ******* macros ***************************************************************
  ******************************************************************************/
-	# define	ERROR_BIT_LEN			(1000000u)
-	# define	ERROR_LONG_PULSE_LEN_US		( 800000u)
-	# define	ERROR_SHORT_PULSE_LEN_US	( 200000u)
+	# define	ERROR_BIT_LEN			(UINT32_C(1000000))
+	# define	ERROR_LONG_PULSE_LEN_US		((uint32_t)(ERROR_BIT_LEN * 0.8))
+	# define	ERROR_SHORT_PULSE_LEN_US	((uint32_t)(ERROR_BIT_LEN * 0.2))
 	# define	ERROR_LOOP_FOREVER		(true)
 
 
@@ -66,10 +66,10 @@ static	void	flash_short	(void);
  ******************************************************************************/
 	/**
 	 * @brief	Handle error
-	 *		Displays the error value by flashing a led from MSB
+	 * @return	None
+	 * @note	Displays the error value by flashing a led from MSB
 	 *		to LSB.  A long flash is a 1 and a short flash is a 0.
 	 *		After displaying the value, it resets 'error'.
-	 * @return	None
 	 */
 void	error_handle	(void)
 {
