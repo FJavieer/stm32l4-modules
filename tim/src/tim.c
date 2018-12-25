@@ -74,7 +74,7 @@ int	tim_tim3_init		(uint32_t freq_hz)
 		return	ERROR_OK;
 	}
 
-	tim3_interrupt	= false;
+	tim_tim3_interrupt	= false;
 
 	__HAL_RCC_TIM3_CLK_ENABLE();
 	if (tim_tim3_tim_init(freq_hz)) {
@@ -97,7 +97,7 @@ int	tim_tim3_init		(uint32_t freq_hz)
 	 * @param	data:	data to be used by func
 	 * @return	Error
 	 */
-int	tim_callback_push	(void (*func)(void *), void *data)
+int	tim_callback_push	(int (*func)(void *), void *data)
 {
 	if (stack_len >= CALLBACK_STACK_MAX) {
 		error	|= ERROR_TIM_STACK;
@@ -142,7 +142,11 @@ int	tim_callback_exe	(void)
 	}
 
 	for (i = 0; i < stack_len; i++) {
-		callback_stack[i].func(callback_stack[i].data);
+		if (callback_stack[i].func(callback_stack[i].data)) {
+			error	|= ERROR_TIM_CALLBACK_EXE;
+			error_handle();
+			return	ERROR_NOK;
+		}
 	}
 
 	return	ERROR_OK;
@@ -169,7 +173,7 @@ void	HAL_TIM_PeriodElapsedCallback	(TIM_HandleTypeDef *tim_ptr)
 	/* Silence unused variable */
 	(void)tim_ptr;
 
-	tim3_interrupt	= true;
+	tim_tim3_interrupt	= true;
 }
 
 

@@ -1,6 +1,6 @@
 /******************************************************************************
- *	led_test.c							      *
- *	2018/dec/13							      *
+ *	tim_test.c							      *
+ *	2018/dec/25							      *
  ******************************************************************************/
 
 
@@ -8,14 +8,19 @@
  ******* headers **************************************************************
  ******************************************************************************/
 /* Standard C ----------------------------------------------------------------*/
+	#include <stdbool.h>
+	#include <stdint.h>
+
 /* Drivers -------------------------------------------------------------------*/
 	#include "stm32l4xx_hal.h"
 
 /* libalx --------------------------------------------------------------------*/
+	#include "alx_mask.h"
 
 /* STM32L4 modules -----------------------------------------------------------*/
 	#include "delay.h"
 	#include "errors.h"
+	#include "led.h"
 
 	#include "tim.h"
 
@@ -151,12 +156,13 @@ static	int	flash_u8	(void *data)
 	}
 
 	num++;
+
+	return	ERROR_OK;
 }
 
 static	int	flash_sos	(void *data)
 {
 	Tim_Test_Data_s	*data_cast;
-	int		i;
 	float		bit_len;
 
 	data_cast	= (Tim_Test_Data_s *)data;
@@ -191,6 +197,8 @@ static	int	flash_sos	(void *data)
 	if (flash_short(bit_len)) {
 		return	ERROR_NOK;
 	}
+
+	return	ERROR_OK;
 }
 
 static	int	flash_long	(float bit_len)
@@ -204,6 +212,8 @@ static	int	flash_long	(float bit_len)
 	if (delay_us(bit_len * 0.2)) {
 		return	ERROR_NOK;
 	}
+
+	return	ERROR_OK;
 }
 
 static	int	flash_short	(float bit_len)
@@ -217,6 +227,8 @@ static	int	flash_short	(float bit_len)
 	if (delay_us(bit_len * 0.8)) {
 		return	ERROR_NOK;
 	}
+
+	return	ERROR_OK;
 }
 
 static	int	execution_loop	(void)
