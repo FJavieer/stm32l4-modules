@@ -42,12 +42,12 @@
 /* Global --------------------------------------------------------------------*/
 /* Static --------------------------------------------------------------------*/
 static	bool			init_pending	= true;
-static	TIM_HandleTypeDef	tim_handle;
+static	TIM_HandleTypeDef	tim;
 static	TIM_OC_InitTypeDef	oc_init;
 
 
 /******************************************************************************
- ******* static functions (declarations) **************************************
+ ******* static functions (prototypes) ****************************************
  ******************************************************************************/
 static	int	pwm_tim2_tim_init	(uint32_t resolution_sec,
 								uint32_t period);
@@ -94,7 +94,7 @@ int	pwm_tim2_init		(uint32_t resolution_sec, uint32_t period)
 		error_handle();
 		return	ERROR_NOK;
 	}
-	if (HAL_TIM_PWM_Init(&tim_handle)) {
+	if (HAL_TIM_PWM_Init(&tim)) {
 		error	|= ERROR_PWM_HAL_TIM_PWM_INIT;
 		error_handle();
 		return	ERROR_NOK;
@@ -125,22 +125,22 @@ int	pwm_tim2_chX_set	(float duty_cycle, uint32_t tim_chan)
 	}
 
 	if (duty_cycle > 1.0) {
-		oc_init.Pulse	= tim_handle.Init.Period;
+		oc_init.Pulse	= tim.Init.Period;
 		error	|= ERROR_PWM_DUTY;
 	} else if (duty_cycle < 0.0) {
 		oc_init.Pulse	= 0;
 		error	|= ERROR_PWM_DUTY;
 	} else {
-		oc_init.Pulse	= tim_handle.Init.Period * duty_cycle;
+		oc_init.Pulse	= tim.Init.Period * duty_cycle;
 	}
 
-	if (HAL_TIM_PWM_ConfigChannel(&tim_handle, &oc_init, tim_chan)) {
+	if (HAL_TIM_PWM_ConfigChannel(&tim, &oc_init, tim_chan)) {
 		error	|= ERROR_PWM_HAL_TIM_PWM_CONF;
 		error_handle();
 		return	ERROR_NOK;
 	}
 
-	if (HAL_TIM_PWM_Start(&tim_handle, tim_chan)) {
+	if (HAL_TIM_PWM_Start(&tim, tim_chan)) {
 		error	|= ERROR_PWM_HAL_TIM_PWM_START;
 		error_handle();
 		return	ERROR_NOK;
@@ -162,7 +162,7 @@ int	pwm_tim2_stop		(void)
 		return	ERROR_NOK;
 	}
 
-	if (HAL_TIM_Base_Stop(&tim_handle)) {
+	if (HAL_TIM_Base_Stop(&tim)) {
 		error	|= ERROR_PWM_HAL_TIM_STOP;
 		error_handle();
 		return	ERROR_NOK;
@@ -178,39 +178,38 @@ int	pwm_tim2_stop		(void)
 static	int	pwm_tim2_tim_init	(uint32_t resolution_sec,
 								uint32_t period)
 {
-	tim_handle.Instance		= TIM2;
-	tim_handle.Init.Prescaler		= (SystemCoreClock /
-							resolution_sec) - 1u;
-	tim_handle.Init.CounterMode		= TIM_COUNTERMODE_UP;
-	tim_handle.Init.Period			= period - 1u;
-	tim_handle.Init.ClockDivision		= TIM_CLOCKDIVISION_DIV1;
-	tim_handle.Init.RepetitionCounter	= 0;
-	tim_handle.Init.AutoReloadPreload	= TIM_AUTORELOAD_PRELOAD_DISABLE;
+	tim.Instance		= TIM2;
+	tim.Init.Prescaler		= (SystemCoreClock / resolution_sec)
+									- 1u;
+	tim.Init.CounterMode		= TIM_COUNTERMODE_UP;
+	tim.Init.Period			= period - 1u;
+	tim.Init.ClockDivision		= TIM_CLOCKDIVISION_DIV1;
+	tim.Init.RepetitionCounter	= 0;
+	tim.Init.AutoReloadPreload	= TIM_AUTORELOAD_PRELOAD_DISABLE;
 
-	return	HAL_TIM_Base_Init(&tim_handle);
+	return	HAL_TIM_Base_Init(&tim);
 }
 
 static	int	pwm_tim2_clk_conf	(void)
 {
-	TIM_ClockConfigTypeDef	clk_config;
+	TIM_ClockConfigTypeDef	clk;
 
-	clk_config.ClockSource		= TIM_CLOCKSOURCE_INTERNAL;
-	clk_config.ClockPolarity	= TIM_CLOCKPOLARITY_INVERTED;
-	clk_config.ClockPrescaler	= TIM_CLOCKPRESCALER_DIV1;
-	clk_config.ClockFilter		= 0;
+	clk.ClockSource		= TIM_CLOCKSOURCE_INTERNAL;
+	clk.ClockPolarity	= TIM_CLOCKPOLARITY_INVERTED;
+	clk.ClockPrescaler	= TIM_CLOCKPRESCALER_DIV1;
+	clk.ClockFilter		= 0;
 
-	return	HAL_TIM_ConfigClockSource(&tim_handle, &clk_config);
+	return	HAL_TIM_ConfigClockSource(&tim, &clk);
 }
 
 static	int	pwm_tim2_master_conf	(void)
 {
-	TIM_MasterConfigTypeDef	master_config;
+	TIM_MasterConfigTypeDef	master;
 
-	master_config.MasterOutputTrigger	= TIM_TRGO_RESET;
-	master_config.MasterSlaveMode		= TIM_MASTERSLAVEMODE_DISABLE;
+	master.MasterOutputTrigger	= TIM_TRGO_RESET;
+	master.MasterSlaveMode		= TIM_MASTERSLAVEMODE_DISABLE;
 
-	return	HAL_TIMEx_MasterConfigSynchronization(&tim_handle,
-								&master_config);
+	return	HAL_TIMEx_MasterConfigSynchronization(&tim, &master);
 }
 
 static	void	pwm_tim2_oc_conf	(void)
@@ -226,58 +225,58 @@ static	void	pwm_tim2_oc_conf	(void)
 
 static	void	pwm_tim2_ch1_gpio_init	(void)
 {
-	GPIO_InitTypeDef	gpio_init_values;
+	GPIO_InitTypeDef	gpio;
 
 	__HAL_RCC_GPIOA_CLK_ENABLE();
 
-	gpio_init_values.Pin		= GPIO_PIN_15;
-	gpio_init_values.Mode		= GPIO_MODE_AF_OD;
-	gpio_init_values.Pull		= GPIO_NOPULL;
-	gpio_init_values.Speed		= GPIO_SPEED_FREQ_LOW;
-	gpio_init_values.Alternate	= GPIO_AF1_TIM2;
-	HAL_GPIO_Init(GPIOA, &gpio_init_values);
+	gpio.Pin	= GPIO_PIN_15;
+	gpio.Mode	= GPIO_MODE_AF_OD;
+	gpio.Pull	= GPIO_NOPULL;
+	gpio.Speed	= GPIO_SPEED_FREQ_LOW;
+	gpio.Alternate	= GPIO_AF1_TIM2;
+	HAL_GPIO_Init(GPIOA, &gpio);
 }
 
 static	void	pwm_tim2_ch2_gpio_init	(void)
 {
-	GPIO_InitTypeDef	gpio_init_values;
+	GPIO_InitTypeDef	gpio;
 
 	__HAL_RCC_GPIOA_CLK_ENABLE();
 
-	gpio_init_values.Pin		= GPIO_PIN_1;
-	gpio_init_values.Mode		= GPIO_MODE_AF_OD;
-	gpio_init_values.Pull		= GPIO_NOPULL;
-	gpio_init_values.Speed		= GPIO_SPEED_FREQ_LOW;
-	gpio_init_values.Alternate	= GPIO_AF1_TIM2;
-	HAL_GPIO_Init(GPIOA, &gpio_init_values);
+	gpio.Pin	= GPIO_PIN_1;
+	gpio.Mode	= GPIO_MODE_AF_OD;
+	gpio.Pull	= GPIO_NOPULL;
+	gpio.Speed	= GPIO_SPEED_FREQ_LOW;
+	gpio.Alternate	= GPIO_AF1_TIM2;
+	HAL_GPIO_Init(GPIOA, &gpio);
 }
 
 static	void	pwm_tim2_ch3_gpio_init	(void)
 {
-	GPIO_InitTypeDef	gpio_init_values;
+	GPIO_InitTypeDef	gpio;
 
 	__HAL_RCC_GPIOB_CLK_ENABLE();
 
-	gpio_init_values.Pin		= GPIO_PIN_10;
-	gpio_init_values.Mode		= GPIO_MODE_AF_OD;
-	gpio_init_values.Pull		= GPIO_NOPULL;
-	gpio_init_values.Speed		= GPIO_SPEED_FREQ_LOW;
-	gpio_init_values.Alternate	= GPIO_AF1_TIM2;
-	HAL_GPIO_Init(GPIOB, &gpio_init_values);
+	gpio.Pin	= GPIO_PIN_10;
+	gpio.Mode	= GPIO_MODE_AF_OD;
+	gpio.Pull	= GPIO_NOPULL;
+	gpio.Speed	= GPIO_SPEED_FREQ_LOW;
+	gpio.Alternate	= GPIO_AF1_TIM2;
+	HAL_GPIO_Init(GPIOB, &gpio);
 }
 
 static	void	pwm_tim2_ch4_gpio_init	(void)
 {
-	GPIO_InitTypeDef	gpio_init_values;
+	GPIO_InitTypeDef	gpio;
 
 	__HAL_RCC_GPIOB_CLK_ENABLE();
 
-	gpio_init_values.Pin		= GPIO_PIN_11;
-	gpio_init_values.Mode		= GPIO_MODE_AF_OD;
-	gpio_init_values.Pull		= GPIO_NOPULL;
-	gpio_init_values.Speed		= GPIO_SPEED_FREQ_LOW;
-	gpio_init_values.Alternate	= GPIO_AF1_TIM2;
-	HAL_GPIO_Init(GPIOB, &gpio_init_values);
+	gpio.Pin	= GPIO_PIN_11;
+	gpio.Mode	= GPIO_MODE_AF_OD;
+	gpio.Pull	= GPIO_NOPULL;
+	gpio.Speed	= GPIO_SPEED_FREQ_LOW;
+	gpio.Alternate	= GPIO_AF1_TIM2;
+	HAL_GPIO_Init(GPIOB, &gpio);
 }
 
 
