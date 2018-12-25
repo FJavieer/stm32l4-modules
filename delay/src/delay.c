@@ -33,11 +33,11 @@
 /* Global --------------------------------------------------------------------*/
 /* Static --------------------------------------------------------------------*/
 static	bool			init_pending	= true;
-static	TIM_HandleTypeDef	tim_handle;
+static	TIM_HandleTypeDef	tim;
 
 
 /******************************************************************************
- ******* static functions (declarations) **************************************
+ ******* static functions (prototypes) ****************************************
  ******************************************************************************/
 static	int	delay_us_tim_init	(void);
 static	void	delay_us_delay_init	(uint32_t time_us, uint32_t *overflows);
@@ -95,7 +95,7 @@ int	delay_us	(uint32_t time_us)
 
 	delay_us_delay_init(time_us, &overflows);
 
-	if (HAL_TIM_Base_Start(&tim_handle)) {
+	if (HAL_TIM_Base_Start(&tim)) {
 		error	|= ERROR_DELAY_HAL_TIM_START;
 		error_handle();
 		return	ERROR_NOK;
@@ -103,7 +103,7 @@ int	delay_us	(uint32_t time_us)
 
 	delay_us_delay_loop(overflows);
 
-	if (HAL_TIM_Base_Stop(&tim_handle)) {
+	if (HAL_TIM_Base_Stop(&tim)) {
 		error	|= ERROR_DELAY_HAL_TIM_STOP;
 		error_handle();
 		return	ERROR_NOK;
@@ -119,16 +119,16 @@ int	delay_us	(uint32_t time_us)
 static	int	delay_us_tim_init	(void)
 {
 	/* Resolution: 1 us */
-	tim_handle.Instance		= TIM6; 
-	tim_handle.Init.Prescaler		= (SystemCoreClock /
+	tim.Instance		= TIM6; 
+	tim.Init.Prescaler		= (SystemCoreClock /
 							RESOLUTION_1_US) - 1u;
-	tim_handle.Init.CounterMode		= TIM_COUNTERMODE_UP;
-	tim_handle.Init.Period			= UINT16_MAX;
-	tim_handle.Init.ClockDivision		= TIM_CLOCKDIVISION_DIV1;
-	tim_handle.Init.RepetitionCounter	= 0;
-	tim_handle.Init.AutoReloadPreload	= TIM_AUTORELOAD_PRELOAD_DISABLE;
+	tim.Init.CounterMode		= TIM_COUNTERMODE_UP;
+	tim.Init.Period			= UINT16_MAX;
+	tim.Init.ClockDivision		= TIM_CLOCKDIVISION_DIV1;
+	tim.Init.RepetitionCounter	= 0;
+	tim.Init.AutoReloadPreload	= TIM_AUTORELOAD_PRELOAD_DISABLE;
 
-	return	HAL_TIM_Base_Init(&tim_handle);
+	return	HAL_TIM_Base_Init(&tim);
 }
 
 static	void	delay_us_delay_init	(uint32_t time_us, uint32_t *overflows)
@@ -136,11 +136,11 @@ static	void	delay_us_delay_init	(uint32_t time_us, uint32_t *overflows)
 	uint32_t	counter_initial;
 	uint32_t	partial;
 
-	*overflows		= (time_us / ((uint32_t)UINT16_MAX + 1u)) + 1u;
-	partial			= time_us % ((uint32_t)UINT16_MAX + 1u);
+	*overflows	= (time_us / ((uint32_t)UINT16_MAX + 1u)) + 1u;
+	partial		= time_us % ((uint32_t)UINT16_MAX + 1u);
 	counter_initial	= (uint32_t)UINT16_MAX + 1u - partial;
 
-	__HAL_TIM_SET_COUNTER(&tim_handle, counter_initial);
+	__HAL_TIM_SET_COUNTER(&tim, counter_initial);
 }
 
 static	void	delay_us_delay_loop	(uint32_t overflows)
@@ -150,9 +150,9 @@ static	void	delay_us_delay_loop	(uint32_t overflows)
 
 	counter_flags	= 0;
 	while (counter_flags < overflows) {
-		flag	= __HAL_TIM_GET_FLAG(&tim_handle, TIM_FLAG_UPDATE);
+		flag	= __HAL_TIM_GET_FLAG(&tim, TIM_FLAG_UPDATE);
 		if (flag) {
-			__HAL_TIM_CLEAR_FLAG(&tim_handle, TIM_FLAG_UPDATE);
+			__HAL_TIM_CLEAR_FLAG(&tim, TIM_FLAG_UPDATE);
 			counter_flags++;
 		}
 	}
