@@ -33,11 +33,11 @@
 /* Global --------------------------------------------------------------------*/
 /* Static --------------------------------------------------------------------*/
 static	bool			init_pending	= true;
-static	SPI_HandleTypeDef	spi_handle;
+static	SPI_HandleTypeDef	spi;
 
 
 /******************************************************************************
- ******* static functions (declarations) **************************************
+ ******* static functions (prototypes) ****************************************
  ******************************************************************************/
 static	void	spi_gpio_init		(void);
 static	int	spi_peripherial_init	(void);
@@ -93,12 +93,12 @@ int	spi_msg_write	(uint16_t data)
 
 	HAL_GPIO_WritePin(GPIOC, GPIO_PIN_2, GPIO_PIN_RESET);
 
-	if (HAL_SPI_Transmit(&spi_handle, spi_data, 1, SPI_TIMEOUT)) {
+	if (HAL_SPI_Transmit(&spi, spi_data, 1, SPI_TIMEOUT)) {
 		error	|= ERROR_SPI_HAL_SPI_TRANSMIT;
 		error_handle();
 		return	ERROR_NOK;
 	}
-	while (HAL_SPI_GetState(&spi_handle) != HAL_SPI_STATE_READY) {
+	while (HAL_SPI_GetState(&spi) != HAL_SPI_STATE_READY) {
 		/* Empty loop */
 	}
 
@@ -113,50 +113,50 @@ int	spi_msg_write	(uint16_t data)
  ******************************************************************************/
 static	void	spi_gpio_init		(void)
 {
-	GPIO_InitTypeDef gpio_init_values;
+	GPIO_InitTypeDef	gpio;
 
 	__HAL_RCC_GPIOB_CLK_ENABLE ();
 
-	gpio_init_values.Pin		= GPIO_PIN_13;                
-	gpio_init_values.Mode		= GPIO_MODE_AF_PP;
-	gpio_init_values.Speed		= GPIO_SPEED_FREQ_HIGH;
-	gpio_init_values.Pull		= GPIO_NOPULL;
-	gpio_init_values.Alternate	= GPIO_AF5_SPI2;
-	HAL_GPIO_Init(GPIOB, &gpio_init_values);
+	gpio.Pin	= GPIO_PIN_13;
+	gpio.Mode	= GPIO_MODE_AF_PP;
+	gpio.Speed	= GPIO_SPEED_FREQ_HIGH;
+	gpio.Pull	= GPIO_NOPULL;
+	gpio.Alternate	= GPIO_AF5_SPI2;
+	HAL_GPIO_Init(GPIOB, &gpio);
 
 	__HAL_RCC_GPIOC_CLK_ENABLE ();
 
-	gpio_init_values.Pin		= GPIO_PIN_3;                
-	gpio_init_values.Mode		= GPIO_MODE_AF_PP;
-	gpio_init_values.Speed		= GPIO_SPEED_FREQ_HIGH;
-	gpio_init_values.Pull		= GPIO_NOPULL;
-	gpio_init_values.Alternate	= GPIO_AF5_SPI2;
-	HAL_GPIO_Init(GPIOC, &gpio_init_values);
+	gpio.Pin	= GPIO_PIN_3;
+	gpio.Mode	= GPIO_MODE_AF_PP;
+	gpio.Speed	= GPIO_SPEED_FREQ_HIGH;
+	gpio.Pull	= GPIO_NOPULL;
+	gpio.Alternate	= GPIO_AF5_SPI2;
+	HAL_GPIO_Init(GPIOC, &gpio);
 
-	gpio_init_values.Pin		= GPIO_PIN_2;                
-	gpio_init_values.Mode		= GPIO_MODE_OUTPUT_PP;
-	gpio_init_values.Speed		= GPIO_SPEED_FREQ_HIGH;
-	gpio_init_values.Pull		= GPIO_NOPULL;
-	HAL_GPIO_Init(GPIOC, &gpio_init_values);
+	gpio.Pin	= GPIO_PIN_2;
+	gpio.Mode	= GPIO_MODE_OUTPUT_PP;
+	gpio.Speed	= GPIO_SPEED_FREQ_HIGH;
+	gpio.Pull	= GPIO_NOPULL;
+	HAL_GPIO_Init(GPIOC, &gpio);
 
 	HAL_GPIO_WritePin(GPIOC, GPIO_PIN_2, GPIO_PIN_SET);
 }
 
 static	int	spi_peripherial_init	(void)
 {
-	spi_handle.Instance		= SPI2;
-	spi_handle.Init.BaudRatePrescaler	= SPI_BAUDRATEPRESCALER_32;
-	spi_handle.Init.Direction		= SPI_DIRECTION_2LINES;
-	spi_handle.Init.CLKPhase		= SPI_PHASE_1EDGE;
-	spi_handle.Init.CLKPolarity		= SPI_POLARITY_LOW;
-	spi_handle.Init.CRCCalculation		= SPI_CRCCALCULATION_DISABLE;
-	spi_handle.Init.DataSize		= SPI_DATASIZE_16BIT;
-	spi_handle.Init.FirstBit		= SPI_FIRSTBIT_MSB;
-	spi_handle.Init.NSS			= SPI_NSS_SOFT;
-	spi_handle.Init.TIMode			= SPI_TIMODE_DISABLE;
-	spi_handle.Init.Mode			= SPI_MODE_MASTER;
+	spi.Instance		= SPI2;
+	spi.Init.BaudRatePrescaler	= SPI_BAUDRATEPRESCALER_32;
+	spi.Init.Direction		= SPI_DIRECTION_2LINES;
+	spi.Init.CLKPhase		= SPI_PHASE_1EDGE;
+	spi.Init.CLKPolarity		= SPI_POLARITY_LOW;
+	spi.Init.CRCCalculation		= SPI_CRCCALCULATION_DISABLE;
+	spi.Init.DataSize		= SPI_DATASIZE_16BIT;
+	spi.Init.FirstBit		= SPI_FIRSTBIT_MSB;
+	spi.Init.NSS			= SPI_NSS_SOFT;
+	spi.Init.TIMode			= SPI_TIMODE_DISABLE;
+	spi.Init.Mode			= SPI_MODE_MASTER;
 
-	return	HAL_SPI_Init(&spi_handle);
+	return	HAL_SPI_Init(&spi);
 }
 
 
