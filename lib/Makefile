@@ -32,7 +32,7 @@ MODS_OBJ_NUNCHUK	= nunchuk.o nunchuk_test.o
 MODS_OBJ_PWM		= pwm.o
 MODS_OBJ_SERVO		= servo.o servo_test.o
 MODS_OBJ_SPI		= spi.o
-MODS_OBJ_TIM		= tim.o
+MODS_OBJ_TIM		= tim.o tim_test.o
 MODS_OBJS		= \
 			$(patsubst %,$(CAN_TMP_DIR)/%,$(MODS_OBJ_CAN)) \
 			$(patsubst %,$(CLK_TMP_DIR)/%,$(MODS_OBJ_CLK)) \
