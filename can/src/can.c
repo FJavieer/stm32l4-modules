@@ -32,7 +32,7 @@
 /* Global --------------------------------------------------------------------*/
 /* Static --------------------------------------------------------------------*/
 static	bool			init_pending	= true;
-static	CAN_HandleTypeDef	can_handle;
+static	CAN_HandleTypeDef	can;
 static	CAN_TxHeaderTypeDef	can_tx_header;
 static	CAN_RxHeaderTypeDef	can_rx_header;
 static	uint8_t			can_rx_data [CAN_DATA_LEN];
@@ -42,7 +42,7 @@ static	volatile	bool	can_msg_pending;
 
 
 /******************************************************************************
- ******* static functions (declarations) **************************************
+ ******* static functions (prototypes) ****************************************
  ******************************************************************************/
 static	void	can_msp_init		(void);
 static	void	can_gpio_init		(void);
@@ -84,12 +84,12 @@ int	can_init	(void)
 		error_handle();
 		return	ERROR_NOK;
 	}
-	if (HAL_CAN_Start(&can_handle)) {
+	if (HAL_CAN_Start(&can)) {
 		error	|= ERROR_CAN_HAL_CAN_START;
 		error_handle();
 		return	ERROR_NOK;
 	}
-	if (HAL_CAN_ActivateNotification(&can_handle, CAN_IT_RX_FIFO0_MSG_PENDING)) {
+	if (HAL_CAN_ActivateNotification(&can, CAN_IT_RX_FIFO0_MSG_PENDING)) {
 		error	|= ERROR_CAN_HAL_CAN_ACTI_NOTIF;
 		error_handle();
 		return	ERROR_NOK;
@@ -123,7 +123,7 @@ int	can_msg_write	(uint8_t data [CAN_DATA_LEN])
 		can_tx_data[i]	= data[i];
 	}
 
-	if (HAL_CAN_AddTxMessage(&can_handle, &can_tx_header, can_tx_data,
+	if (HAL_CAN_AddTxMessage(&can, &can_tx_header, can_tx_data,
 							&can_tx_mailbox)) {
 		error	|= ERROR_CAN_HAL_ADD_TX_MSG;
 		error_handle();
@@ -170,12 +170,12 @@ int	can_msg_read	(uint8_t data [CAN_DATA_LEN])
  ******* HAL weak functions (redefinitions) ***********************************
  ******************************************************************************/
 /**
-* @brief	This function handles CAN1 RX0 interrupt request.
-* @return	None
-*/
+ * @brief	This function handles CAN1 RX0 interrupt request.
+ * @return	None
+ */
 void	CAN1_RX0_IRQHandler			(void)
 {
-	HAL_CAN_IRQHandler(&can_handle);
+	HAL_CAN_IRQHandler(&can);
 }
 
 /**
@@ -184,9 +184,9 @@ void	CAN1_RX0_IRQHandler			(void)
  *		contains the configuration information for the specified CAN.
  * @return	None
  */
-void	HAL_CAN_RxFifo0MsgPendingCallback	(CAN_HandleTypeDef *can_handle_ptr)
+void	HAL_CAN_RxFifo0MsgPendingCallback	(CAN_HandleTypeDef *can_ptr)
 {
-	if (HAL_CAN_GetRxMessage(can_handle_ptr, CAN_RX_FIFO0, &can_rx_header,
+	if (HAL_CAN_GetRxMessage(can_ptr, CAN_RX_FIFO0, &can_rx_header,
 								can_rx_data)) {
 		error	|= ERROR_CAN_HAL_GET_RX_MSG;
 		error_handle();
@@ -210,17 +210,17 @@ static	void	can_msp_init		(void)
 
 static	void	can_gpio_init		(void)
 {
-	GPIO_InitTypeDef	gpio_init_values;
+	GPIO_InitTypeDef	gpio;
 
 	__HAL_RCC_GPIOA_CLK_ENABLE();
 
 	/* PA12 -> TX // PA11 -> RX */
-	gpio_init_values.Pin		= GPIO_PIN_12 | GPIO_PIN_11;
-	gpio_init_values.Mode		= GPIO_MODE_AF_OD;
-	gpio_init_values.Speed		= GPIO_SPEED_FREQ_LOW;
-	gpio_init_values.Pull		= GPIO_NOPULL;
-	gpio_init_values.Alternate	= GPIO_AF9_CAN1;
-	HAL_GPIO_Init(GPIOA, &gpio_init_values);
+	gpio.Pin	= GPIO_PIN_12 | GPIO_PIN_11;
+	gpio.Mode	= GPIO_MODE_AF_OD;
+	gpio.Speed	= GPIO_SPEED_FREQ_LOW;
+	gpio.Pull	= GPIO_NOPULL;
+	gpio.Alternate	= GPIO_AF9_CAN1;
+	HAL_GPIO_Init(GPIOA, &gpio);
 }
 
 static	void	can_nvic_conf		(void)
@@ -231,21 +231,21 @@ static	void	can_nvic_conf		(void)
 
 static	int	can_peripherial_init	(void)
 {
-	can_handle.Instance		= CAN1;
-	can_handle.Init.TimeTriggeredMode	= DISABLE;
-	can_handle.Init.AutoBusOff		= DISABLE;
-	can_handle.Init.AutoWakeUp		= DISABLE;
-	can_handle.Init.AutoRetransmission	= ENABLE;
-	can_handle.Init.ReceiveFifoLocked	= DISABLE;
-	can_handle.Init.TransmitFifoPriority	= DISABLE;
-	can_handle.Init.Mode			= CAN_MODE_NORMAL;
-	can_handle.Init.SyncJumpWidth		= CAN_SJW_1TQ;
-	can_handle.Init.TimeSeg1		= CAN_BS1_4TQ;
-	can_handle.Init.TimeSeg2		= CAN_BS2_5TQ;
+	can.Instance		= CAN1;
+	can.Init.TimeTriggeredMode	= DISABLE;
+	can.Init.AutoBusOff		= DISABLE;
+	can.Init.AutoWakeUp		= DISABLE;
+	can.Init.AutoRetransmission	= ENABLE;
+	can.Init.ReceiveFifoLocked	= DISABLE;
+	can.Init.TransmitFifoPriority	= DISABLE;
+	can.Init.Mode			= CAN_MODE_NORMAL;
+	can.Init.SyncJumpWidth		= CAN_SJW_1TQ;
+	can.Init.TimeSeg1		= CAN_BS1_4TQ;
+	can.Init.TimeSeg2		= CAN_BS2_5TQ;
 	/* CAN clock = 1 MHz = 80 MHz / 80;  Period = 1 us */
-	can_handle.Init.Prescaler		= SystemCoreClock / 1000000u;
+	can.Init.Prescaler		= SystemCoreClock / 1000000u;
 
-	return	HAL_CAN_Init(&can_handle);
+	return	HAL_CAN_Init(&can);
 }
 
 static	int	can_filter_conf		(void)
@@ -262,7 +262,7 @@ static	int	can_filter_conf		(void)
 	can_filter.FilterScale		= CAN_FILTERSCALE_16BIT;
 	can_filter.FilterActivation	= ENABLE;
 
-	return	HAL_CAN_ConfigFilter(&can_handle, &can_filter);
+	return	HAL_CAN_ConfigFilter(&can, &can_filter);
 }
 
 static	void	can_tx_header_conf	(void)
