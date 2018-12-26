@@ -78,19 +78,11 @@ STM32L4_HAL_DIR		= $(STM32_DRIVERS_DIR)/STM32L4xx_HAL_Driver/
 
 LIBALX_DIR		= $(PARENT_DIR)/libalx/
 
-CAN_DIR			= $(STM32L4_MODULES_DIR)/can/
-CLK_DIR			= $(STM32L4_MODULES_DIR)/clk/
-DELAY_DIR		= $(STM32L4_MODULES_DIR)/delay/
-DISPLAY_DIR		= $(STM32L4_MODULES_DIR)/display/
-ERRORS_DIR		= $(STM32L4_MODULES_DIR)/errors/
-I2C_DIR			= $(STM32L4_MODULES_DIR)/i2c/
-LED_DIR			= $(STM32L4_MODULES_DIR)/led/
-NUNCHUK_DIR		= $(STM32L4_MODULES_DIR)/nunchuk/
-PWM_DIR			= $(STM32L4_MODULES_DIR)/pwm/
-SERVO_DIR		= $(STM32L4_MODULES_DIR)/servo/
-SPI_DIR			= $(STM32L4_MODULES_DIR)/spi/
-TIM_DIR			= $(STM32L4_MODULES_DIR)/tim/
+MODULES_BASE_DIR	= $(STM32L4_MODULES_DIR)/base/
+MODULES_DEV_DIR		= $(STM32L4_MODULES_DIR)/dev/
+MODULES_TEST_DIR	= $(STM32L4_MODULES_DIR)/test/
 
+INC_DIR			= $(STM32L4_MODULES_DIR)/include/
 LIB_DIR			= $(STM32L4_MODULES_DIR)/lib/
 
 export	STM32L4_MODULES_DIR
@@ -102,48 +94,21 @@ export	STM32L4_HAL_DIR
 
 export	LIBALX_DIR
 
-export	CAN_DIR
-export	CLK_DIR
-export	DELAY_DIR
-export	DISPLAY_DIR
-export	ERRORS_DIR
-export	I2C_DIR
-export	LED_DIR
-export	NUNCHUK_DIR
-export	PWM_DIR
-export	SERVO_DIR
-export	SPI_DIR
-export	TIM_DIR
+export	MODULES_BASE_DIR
+export	MODULES_DEV_DIR
+export	MODULES_TEST_DIR
 
 ################################################################################
 # target: dependencies
 #	action
 
 all:
-	@echo	'	MAKE	modules:	can'
-	$(Q)make -C $(CAN_DIR)
-	@echo	'	MAKE	modules:	clk'
-	$(Q)make -C $(CLK_DIR)
-	@echo	'	MAKE	modules:	delay'
-	$(Q)make -C $(DELAY_DIR)
-	@echo	'	MAKE	modules:	display'
-	$(Q)make -C $(DISPLAY_DIR)
-	@echo	'	MAKE	modules:	errors'
-	$(Q)make -C $(ERRORS_DIR)
-	@echo	'	MAKE	modules:	i2c'
-	$(Q)make -C $(I2C_DIR)
-	@echo	'	MAKE	modules:	led'
-	$(Q)make -C $(LED_DIR)
-	@echo	'	MAKE	modules:	nunchuk'
-	$(Q)make -C $(NUNCHUK_DIR)
-	@echo	'	MAKE	modules:	pwm'
-	$(Q)make -C $(PWM_DIR)
-	@echo	'	MAKE	modules:	servo'
-	$(Q)make -C $(SERVO_DIR)
-	@echo	'	MAKE	modules:	spi'
-	$(Q)make -C $(SPI_DIR)
-	@echo	'	MAKE	modules:	tim'
-	$(Q)make -C $(TIM_DIR)
+	@echo	'	MAKE	modules:	base'
+	$(Q)make -C $(MODULES_BASE_DIR)
+	@echo	'	MAKE	modules:	dev'
+	$(Q)make -C $(MODULES_DEV_DIR)
+	@echo	'	MAKE	modules:	test'
+	$(Q)make -C $(MODULES_TEST_DIR)
 	@echo	'	MAKE	modules:	lib'
 	$(Q)make -C $(LIB_DIR)
 
