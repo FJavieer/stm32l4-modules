@@ -114,7 +114,7 @@ all:
 
 
 clean:
-	@echo  "	RM	*.o *.s *.a"
+	@echo	'	RM	*.o *.s *.a'
 	$(Q)find . -type f -name '*.o' -exec rm '{}' '+'
 	$(Q)find . -type f -name '*.s' -exec rm '{}' '+'
 	$(Q)find . -type f -name '*.a' -exec rm '{}' '+'

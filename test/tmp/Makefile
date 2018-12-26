@@ -52,7 +52,7 @@ LED_DEPS		= $(SRC_DIR)/led_test.c \
 			$(COMMON_DEPS) \
 			$(patsubst %,$(BASE_INC_DIR)/%,$(LED_INC_BASE)) \
 			$(patsubst %,$(INC_DIR)/%,$(LED_INC))
-LED_TST_INC_DIRS	= -I $(INC_DIR) \
+LED_INC_DIRS		= -I $(INC_DIR) \
 			-I $(BASE_INC_DIR) \
 			$(COMMON_INC_DIRS)
 
