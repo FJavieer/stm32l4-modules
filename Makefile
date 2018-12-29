@@ -102,22 +102,31 @@ export	MODULES_TEST_DIR
 # target: dependencies
 #	action
 
+PHONY := all
 all:
 	@echo	'	MAKE	modules:	base'
-	$(Q)make -C $(MODULES_BASE_DIR)
+	$(Q)$(MAKE) -C $(MODULES_BASE_DIR)
 	@echo	'	MAKE	modules:	dev'
-	$(Q)make -C $(MODULES_DEV_DIR)
+	$(Q)$(MAKE) -C $(MODULES_DEV_DIR)
 	@echo	'	MAKE	modules:	test'
-	$(Q)make -C $(MODULES_TEST_DIR)
+	$(Q)$(MAKE) -C $(MODULES_TEST_DIR)
 	@echo	'	MAKE	modules:	lib'
-	$(Q)make -C $(LIB_DIR)
+	$(Q)$(MAKE) -C $(LIB_DIR)
 
 
+PHONY += clean
 clean:
 	@echo	'	RM	*.o *.s *.a'
 	$(Q)find . -type f -name '*.o' -exec rm '{}' '+'
 	$(Q)find . -type f -name '*.s' -exec rm '{}' '+'
 	$(Q)find . -type f -name '*.a' -exec rm '{}' '+'
+
+################################################################################
+# Declare the contents of the .PHONY variable as phony.
+.PHONY: $(PHONY)
+
+
+
 
 ################################################################################
 ######## End of file ###########################################################
