@@ -29,10 +29,10 @@
 /******************************************************************************
  ******* macros ***************************************************************
  ******************************************************************************/
-	# define	ERROR_BIT_LEN			(UINT32_C(1000000))
+	# define	ERROR_BIT_LEN			(UINT32_C(2000000))
 	# define	ERROR_LONG_PULSE_LEN_US		((uint32_t)(ERROR_BIT_LEN * 0.8))
 	# define	ERROR_SHORT_PULSE_LEN_US	((uint32_t)(ERROR_BIT_LEN * 0.2))
-	# define	ERROR_LOOP_FOREVER		(true)
+	# define	ERROR_LOOP_FOREVER		(false)
 
 
 /******************************************************************************
@@ -49,7 +49,7 @@
  ******* variables ************************************************************
  ******************************************************************************/
 /* Global --------------------------------------------------------------------*/
-	uint32_t	error;
+	uint32_t	prj_error;
 /* Static --------------------------------------------------------------------*/
 
 
@@ -71,7 +71,7 @@ static	void	flash_short	(void);
 	 *		to LSB.  A long flash is a 1 and a short flash is a 0.
 	 *		After displaying the value, it resets 'error'.
 	 */
-void	error_handle	(void)
+void	prj_error_handle	(void)
 {
 	int	i;
 #if (!ERROR_LOOP_FOREVER)
@@ -81,8 +81,12 @@ void	error_handle	(void)
 #if (ERROR_LOOP_FOREVER)
 	while (true) {
 #else
-	for (j = 0; j < 3; j++) {
+	for (j = 0; j < 1; j++) {
+
 #endif
+		led_reset();
+		delay_us(1000000u);
+
 		for (i = 0; i < 10; i++) {
 			led_set();
 			delay_us(50000u);
@@ -90,10 +94,13 @@ void	error_handle	(void)
 			delay_us(50000u);
 		}
 
+		led_reset();
+		delay_us(1000000u);
+
 		flash_error();
 	}
 
-	error	= 0;
+	prj_error	= 0;
 }
 
 
@@ -106,7 +113,7 @@ static	void	flash_error	(void)
 	bool	bit;
 
 	for (i = 31; i >= 0; i--) {
-		bit	= (bool)(error & alx_maskgen_u32(i));
+		bit	= (bool)(prj_error & alx_maskgen_u32(i));
 
 		if (bit) {
 			flash_long();
