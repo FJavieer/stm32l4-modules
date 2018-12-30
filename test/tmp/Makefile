@@ -17,7 +17,9 @@ INC_DIR = $(STM32L4_MODULES_DIR)/inc/test/
 
 # dependencies
 
-ALL	= display_test.o led_test.o nunchuk_test.o servo_test.o tim_test.o
+ALL	= \
+		can_test.o led_test.o tim_test.o \
+		display_test.o nunchuk_test.o servo_test.o
 
 COMMON_INC_CMSIS	= core_cm4.h cmsis_gcc.h
 COMMON_INC_CMSIS_L4	= stm32l4xx.h
@@ -30,6 +32,17 @@ COMMON_INC_DIRS		= \
 			-I $(STM32_CMSIS_INC_DIR) \
 			-I $(STM32L4_CMSIS_INC_DIR) \
 			-I $(STM32L4_HAL_INC_DIR)
+
+
+CAN_INC_BASE		= can.h delay.h errors.h led.h
+CAN_INC			= can_test.h
+CAN_DEPS		= $(SRC_DIR)/can_test.c \
+			$(COMMON_DEPS) \
+			$(patsubst %,$(BASE_INC_DIR)/%,$(CAN_INC_BASE)) \
+			$(patsubst %,$(INC_DIR)/%,$(CAN_INC))
+CAN_INC_DIRS		= -I $(INC_DIR) \
+			-I $(BASE_INC_DIR) \
+			$(COMMON_INC_DIRS)
 
 
 DISPLAY_INC_BASE	= delay.h errors.h
@@ -58,7 +71,7 @@ LED_INC_DIRS		= -I $(INC_DIR) \
 
 
 NUNCHUK_INC_BASE	= delay.h errors.h
-NUNCHUK_INC_DEV		= display.h nunchuk.h
+NUNCHUK_INC_DEV		= display.h nunchuk.h servo.h
 NUNCHUK_INC		= nunchuk_test.h
 NUNCHUK_DEPS		= $(SRC_DIR)/nunchuk_test.c \
 			$(COMMON_DEPS) \
@@ -103,6 +116,13 @@ TIM_INC_DIRS		= -I $(INC_DIR) \
 
 all: $(ALL)
 
+
+can_test.s: $(CAN_DEPS)
+	@echo	"	CC	$@"
+	$(Q)$(CC) $(CFLAGS) $(CAN_INC_DIRS) -S $< -o $@
+can_test.o: can_test.s
+	@echo	"	AS	$@"
+	$(Q)$(AS) $< -o $@
 
 display_test.s: $(DISPLAY_DEPS)
 	@echo	"	CC	$@"

@@ -16,20 +16,17 @@ ALL		= \
 		libstm32l4-modules-test.a
 
 MODS_OBJ_BASE	= can.o clk.o delay.o errors.o i2c.o led.o pwm.o spi.o tim.o
-MODS_BASE_OBJS	= \
-		$(patsubst %,$(BASE_TMP_DIR)/%,$(MODS_OBJ_BASE))
+MODS_BASE_OBJS	= $(patsubst %,$(BASE_TMP_DIR)/%,$(MODS_OBJ_BASE))
 
 
 MODS_OBJ_DEV	= display.o nunchuk.o servo.o
-MODS_DEV_OBJS	= \
-		$(patsubst %,$(DEV_TMP_DIR)/%,$(MODS_OBJ_DEV))
+MODS_DEV_OBJS	= $(patsubst %,$(DEV_TMP_DIR)/%,$(MODS_OBJ_DEV))
 
 
 MODS_OBJ_TEST	= \
-		led_test.o tim_test.o \
+		can_test.o led_test.o tim_test.o \
 		display_test.o nunchuk_test.o servo_test.o
-MODS_TEST_OBJS	= \
-		$(patsubst %,$(TEST_TMP_DIR)/%,$(MODS_OBJ_TEST))
+MODS_TEST_OBJS	= $(patsubst %,$(TEST_TMP_DIR)/%,$(MODS_OBJ_TEST))
 
 # target: dependencies
 #	action
