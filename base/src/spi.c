@@ -62,8 +62,8 @@ int	spi_init	(void)
 	__SPI2_CLK_ENABLE();
 	spi_gpio_init();
 	if (spi_peripherial_init()) {
-		error	|= ERROR_SPI_HAL_SPI_INIT;
-		error_handle();
+		prj_error	|= ERROR_SPI_HAL_SPI_INIT;
+		prj_error_handle();
 		return	ERROR_NOK;
 	}
 
@@ -82,8 +82,8 @@ int	spi_msg_write	(uint16_t data)
 
 	if (init_pending) {
 		if (spi_init()) {
-			error	|= ERROR_SPI_INIT;
-			error_handle();
+			prj_error	|= ERROR_SPI_INIT;
+			prj_error_handle();
 			return	ERROR_NOK;
 		}
 	}
@@ -94,8 +94,8 @@ int	spi_msg_write	(uint16_t data)
 	HAL_GPIO_WritePin(GPIOC, GPIO_PIN_2, GPIO_PIN_RESET);
 
 	if (HAL_SPI_Transmit(&spi, spi_data, 1, SPI_TIMEOUT)) {
-		error	|= ERROR_SPI_HAL_SPI_TRANSMIT;
-		error_handle();
+		prj_error	|= ERROR_SPI_HAL_SPI_TRANSMIT;
+		prj_error_handle();
 		return	ERROR_NOK;
 	}
 	while (HAL_SPI_GetState(&spi) != HAL_SPI_STATE_READY) {
