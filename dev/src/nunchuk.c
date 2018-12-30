@@ -81,13 +81,13 @@ int	nunchuk_init	(void)
 	}
 
 	if (i2c_init()) {
-		error	|= ERROR_NUNCHUK_I2C_INIT;
-		error_handle();
+		prj_error	|= ERROR_NUNCHUK_I2C_INIT;
+		prj_error_handle();
 		return	ERROR_NOK;
 	}
 	if (nunchuk_start()) {
-		error	|= ERROR_NUNCHUK_START;
-		error_handle();
+		prj_error	|= ERROR_NUNCHUK_START;
+		prj_error_handle();
 		return	ERROR_NOK;
 	}
 
@@ -106,32 +106,31 @@ int	nunchuk_read	(Nunchuk_Data_s *data)
 
 	if (init_pending) {
 		if (nunchuk_init()) {
-			error	|= ERROR_NUNCHUK_INIT;
-			error_handle();
+			prj_error	|= ERROR_NUNCHUK_INIT;
+			prj_error_handle();
 			return	ERROR_NOK;
 		}
 	}
 
 	if (i2c_msg_write(NUNCHUK_ADDRESS, NUNCHUK_COMMAND_GETDATA_LEN,
 						NUNCHUK_COMMAND_GETDATA_DATA)) {
-		error	|= ERROR_NUNCHUK_I2C_TRANSMIT;
-		error_handle();
+		prj_error	|= ERROR_NUNCHUK_I2C_TRANSMIT;
+		prj_error_handle();
 		return	ERROR_NOK;
 	}
 
 	if (i2c_msg_ask(NUNCHUK_ADDRESS, NUNCHUK_DATA_LEN)) {
-		error	|= ERROR_NUNCHUK_I2C_ASK;
-		error_handle();
+		prj_error	|= ERROR_NUNCHUK_I2C_ASK;
+		prj_error_handle();
 		return	ERROR_NOK;
 	}
 
 	while (!i2c_msg_ready()) {
-		__WFE();
 	}
 
 	if (i2c_msg_read(NUNCHUK_DATA_LEN, buff)) {
-		error	|= ERROR_NUNCHUK_I2C_READ;
-		error_handle();
+		prj_error	|= ERROR_NUNCHUK_I2C_READ;
+		prj_error_handle();
 		return	ERROR_NOK;
 	}
 
@@ -149,8 +148,8 @@ static	int	nunchuk_start		(void)
 {
 	if (i2c_msg_write(NUNCHUK_ADDRESS, NUNCHUK_COMMAND_START_LEN,
 						NUNCHUK_COMMAND_START_DATA)) {
-		error	|= ERROR_NUNCHUK_I2C_TRANSMIT;
-		error_handle();
+		prj_error	|= ERROR_NUNCHUK_I2C_TRANSMIT;
+		prj_error_handle();
 		return	ERROR_NOK;
 	}
 

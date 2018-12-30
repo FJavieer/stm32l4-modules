@@ -93,29 +93,29 @@ int	servo_init		(void)
 	}
 
 	if (pwm_tim2_init(SERVO_PWM_RESOLUTION_s, SERVO_PWM_PERIOD_us)) {
-		error	|= ERROR_SERVO_PWM_INIT;
-		error_handle();
+		prj_error	|= ERROR_SERVO_PWM_INIT;
+		prj_error_handle();
 		return	ERROR_NOK;
 	}
 
 	if (pwm_tim2_chX_set(SERVO_PWM_DUTY_DEF, TIM_CHANNEL_1)) {
-		error	|= ERROR_SERVO_PWM_SET;
-		error_handle();
+		prj_error	|= ERROR_SERVO_PWM_SET;
+		prj_error_handle();
 		return	ERROR_NOK;
 	}
 	if (pwm_tim2_chX_set(SERVO_PWM_DUTY_DEF, TIM_CHANNEL_2)) {
-		error	|= ERROR_SERVO_PWM_SET;
-		error_handle();
+		prj_error	|= ERROR_SERVO_PWM_SET;
+		prj_error_handle();
 		return	ERROR_NOK;
 	}
 	if (pwm_tim2_chX_set(SERVO_PWM_DUTY_DEF, TIM_CHANNEL_3)) {
-		error	|= ERROR_SERVO_PWM_SET;
-		error_handle();
+		prj_error	|= ERROR_SERVO_PWM_SET;
+		prj_error_handle();
 		return	ERROR_NOK;
 	}
 	if (pwm_tim2_chX_set(SERVO_PWM_DUTY_DEF, TIM_CHANNEL_4)) {
-		error	|= ERROR_SERVO_PWM_SET;
-		error_handle();
+		prj_error	|= ERROR_SERVO_PWM_SET;
+		prj_error_handle();
 		return	ERROR_NOK;
 	}
 
@@ -136,8 +136,8 @@ int	servo_position_set	(int8_t servo, float position)
 
 	if (init_pending) {
 		if (servo_init()) {
-			error	|= ERROR_SERVO_INIT;
-			error_handle();
+			prj_error	|= ERROR_SERVO_INIT;
+			prj_error_handle();
 			return	ERROR_NOK;
 		}
 	}
@@ -156,15 +156,15 @@ int	servo_position_set	(int8_t servo, float position)
 		tim_chan	= TIM_CHANNEL_4;
 		break;
 	default:
-		error	|= ERROR_SERVO_ID;
-		error_handle();
+		prj_error	|= ERROR_SERVO_ID;
+		prj_error_handle();
 		return	ERROR_NOK;
 	}
 
 	servo_duty_calc(position, &duty_cycle[servo]);
 	if (pwm_tim2_chX_set(duty_cycle[servo], tim_chan)) {
-		error	|= ERROR_SERVO_PWM_SET;
-		error_handle();
+		prj_error	|= ERROR_SERVO_PWM_SET;
+		prj_error_handle();
 		return	ERROR_NOK;
 	}
 
@@ -182,8 +182,8 @@ int	servo_stop		(void)
 	}
 
 	if (pwm_tim2_stop()) {
-		error	|= ERROR_SERVO_PWM_STOP;
-		error_handle();
+		prj_error	|= ERROR_SERVO_PWM_STOP;
+		prj_error_handle();
 		return	ERROR_NOK;
 	}
 

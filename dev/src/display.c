@@ -199,13 +199,14 @@ int	display_init	(void)
 	}
 
 	if (spi_init()) {
-		error	|= ERROR_DISPLAY_SPI_INIT;
-		error_handle();
+		prj_error	|= ERROR_DISPLAY_SPI_INIT;
+		prj_error_handle();
 		return	ERROR_NOK;
 	}
+
 	if (display_start()) {
-		error	|= ERROR_DISPLAY_START;
-		error_handle();
+		prj_error	|= ERROR_DISPLAY_START;
+		prj_error_handle();
 		return	ERROR_NOK;
 	}
 
@@ -224,16 +225,16 @@ int	display_set	(uint16_t data [DISPLAY_ROWS])
 
 	if (init_pending) {
 		if (display_init()) {
-			error	|= ERROR_DISPLAY_INIT;
-			error_handle();
+			prj_error	|= ERROR_DISPLAY_INIT;
+			prj_error_handle();
 			return	ERROR_NOK;
 		}
 	}
 
 	for (i = 0; i < DISPLAY_ROWS; i++) {
 		if (spi_msg_write(data[i])) {
-			error	|= ERROR_DISPLAY_SPI_MSG_WRITE;
-			error_handle();
+			prj_error	|= ERROR_DISPLAY_SPI_MSG_WRITE;
+			prj_error_handle();
 			return	ERROR_NOK;
 		}
 	}
@@ -253,15 +254,15 @@ int	display_set_ch	(char ch)
 
 	if (init_pending) {
 		if (display_init()) {
-			error	|= ERROR_DISPLAY_INIT;
-			error_handle();
+			prj_error	|= ERROR_DISPLAY_INIT;
+			prj_error_handle();
 			return	ERROR_NOK;
 		}
 	}
 
 	if (display_data_set(ch, data)) {
-		error	|= ERROR_DISPLAY_CHAR;
-		error_handle();
+		prj_error	|= ERROR_DISPLAY_CHAR;
+		prj_error_handle();
 		return	ERROR_NOK;
 	}
 
