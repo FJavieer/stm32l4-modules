@@ -63,7 +63,6 @@ static	void	can_tx_header_conf	(void);
 	 */
 int	can_init	(void)
 {
-
 	if (init_pending) {
 		init_pending	= false;
 	} else {
@@ -75,23 +74,23 @@ int	can_init	(void)
 	can_msp_init();
 
 	if (can_peripherial_init()) {
-		error	|= ERROR_CAN_HAL_CAN_INIT;
-		error_handle();
+		prj_error	|= ERROR_CAN_HAL_CAN_INIT;
+		prj_error_handle();
 		return	ERROR_NOK;
 	}
 	if (can_filter_conf()) {
-		error	|= ERROR_CAN_HAL_CAN_FILTER;
-		error_handle();
+		prj_error	|= ERROR_CAN_HAL_CAN_FILTER;
+		prj_error_handle();
 		return	ERROR_NOK;
 	}
 	if (HAL_CAN_Start(&can)) {
-		error	|= ERROR_CAN_HAL_CAN_START;
-		error_handle();
+		prj_error	|= ERROR_CAN_HAL_CAN_START;
+		prj_error_handle();
 		return	ERROR_NOK;
 	}
 	if (HAL_CAN_ActivateNotification(&can, CAN_IT_RX_FIFO0_MSG_PENDING)) {
-		error	|= ERROR_CAN_HAL_CAN_ACTI_NOTIF;
-		error_handle();
+		prj_error	|= ERROR_CAN_HAL_CAN_ACTI_NOTIF;
+		prj_error_handle();
 		return	ERROR_NOK;
 	}
 
@@ -113,8 +112,8 @@ int	can_msg_write	(uint8_t data [CAN_DATA_LEN])
 
 	if (init_pending) {
 		if (can_init()) {
-			error	|= ERROR_CAN_INIT;
-			error_handle();
+			prj_error	|= ERROR_CAN_INIT;
+			prj_error_handle();
 			return	ERROR_NOK;
 		}
 	}
@@ -125,8 +124,8 @@ int	can_msg_write	(uint8_t data [CAN_DATA_LEN])
 
 	if (HAL_CAN_AddTxMessage(&can, &can_tx_header, can_tx_data,
 							&can_tx_mailbox)) {
-		error	|= ERROR_CAN_HAL_ADD_TX_MSG;
-		error_handle();
+		prj_error	|= ERROR_CAN_HAL_ADD_TX_MSG;
+		prj_error_handle();
 		return	ERROR_NOK;
 	}
 
@@ -145,21 +144,23 @@ int	can_msg_read	(uint8_t data [CAN_DATA_LEN])
 
 	if (init_pending) {
 		if (can_init()) {
-			error	|= ERROR_CAN_INIT;
-			error_handle();
+			prj_error	|= ERROR_CAN_INIT;
+			prj_error_handle();
 			return	ERROR_NOK;
 		}
 	}
 
 	if (!can_msg_pending) {
-		error	|= ERROR_CAN_NO_MSG;
-		return	ERROR_NOK;
+		prj_error	|= ERROR_CAN_NO_MSG;
 	}
 
 	for (i = 0; i < CAN_DATA_LEN; i++) {
 		data[i]	= can_rx_data[i];
 	}
 
+	for (i = 0; i < CAN_DATA_LEN; i++) {
+		can_rx_data[i]	= 0;
+	}
 	can_msg_pending	= false;
 
 	return	ERROR_OK;
@@ -188,10 +189,10 @@ void	HAL_CAN_RxFifo0MsgPendingCallback	(CAN_HandleTypeDef *can_ptr)
 {
 	if (HAL_CAN_GetRxMessage(can_ptr, CAN_RX_FIFO0, &can_rx_header,
 								can_rx_data)) {
-		error	|= ERROR_CAN_HAL_GET_RX_MSG;
-		error_handle();
+		prj_error	|= ERROR_CAN_HAL_GET_RX_MSG;
+		prj_error_handle();
 	} else if (can_msg_pending) {
-		error	|= ERROR_CAN_MSG_LOST;
+		prj_error	|= ERROR_CAN_MSG_LOST;
 	} else {
 		can_msg_pending	= true;
 	}
