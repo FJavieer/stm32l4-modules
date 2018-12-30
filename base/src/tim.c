@@ -78,13 +78,13 @@ int	tim_tim3_init		(uint32_t freq_hz)
 
 	__HAL_RCC_TIM3_CLK_ENABLE();
 	if (tim_tim3_tim_init(freq_hz)) {
-		error	|= ERROR_TIM_HAL_TIM_INIT;
-		error_handle();
+		prj_error	|= ERROR_TIM_HAL_TIM_INIT;
+		prj_error_handle();
 		return	ERROR_NOK;
 	}
 	if (HAL_TIM_Base_Start_IT(&tim)) {
-		error	|= ERROR_TIM_HAL_TIM_START_IT;
-		error_handle();
+		prj_error	|= ERROR_TIM_HAL_TIM_START_IT;
+		prj_error_handle();
 		return	ERROR_NOK;
 	}
 
@@ -100,8 +100,8 @@ int	tim_tim3_init		(uint32_t freq_hz)
 int	tim_callback_push	(int (*func)(void *), void *data)
 {
 	if (stack_len >= CALLBACK_STACK_MAX) {
-		error	|= ERROR_TIM_STACK;
-		error_handle();
+		prj_error	|= ERROR_TIM_STACK;
+		prj_error_handle();
 		return	ERROR_NOK;
 	}
 
@@ -136,15 +136,15 @@ int	tim_callback_exe	(void)
 	int	i;
 
 	if (init_pending) {
-		error	|= ERROR_TIM_INIT;
-		error_handle();
+		prj_error	|= ERROR_TIM_INIT;
+		prj_error_handle();
 		return	ERROR_NOK;
 	}
 
 	for (i = 0; i < stack_len; i++) {
 		if (callback_stack[i].func(callback_stack[i].data)) {
-			error	|= ERROR_TIM_CALLBACK_EXE;
-			error_handle();
+			prj_error	|= ERROR_TIM_CALLBACK_EXE;
+			prj_error_handle();
 			return	ERROR_NOK;
 		}
 	}

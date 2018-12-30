@@ -57,14 +57,13 @@ int	delay_us_init	(void)
 	if (init_pending) {
 		init_pending	= false;
 	} else {
-		error	|= ERROR_DELAY_INIT;
 		return	ERROR_OK;
 	}
 
 	__HAL_RCC_TIM6_CLK_ENABLE();
 	if (delay_us_tim_init()) {
-		error	|= ERROR_DELAY_HAL_TIM_INIT;
-		error_handle();
+		prj_error	|= ERROR_DELAY_HAL_TIM_INIT;
+		prj_error_handle();
 		return	ERROR_NOK;
 	}
 
@@ -83,8 +82,8 @@ int	delay_us	(uint32_t time_us)
 
 	if (init_pending) {
 		if (delay_us_init()) {
-			error	|= ERROR_DELAY_INIT;
-			error_handle();
+			prj_error	|= ERROR_DELAY_INIT;
+			prj_error_handle();
 			return	ERROR_NOK;
 		}
 	}
@@ -96,16 +95,17 @@ int	delay_us	(uint32_t time_us)
 	delay_us_delay_init(time_us, &overflows);
 
 	if (HAL_TIM_Base_Start(&tim)) {
-		error	|= ERROR_DELAY_HAL_TIM_START;
-		error_handle();
+		prj_error	|= ERROR_DELAY_HAL_TIM_START;
+		prj_error_handle();
 		return	ERROR_NOK;
 	}
 
 	delay_us_delay_loop(overflows);
 
 	if (HAL_TIM_Base_Stop(&tim)) {
-		error	|= ERROR_DELAY_HAL_TIM_STOP;
-		error_handle();
+		/* FIXME */
+		prj_error	|= ERROR_DELAY_HAL_TIM_STOP;
+		prj_error_handle();
 		return	ERROR_NOK;
 	}
 

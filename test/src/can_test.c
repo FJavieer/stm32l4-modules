@@ -1,6 +1,6 @@
 /******************************************************************************
- *	nunchuk_test.c							      *
- *	2018/dec/22							      *
+ *	can_test.c							      *
+ *	2018/dec/30							      *
  ******************************************************************************/
 
 
@@ -10,20 +10,19 @@
 /* Standard C ----------------------------------------------------------------*/
 	#include <stdbool.h>
 	#include <stdint.h>
+	#include <stdnoreturn.h>
 
 /* Drivers -------------------------------------------------------------------*/
 	#include "stm32l4xx_hal.h"
 
 /* libalx --------------------------------------------------------------------*/
 /* STM32L4 modules -----------------------------------------------------------*/
-	#include "display.h"
+	#include "can.h"
 	#include "delay.h"
 	#include "errors.h"
-	#include "servo.h"
+	#include "led.h"
 
-	#include "nunchuk.h"
-
-	#include "nunchuk_test.h"
+	#include "can_test.h"
 
 
 /******************************************************************************
@@ -51,116 +50,95 @@
 /******************************************************************************
  ******* static functions (prototypes) ****************************************
  ******************************************************************************/
-static	void	display_data_clear	(uint16_t display_data[DISPLAY_ROWS]);
-static	void	display_data_set	(Nunchuk_Data_s	nunchuk_data,
-					uint16_t display_data[DISPLAY_ROWS]);
-static	void	nunchuk_servo_set	(Nunchuk_Data_s	nunchuk_data);
+static	int	can_tst_msg_write	(int i, int8_t buff[CAN_DATA_LEN]);
+static	void	can_tst_msg_show	(int i, int8_t buff[CAN_DATA_LEN]);
 
 
 /******************************************************************************
  ******* global functions *****************************************************
  ******************************************************************************/
 	/**
-	 * @brief	Test nunchuk
+	 * @brief	Test can: write
 	 * @return	Error
 	 */
-int	nunchuk_test_1	(void)
+noreturn int	can_w_test	(void)
 {
-	Nunchuk_Data_s	nunchuk_data;
-	uint16_t	display_data [DISPLAY_ROWS];
+	int8_t	buff [CAN_DATA_LEN];
+	int	i	= 0;
 
 	delay_us_init();
-	display_init();
-	nunchuk_init();
+	can_init();
 
-	do {
-		if (nunchuk_read(&nunchuk_data)) {
-			return	ERROR_NOK;
+	delay_us(2000000u);
+	while (true) {
+		i++;
+		i	%= 8;
+
+		if (can_tst_msg_write(i, buff)) {
+			prj_error_handle();
 		}
 
-		display_data_set(nunchuk_data, display_data);
-
-		if (delay_us(1000000u)) {
-			return	ERROR_NOK;
-		}
-	} while (!nunchuk_data.btn_z);
-
-	return	ERROR_OK;
+		delay_us(2500000u - (2*100000u*i));
+	}
 }
 
 	/**
-	 * @brief	Test nunchuk
+	 * @brief	Test can: read
 	 * @return	Error
 	 */
-int	nunchuk_test_2	(void)
+noreturn int	can_r_test	(void)
 {
-	Nunchuk_Data_s	nunchuk_data;
+	int8_t	buff [CAN_DATA_LEN];
+	int	i	= 0;
 
 	delay_us_init();
-	servo_init();
-	nunchuk_init();
+	led_init();
+	can_init();
 
-	do {
-		if (nunchuk_read(&nunchuk_data)) {
-			return	ERROR_NOK;
-		}
+	delay_us(3000000u);
+	while (true) {
+		i++;
+		i	%= 8;
 
-		nunchuk_servo_set(nunchuk_data);
+		can_msg_read((uint8_t *)buff);
 
-		if (delay_us(100000u)) {
-			return	ERROR_NOK;
-		}
-	} while (true);
-//	} while (!nunchuk_data.btn_z);
+		can_tst_msg_show(i, buff);
 
-	return	ERROR_OK;
+		delay_us(2500000u - (2*100000u*i));
+	}
 }
 
 
 /******************************************************************************
  ******* static functions (definitions) ***************************************
  ******************************************************************************/
-static	void	display_data_clear	(uint16_t display_data[DISPLAY_ROWS])
+static	int	can_tst_msg_write	(int i, int8_t buff[CAN_DATA_LEN])
 {
-	int	i;
+	buff[0]	= i;
+	buff[1]	= i;
+	buff[2]	= i;
+	buff[3]	= i;
+	buff[4]	= i;
+	buff[5]	= i;
+	buff[6]	= i;
+	buff[7]	= i;
 
-	for (i = 0; i < DISPLAY_ROWS; i++) {
-		display_data[i]	= DISPLAY_ROW(i);
+	if (can_msg_write((uint8_t *)buff)) {
+		return	ERROR_NOK;
 	}
+
+	return	ERROR_OK;
 }
 
-static	void	display_data_set	(Nunchuk_Data_s	nunchuk_data,
-					uint16_t display_data[DISPLAY_ROWS])
+static	void	can_tst_msg_show	(int i, int8_t buff[CAN_DATA_LEN])
 {
-	display_data_clear(display_data);
+	int	j;
 
-	display_data[0]	|= nunchuk_data.jst.x;
-	display_data[1]	|= nunchuk_data.jst.y;
-
-	if (!nunchuk_data.btn_c) {
-		display_data[2]	|= nunchuk_data.acc.x8;
-		display_data[3]	|= nunchuk_data.acc.y8;
-		display_data[4]	|= nunchuk_data.acc.z8;
-	} else {
-		display_data[5]	|= (nunchuk_data.acc.x10 >> 2);
-		display_data[6]	|= (nunchuk_data.acc.y10 >> 2);
-		display_data[7]	|= (nunchuk_data.acc.z10 >> 2);
-	}
-}
-
-static	void	nunchuk_servo_set	(Nunchuk_Data_s	nunchuk_data)
-{
-	if (servo_position_set(SERVO_S1, ((float)nunchuk_data.acc.x8 / UINT8_MAX * 90))) {
-		return;
-	}
-	if (servo_position_set(SERVO_S2, ((float)nunchuk_data.acc.y8 / UINT8_MAX * 90))) {
-		return;
-	}
-	if (servo_position_set(SERVO_S3, ((float)nunchuk_data.acc.z8 / UINT8_MAX * 90))) {
-		return;
-	}
-	if (servo_position_set(SERVO_S4, ((float)nunchuk_data.jst.x / UINT8_MAX * 90))) {
-		return;
+	for (j = 0; j < buff[i]; j++) {
+		led_set();
+		delay_us(100000u);
+		led_reset();
+		delay_us(100000u);
 	}
 }
 

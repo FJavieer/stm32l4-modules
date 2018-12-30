@@ -31,7 +31,6 @@
 /******************************************************************************
  ******* macros ***************************************************************
  ******************************************************************************/
-	# define	I2C_TIMING		(0x00D00E28u)
 
 
 /******************************************************************************
@@ -77,18 +76,18 @@ int	i2c_init	(void)
 	i2c_msp_init();
 
 	if (i2c_peripherial_init()) {
-		error	|= ERROR_I2C_HAL_I2C_INIT;
-		error_handle();
+		prj_error	|= ERROR_I2C_HAL_I2C_INIT;
+		prj_error_handle();
 		return	ERROR_NOK;
 	}
 	if (i2c_filter_analog_conf()) {
-		error	|= ERROR_I2C_HAL_I2C_FILTER_A;
-		error_handle();
+		prj_error	|= ERROR_I2C_HAL_I2C_FILTER_A;
+		prj_error_handle();
 		return	ERROR_NOK;
 	}
 	if (i2c_filter_digital_conf()) {
-		error	|= ERROR_I2C_HAL_I2C_FILTER_D;
-		error_handle();
+		prj_error	|= ERROR_I2C_HAL_I2C_FILTER_D;
+		prj_error_handle();
 		return	ERROR_NOK;
 	}
 
@@ -110,8 +109,8 @@ int	i2c_msg_write	(uint8_t addr, uint8_t data_len, uint8_t data [data_len])
 
 	if (init_pending) {
 		if (i2c_init()) {
-			error	|= ERROR_I2C_INIT;
-			error_handle();
+			prj_error	|= ERROR_I2C_INIT;
+			prj_error_handle();
 			return	ERROR_NOK;
 		}
 	}
@@ -122,8 +121,8 @@ int	i2c_msg_write	(uint8_t addr, uint8_t data_len, uint8_t data [data_len])
 
 	/*  << 1 is because of HAL bug */
 	if (HAL_I2C_Master_Transmit_IT(&i2c, addr << 1, i2c_buff, data_len)) {
-		error	|= ERROR_I2C_TRANSMIT;
-		error_handle();
+		prj_error	|= ERROR_I2C_TRANSMIT;
+		prj_error_handle();
 		return	ERROR_NOK;
 	}
 
@@ -141,16 +140,16 @@ int	i2c_msg_ask	(uint8_t addr, uint8_t data_len)
 {
 	if (init_pending) {
 		if (i2c_init()) {
-			error	|= ERROR_I2C_INIT;
-			error_handle();
+			prj_error	|= ERROR_I2C_INIT;
+			prj_error_handle();
 			return	ERROR_NOK;
 		}
 	}
 
 	/*  << 1 is because of HAL bug */
 	if (HAL_I2C_Master_Receive_IT(&i2c, addr << 1, i2c_buff, data_len)) {
-		error	|= ERROR_I2C_RECEIVE;
-		error_handle();
+		prj_error	|= ERROR_I2C_RECEIVE;
+		prj_error_handle();
 		return	ERROR_NOK;
 	}
 
@@ -179,14 +178,14 @@ int	i2c_msg_read	(uint8_t data_len, uint8_t data [data_len])
 
 	if (init_pending) {
 		if (i2c_init()) {
-			error	|= ERROR_I2C_INIT;
-			error_handle();
+			prj_error	|= ERROR_I2C_INIT;
+			prj_error_handle();
 			return	ERROR_NOK;
 		}
 	}
 
 	if (!i2c_msg_ready()) {
-		error	|= ERROR_I2C_NOT_READY;
+		prj_error	|= ERROR_I2C_NOT_READY;
 		return	ERROR_NOK;
 	}
 
@@ -229,7 +228,7 @@ static	void	i2c_gpio_init		(void)
 	gpio.Pin	= GPIO_PIN_6 | GPIO_PIN_7;
 	gpio.Mode	= GPIO_MODE_AF_OD;
 	gpio.Speed	= GPIO_SPEED_FREQ_VERY_HIGH;
-	gpio.Pull	= GPIO_NOPULL;
+	gpio.Pull	= GPIO_PULLUP;
 	gpio.Alternate	= GPIO_AF4_I2C1;
 	HAL_GPIO_Init(GPIOB, &gpio);
 }

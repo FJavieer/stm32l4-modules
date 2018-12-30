@@ -57,7 +57,7 @@ static	int	servo_test_position	(float pos);
 	 * @brief	Test servos
 	 * @return	Error
 	 */
-int	servo_test	(void)
+int	servo_test_1	(void)
 {
 	int	i;
 
@@ -65,7 +65,7 @@ int	servo_test	(void)
 		return	ERROR_NOK;
 	}
 
-	for (i = 0; i <= 90; i+=10) {
+	for (i = 00; i <= 90; i+=10) {
 		if (servo_test_position(-i)) {
 			return	ERROR_NOK;
 		}
@@ -79,6 +79,33 @@ int	servo_test	(void)
 		}
 
 		if (servo_test_position(0)) {
+			return	ERROR_NOK;
+		}
+	}
+
+	return	ERROR_OK;
+}
+
+	/**
+	 * @brief	Test servos
+	 * @return	Error
+	 */
+int	servo_test_2	(void)
+{
+	int	i;
+
+	if (servo_init()) {
+		return	ERROR_NOK;
+	}
+
+	for (i = -90; i <= 90; i+=10) {
+		if (servo_test_position(i)) {
+			return	ERROR_NOK;
+		}
+	}
+
+	for (i = 90; i >= -90; i-=10) {
+		if (servo_test_position(i)) {
 			return	ERROR_NOK;
 		}
 	}

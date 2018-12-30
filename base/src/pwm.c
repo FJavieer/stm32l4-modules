@@ -80,23 +80,23 @@ int	pwm_tim2_init		(uint32_t resolution_sec, uint32_t period)
 
 	__HAL_RCC_TIM2_CLK_ENABLE();
 	if (pwm_tim2_tim_init(resolution_sec, period)) {
-		error	|= ERROR_PWM_HAL_TIM_INIT;
-		error_handle();
+		prj_error	|= ERROR_PWM_HAL_TIM_INIT;
+		prj_error_handle();
 		return	ERROR_NOK;
 	}
 	if (pwm_tim2_clk_conf()) {
-		error	|= ERROR_PWM_HAL_TIM_CLK_CONF;
-		error_handle();
+		prj_error	|= ERROR_PWM_HAL_TIM_CLK_CONF;
+		prj_error_handle();
 		return	ERROR_NOK;
 	}
 	if (pwm_tim2_master_conf()) {
-		error	|= ERROR_PWM_HAL_TIM_MASTER_CONF;
-		error_handle();
+		prj_error	|= ERROR_PWM_HAL_TIM_MASTER_CONF;
+		prj_error_handle();
 		return	ERROR_NOK;
 	}
 	if (HAL_TIM_PWM_Init(&tim)) {
-		error	|= ERROR_PWM_HAL_TIM_PWM_INIT;
-		error_handle();
+		prj_error	|= ERROR_PWM_HAL_TIM_PWM_INIT;
+		prj_error_handle();
 		return	ERROR_NOK;
 	}
 	pwm_tim2_oc_conf();
@@ -119,30 +119,30 @@ int	pwm_tim2_init		(uint32_t resolution_sec, uint32_t period)
 int	pwm_tim2_chX_set	(float duty_cycle, uint32_t tim_chan)
 {
 	if (init_pending) {
-		error	|= ERROR_PWM_INIT;
-		error_handle();
+		prj_error	|= ERROR_PWM_INIT;
+		prj_error_handle();
 		return	ERROR_NOK;
 	}
 
 	if (duty_cycle > 1.0) {
 		oc_init.Pulse	= tim.Init.Period;
-		error	|= ERROR_PWM_DUTY;
+		prj_error	|= ERROR_PWM_DUTY;
 	} else if (duty_cycle < 0.0) {
 		oc_init.Pulse	= 0;
-		error	|= ERROR_PWM_DUTY;
+		prj_error	|= ERROR_PWM_DUTY;
 	} else {
 		oc_init.Pulse	= tim.Init.Period * duty_cycle;
 	}
 
 	if (HAL_TIM_PWM_ConfigChannel(&tim, &oc_init, tim_chan)) {
-		error	|= ERROR_PWM_HAL_TIM_PWM_CONF;
-		error_handle();
+		prj_error	|= ERROR_PWM_HAL_TIM_PWM_CONF;
+		prj_error_handle();
 		return	ERROR_NOK;
 	}
 
 	if (HAL_TIM_PWM_Start(&tim, tim_chan)) {
-		error	|= ERROR_PWM_HAL_TIM_PWM_START;
-		error_handle();
+		prj_error	|= ERROR_PWM_HAL_TIM_PWM_START;
+		prj_error_handle();
 		return	ERROR_NOK;
 	}
 
@@ -157,14 +157,14 @@ int	pwm_tim2_chX_set	(float duty_cycle, uint32_t tim_chan)
 int	pwm_tim2_stop		(void)
 {
 	if (init_pending) {
-		error	|= ERROR_PWM_INIT;
-		error_handle();
+		prj_error	|= ERROR_PWM_INIT;
+		prj_error_handle();
 		return	ERROR_NOK;
 	}
 
 	if (HAL_TIM_Base_Stop(&tim)) {
-		error	|= ERROR_PWM_HAL_TIM_STOP;
-		error_handle();
+		prj_error	|= ERROR_PWM_HAL_TIM_STOP;
+		prj_error_handle();
 		return	ERROR_NOK;
 	}
 
@@ -207,7 +207,7 @@ static	int	pwm_tim2_master_conf	(void)
 	TIM_MasterConfigTypeDef	master;
 
 	master.MasterOutputTrigger	= TIM_TRGO_RESET;
-	master.MasterOutputTrigger2	= TIM_TRGO2_RESET;
+//	master.MasterOutputTrigger2	= TIM_TRGO2_RESET;
 	master.MasterSlaveMode		= TIM_MASTERSLAVEMODE_DISABLE;
 
 	return	HAL_TIMEx_MasterConfigSynchronization(&tim, &master);
@@ -231,7 +231,7 @@ static	void	pwm_tim2_ch1_gpio_init	(void)
 	__HAL_RCC_GPIOA_CLK_ENABLE();
 
 	gpio.Pin	= GPIO_PIN_15;
-	gpio.Mode	= GPIO_MODE_AF_OD;
+	gpio.Mode	= GPIO_MODE_AF_PP;
 	gpio.Pull	= GPIO_NOPULL;
 	gpio.Speed	= GPIO_SPEED_FREQ_LOW;
 	gpio.Alternate	= GPIO_AF1_TIM2;
@@ -245,7 +245,7 @@ static	void	pwm_tim2_ch2_gpio_init	(void)
 	__HAL_RCC_GPIOA_CLK_ENABLE();
 
 	gpio.Pin	= GPIO_PIN_1;
-	gpio.Mode	= GPIO_MODE_AF_OD;
+	gpio.Mode	= GPIO_MODE_AF_PP;
 	gpio.Pull	= GPIO_NOPULL;
 	gpio.Speed	= GPIO_SPEED_FREQ_LOW;
 	gpio.Alternate	= GPIO_AF1_TIM2;
@@ -259,7 +259,7 @@ static	void	pwm_tim2_ch3_gpio_init	(void)
 	__HAL_RCC_GPIOB_CLK_ENABLE();
 
 	gpio.Pin	= GPIO_PIN_10;
-	gpio.Mode	= GPIO_MODE_AF_OD;
+	gpio.Mode	= GPIO_MODE_AF_PP;
 	gpio.Pull	= GPIO_NOPULL;
 	gpio.Speed	= GPIO_SPEED_FREQ_LOW;
 	gpio.Alternate	= GPIO_AF1_TIM2;
@@ -273,7 +273,8 @@ static	void	pwm_tim2_ch4_gpio_init	(void)
 	__HAL_RCC_GPIOB_CLK_ENABLE();
 
 	gpio.Pin	= GPIO_PIN_11;
-	gpio.Mode	= GPIO_MODE_AF_OD;
+	gpio.Mode	= GPIO_MODE_AF_PP;
+//	gpio.Mode	= GPIO_MODE_AF_OD;
 	gpio.Pull	= GPIO_NOPULL;
 	gpio.Speed	= GPIO_SPEED_FREQ_LOW;
 	gpio.Alternate	= GPIO_AF1_TIM2;
