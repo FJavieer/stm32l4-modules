@@ -8,6 +8,7 @@
  ******* headers **************************************************************
  ******************************************************************************/
 /* Standard C ----------------------------------------------------------------*/
+	#include <stdbool.h>
 	#include <stdint.h>
 
 /* Drivers -------------------------------------------------------------------*/
@@ -18,6 +19,7 @@
 	#include "display.h"
 	#include "delay.h"
 	#include "errors.h"
+	#include "servo.h"
 
 	#include "nunchuk.h"
 
@@ -52,6 +54,7 @@
 static	void	display_data_clear	(uint16_t display_data[DISPLAY_ROWS]);
 static	void	display_data_set	(Nunchuk_Data_s	nunchuk_data,
 					uint16_t display_data[DISPLAY_ROWS]);
+static	void	nunchuk_servo_set	(Nunchuk_Data_s	nunchuk_data);
 
 
 /******************************************************************************
@@ -61,7 +64,7 @@ static	void	display_data_set	(Nunchuk_Data_s	nunchuk_data,
 	 * @brief	Test nunchuk
 	 * @return	Error
 	 */
-int	nunchuk_test	(void)
+int	nunchuk_test_1	(void)
 {
 	Nunchuk_Data_s	nunchuk_data;
 	uint16_t	display_data [DISPLAY_ROWS];
@@ -81,6 +84,34 @@ int	nunchuk_test	(void)
 			return	ERROR_NOK;
 		}
 	} while (!nunchuk_data.btn_z);
+
+	return	ERROR_OK;
+}
+
+	/**
+	 * @brief	Test nunchuk
+	 * @return	Error
+	 */
+int	nunchuk_test_2	(void)
+{
+	Nunchuk_Data_s	nunchuk_data;
+
+	delay_us_init();
+	servo_init();
+	nunchuk_init();
+
+	do {
+		if (nunchuk_read(&nunchuk_data)) {
+			return	ERROR_NOK;
+		}
+
+		nunchuk_servo_set(nunchuk_data);
+
+		if (delay_us(100000u)) {
+			return	ERROR_NOK;
+		}
+	} while (true);
+//	} while (!nunchuk_data.btn_z);
 
 	return	ERROR_OK;
 }
@@ -114,6 +145,22 @@ static	void	display_data_set	(Nunchuk_Data_s	nunchuk_data,
 		display_data[5]	|= (nunchuk_data.acc.x10 >> 2);
 		display_data[6]	|= (nunchuk_data.acc.y10 >> 2);
 		display_data[7]	|= (nunchuk_data.acc.z10 >> 2);
+	}
+}
+
+static	void	nunchuk_servo_set	(Nunchuk_Data_s	nunchuk_data)
+{
+	if (servo_position_set(SERVO_S1, ((float)nunchuk_data.acc.x8 / UINT8_MAX * 90))) {
+		return;
+	}
+	if (servo_position_set(SERVO_S2, ((float)nunchuk_data.acc.y8 / UINT8_MAX * 90))) {
+		return;
+	}
+	if (servo_position_set(SERVO_S3, ((float)nunchuk_data.acc.z8 / UINT8_MAX * 90))) {
+		return;
+	}
+	if (servo_position_set(SERVO_S4, ((float)nunchuk_data.jst.x / UINT8_MAX * 90))) {
+		return;
 	}
 }
 
