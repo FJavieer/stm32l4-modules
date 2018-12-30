@@ -64,7 +64,7 @@ void	sysclk_config	(void)
 {
 	/* MSI is enabled after System reset, activate PLL with MSI as source */
 	if (clk_set_pll_from_msi()) {
-		error	|= ERROR_CLK_HAL_RCC_OSC_CONF;
+		prj_error	|= ERROR_CLK_HAL_RCC_OSC_CONF;
 		while(true) {
 			;
 		}
@@ -73,7 +73,7 @@ void	sysclk_config	(void)
 	/* Select PLL as system clock source and configure the HCLK, PCLK1
 	 * and PCLK2 clocks dividers */
 	if (clk_sysclk_set_pll()) {
-		error	|= ERROR_CLK_HAL_RCC_CLK_CONF;
+		prj_error	|= ERROR_CLK_HAL_RCC_CLK_CONF;
 		while(true) {
 			;
 		}
