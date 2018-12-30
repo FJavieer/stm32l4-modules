@@ -140,6 +140,7 @@ int	can_msg_write	(uint8_t data [CAN_DATA_LEN])
 	 */
 int	can_msg_read	(uint8_t data [CAN_DATA_LEN])
 {
+	int	status	= ERROR_OK;
 	int	i;
 
 	if (init_pending) {
@@ -152,6 +153,7 @@ int	can_msg_read	(uint8_t data [CAN_DATA_LEN])
 
 	if (!can_msg_pending) {
 		prj_error	|= ERROR_CAN_NO_MSG;
+		status	= ERROR_NOK;
 	}
 
 	for (i = 0; i < CAN_DATA_LEN; i++) {
@@ -163,7 +165,7 @@ int	can_msg_read	(uint8_t data [CAN_DATA_LEN])
 	}
 	can_msg_pending	= false;
 
-	return	ERROR_OK;
+	return	status;
 }
 
 
